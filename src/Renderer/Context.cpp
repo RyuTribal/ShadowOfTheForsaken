@@ -1,0 +1,36 @@
+#include "Context.h"
+#include <glad/gl.h>
+#include <GLFW/glfw3.h>
+#include <stdio.h>
+#include <assert.h>
+
+namespace SOF{
+    Context::Context(GLFWwindow* window_context) : m_WindowHandle(window_context)
+    {
+
+    }
+
+    void Context::Init()
+    {
+        glfwMakeContextCurrent(m_WindowHandle);
+        int status = gladLoadGL((GLADloadfunc)glfwGetProcAddress);
+        assert(status && "GLad did not load");
+
+        printf("Vendor: %s \n", glGetString(GL_VENDOR));
+        printf("Renderer: %s \n", glGetString(GL_RENDERER));
+        printf("Version: %s \n", glGetString(GL_VERSION));
+
+    }
+    void Context::SwapBuffers()
+    {
+        glfwSwapBuffers(m_WindowHandle);
+    }
+    void Context::SetVSync(bool vsync)
+    {
+        glfwSwapInterval(vsync ? 1 : 0);
+    }
+    std::unique_ptr<Context> Context::Create(void *window)
+    {
+        return std::make_unique<Context>(std::forward<GLFWwindow*>(static_cast<GLFWwindow*>(window)));
+    }
+}
