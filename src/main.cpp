@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <glad/gl.h>
 #include "Core/Window.h"
-
+#include <spdlog/spdlog.h>
 bool shouldClose = false;
 
 void KeyEvent(int keycode, int action){
