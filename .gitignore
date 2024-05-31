@@ -1,3 +1,4 @@
+.cache/
 bin/
 bin-int/
 !/vendor/premake/bin/
