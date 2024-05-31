@@ -1,6 +1,6 @@
-!/vendor/premake/bin/
 bin/
 bin-int/
+!/vendor/premake/bin/
 
 .vs/
 .vscode/
