@@ -1,6 +1,8 @@
 #!/bin/bash
 vendor/premake/premake5 gmake2
 
+bear -- make 
+
 PROJECT_ROOT="$(dirname "$0")"
 
 # Create .vscode directory if it doesn't exist
