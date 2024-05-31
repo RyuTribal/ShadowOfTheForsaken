@@ -24,6 +24,7 @@ include("vendor/GLFW")
 include("vendor/Glad")
 include("vendor/imgui")
 
+group("")
 project("Game")
 location("./")
 kind("ConsoleApp")

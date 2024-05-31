@@ -1,7 +1,12 @@
-*/bin/
-*/bin-int/
+!/vendor/premake/bin/
 bin/
 bin-int/
+
+.vs/
 .vscode/
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+**.csproj
 Makefile
-*.make
