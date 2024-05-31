@@ -13,7 +13,6 @@ void KeyEvent(int keycode, int action){
     if(keycode == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
         printf("LEFT MOUSE\n");
     }
-
 }
 
 void MouseEvent(float xpos, float ypos){

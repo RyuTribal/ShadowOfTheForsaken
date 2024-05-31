@@ -79,11 +79,13 @@ OBJECTS :=
 GENERATED += $(OBJDIR)/Context.o
 GENERATED += $(OBJDIR)/Input.o
 GENERATED += $(OBJDIR)/Log.o
+GENERATED += $(OBJDIR)/Manager.o
 GENERATED += $(OBJDIR)/Window.o
 GENERATED += $(OBJDIR)/main.o
 OBJECTS += $(OBJDIR)/Context.o
 OBJECTS += $(OBJDIR)/Input.o
 OBJECTS += $(OBJDIR)/Log.o
+OBJECTS += $(OBJDIR)/Manager.o
 OBJECTS += $(OBJDIR)/Window.o
 OBJECTS += $(OBJDIR)/main.o
 
@@ -149,6 +151,9 @@ endif
 # File Rules
 # #############################################
 
+$(OBJDIR)/Manager.o: src/Asset/Manager.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Input.o: src/Core/Input.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"

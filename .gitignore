@@ -1,7 +1,8 @@
-!/vendor/premake/bin/
+.cache/
 bin/
 bin-int/
-
+!/vendor/premake/bin/
+compile_commands.json
 .vs/
 .vscode/
 **.sln
@@ -10,3 +11,4 @@ bin-int/
 **.vcxproj.user
 **.csproj
 Makefile
+**.make
