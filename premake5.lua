@@ -23,6 +23,7 @@ group("Dependencies")
 include("vendor/GLFW")
 include("vendor/Glad")
 include("vendor/imgui")
+include("vendor/yaml-cpp")
 
 group("")
 project("Game")
@@ -41,6 +42,7 @@ files({
 	"src/**.c",
 	"vendor/glm/glm/**.hpp",
 	"vendor/glm/glm/**.inl",
+	"vendor/stb/stb_image.h",
 })
 
 removefiles({
@@ -55,11 +57,13 @@ links({
 	"GLFW",
 	"Glad",
 	"ImGui",
+	"yaml-cpp"
 })
 
 defines({
 	"_CRT_SECURE_NO_WARNINGS",
 	'ROOT_PATH="' .. rootPath .. "/" .. '%{prj.name}"',
+	"YAML_CPP_STATIC_DEFINE"
 })
 
 includedirs({
@@ -69,6 +73,8 @@ includedirs({
 	"%{IncludeDir.ImGui}",
 	"%{IncludeDir.glm}",
 	"src/",
+	"vendor/stb/",
+	"vendor/yaml-cpp/include/"
 })
 
 filter("system:windows")
