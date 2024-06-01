@@ -13,6 +13,9 @@ configurations({
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+pchheader "pch.h"
+pchsource "src/pch.cpp"
+
 IncludeDir = {}
 IncludeDir["GLFW"] = "vendor/GLFW/include"
 IncludeDir["Glad"] = "vendor/Glad/include"

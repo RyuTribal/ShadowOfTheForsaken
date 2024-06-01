@@ -1,9 +1,6 @@
 #pragma once
 #include "Renderer/Context.h"
 #include <GLFW/glfw3.h>
-#include <memory>
-#include <string>
-#include <functional>
 
 namespace SOF{
     struct WindowProps{
