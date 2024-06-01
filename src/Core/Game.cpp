@@ -2,7 +2,6 @@
 #include "Game.h"
 #include <glad/gl.h>
 #include "Events/DebugEvents.h"
-#include <Scene/Test.h>
 
 namespace SOF {
 
@@ -24,7 +23,6 @@ namespace SOF {
 
 	void Game::Start()
 	{
-		Test test;
 		while (m_Running) {
 			glClearColor(1.f, 0.f, 0.f, 1.f);
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
