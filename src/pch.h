@@ -36,6 +36,7 @@
 
 #include <glm/glm.hpp>
 #include "Core/UUID.h"
+#include "Core/Base.h"
 
 #ifdef PLATFORM_WINDOWS
 #define WIN32_LEAN_AND_MEAN
