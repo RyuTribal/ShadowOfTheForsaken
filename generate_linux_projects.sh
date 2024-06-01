@@ -1,6 +1,8 @@
 #!/bin/bash
 vendor/premake/premake5 gmake2
 
+bear -- make 
+
 PROJECT_ROOT="$(dirname "$0")"
 
 # Create .vscode directory if it doesn't exist
@@ -62,7 +64,7 @@ cat > $PROJECT_ROOT/.vscode/c_cpp_properties.json << EOF
         {
             "name": "Linux",
             "includePath": [
-                "\${workspaceFolder}/**",
+                "\${workspaceFolder}/**"
             ],
             "defines": [
                 "DEBUG",
@@ -71,7 +73,8 @@ cat > $PROJECT_ROOT/.vscode/c_cpp_properties.json << EOF
             "compilerPath": "/usr/bin/gcc", 
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "\${default}"
+            "intelliSenseMode": "\${default}",
+            "compileCommands": "${workspaceFolder}/compile_commands.json"
         }
     ],
     "version": 4
