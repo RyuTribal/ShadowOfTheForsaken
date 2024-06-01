@@ -2,6 +2,7 @@ project "ImGui"
 	kind "StaticLib"
 	language "C++"
 	staticruntime "off"
+	flags {"NoPCH"}
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")

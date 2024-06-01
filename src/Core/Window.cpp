@@ -1,6 +1,5 @@
+#include "pch.h"
 #include "Window.h"
-#include <assert.h>
-#include <iostream>
 
 namespace SOF{
     Window::Window(const WindowProps& props)

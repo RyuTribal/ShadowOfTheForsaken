@@ -1,0 +1,36 @@
+#pragma once
+#include "Registry.h"
+
+
+namespace SOF {
+
+	class Entity;
+
+	class Scene {
+	public:
+		static std::shared_ptr<Scene> CreateScene(const std::string& name);
+
+		Scene(const std::string& name);
+
+		Registry* GetRegistry() { return &m_ComponentRegistry; }
+
+		UUID CreateEntity(const std::string& name);
+		UUID CreateEntity(const std::string& name, UUID handle);
+
+		template<typename T>
+		std::unordered_map<UUID, T> GetAllEntitiesByType() { return m_ComponentRegistry.Get<T>(); }
+
+		UUID GetID() { return m_ID; }
+		
+		const std::string& GetName() { return m_Name; }
+
+		void DestroyEntity(UUID handle);
+
+		Entity* GetEntity(UUID id);
+	private:
+		UUID m_ID = UUID();
+		Registry m_ComponentRegistry;
+		std::unordered_map<UUID, Entity> m_EntityMap;
+		std::string m_Name = "Untitled Level";
+	};
+}

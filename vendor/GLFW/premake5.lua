@@ -3,6 +3,7 @@ project "GLFW"
 	language "C"
 	staticruntime "off"
 	warnings "off"
+	flags {"NoPCH"}
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")

@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 
 struct GLFWwindow;
 namespace SOF{

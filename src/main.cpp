@@ -1,7 +1,6 @@
-#include <stdio.h>
+#include "pch.h"
 #include <glad/gl.h>
 #include "Core/Window.h"
-#include <spdlog/spdlog.h>
 
 bool shouldClose = false;
 

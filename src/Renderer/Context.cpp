@@ -1,8 +1,7 @@
+#include "pch.h"
 #include "Context.h"
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
-#include <stdio.h>
-#include <assert.h>
 
 namespace SOF{
     Context::Context(GLFWwindow* window_context) : m_WindowHandle(window_context)
