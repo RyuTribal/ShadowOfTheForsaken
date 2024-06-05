@@ -15,7 +15,7 @@ namespace SOF{
         m_Data.Height = props.Height;
 
         int success = glfwInit();
-		assert(success && "Could not initialize GLFW!");
+		SOF_ASSERT(success, "Could not initialize GLFW!");
         m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, props.Title.c_str(), nullptr, nullptr);
         m_Context = Context::Create(m_Window);
         m_Context->Init();

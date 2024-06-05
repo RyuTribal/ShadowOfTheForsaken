@@ -13,11 +13,11 @@ namespace SOF{
     {
         glfwMakeContextCurrent(m_WindowHandle);
         int status = gladLoadGL((GLADloadfunc)glfwGetProcAddress);
-        assert(status && "GLad did not load");
+        SOF_ASSERT(status, "GLad did not load");
 
-        printf("Vendor: %s \n", glGetString(GL_VENDOR));
-        printf("Renderer: %s \n", glGetString(GL_RENDERER));
-        printf("Version: %s \n", glGetString(GL_VERSION));
+        SOF_TRACE("Renderer", "Vendor: {}", glGetString(GL_VENDOR));
+        SOF_TRACE("Renderer","Renderer: {}", glGetString(GL_RENDERER));
+        SOF_TRACE("Renderer","Version: {}", glGetString(GL_VERSION));
 
     }
     void Context::SwapBuffers()

@@ -9,7 +9,7 @@ namespace SOF {
 
 	Game::Game(const WindowProps& props)
 	{
-		assert(!s_Instance && "Can only have one instance of a game!");
+		SOF_ASSERT(!s_Instance, "Can only have one instance of a game!");
 		m_Window = std::make_unique<Window>(props);
 		s_Instance = this;
 		m_Window->SetEventCallback(BIND_EVENT_FN(SOF::Game::OnEvent));
@@ -33,14 +33,13 @@ namespace SOF {
 			OnEvent(debug_event);
 			ImGuiLayer::End();
 #endif
-
 			m_Window->OnUpdate();
 		}
 	}
 
 	bool Game::OnShutDown(WindowCloseEvent& event)
 	{
-		printf("Shutting down \n");
+		SOF_INFO("Game", "Shutting down \n");
 		m_Running = false;
 		ImGuiLayer::Shutdown();
 		return true;

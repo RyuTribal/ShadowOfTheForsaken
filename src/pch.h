@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef PLATFORM_WINDOWS
 #ifndef NOMINMAX
 // See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
@@ -34,6 +36,7 @@
 
 #include <glm/glm.hpp>
 #include "Core/UUID.h"
+#include "Core/Log.h"
 #include "Core/Base.h"
 
 #ifdef PLATFORM_WINDOWS

@@ -4,6 +4,9 @@
 
 int main(){
    
+    SOF::Log::Init();
+    SOF_WARN("Log initialized!");
+    
     SOF::WindowProps window_settings{};
     window_settings.Title = "Shadow of the Forsaken";
     window_settings.VSync = true;
@@ -15,6 +18,7 @@ int main(){
     game_instance->Start();
 
     delete game_instance;
+    SOF::Log::Shutdown();
 
     return 0;
 }

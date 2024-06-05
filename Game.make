@@ -88,6 +88,7 @@ GENERATED += $(OBJDIR)/Event.o
 GENERATED += $(OBJDIR)/Game.o
 GENERATED += $(OBJDIR)/ImGuiLayer.o
 GENERATED += $(OBJDIR)/KeyEvents.o
+GENERATED += $(OBJDIR)/Log.o
 GENERATED += $(OBJDIR)/Manager.o
 GENERATED += $(OBJDIR)/MouseEvents.o
 GENERATED += $(OBJDIR)/Scene.o
@@ -107,6 +108,7 @@ OBJECTS += $(OBJDIR)/Event.o
 OBJECTS += $(OBJDIR)/Game.o
 OBJECTS += $(OBJDIR)/ImGuiLayer.o
 OBJECTS += $(OBJDIR)/KeyEvents.o
+OBJECTS += $(OBJDIR)/Log.o
 OBJECTS += $(OBJDIR)/Manager.o
 OBJECTS += $(OBJDIR)/MouseEvents.o
 OBJECTS += $(OBJDIR)/Scene.o
@@ -184,6 +186,9 @@ $(OBJDIR)/Manager.o: src/Asset/Manager.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Game.o: src/Core/Game.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Log.o: src/Core/Log.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/UUID.o: src/Core/UUID.cpp
