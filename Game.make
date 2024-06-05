@@ -19,6 +19,9 @@ endif
 # #############################################
 
 RESCOMP = windres
+PCH = src/pch.h
+PCH_PLACEHOLDER = $(OBJDIR)/$(notdir $(PCH))
+GCH = $(PCH_PLACEHOLDER).gch
 INCLUDES += -Ivendor/spdlog/include -Ivendor/GLFW/include -Ivendor/Glad/include -Ivendor/imgui -Ivendor/glm -Isrc
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
@@ -76,18 +79,44 @@ endif
 GENERATED :=
 OBJECTS :=
 
+GENERATED += $(OBJDIR)/ApplicationEvents.o
+GENERATED += $(OBJDIR)/Components.o
 GENERATED += $(OBJDIR)/Context.o
-GENERATED += $(OBJDIR)/Input.o
-GENERATED += $(OBJDIR)/Log.o
+GENERATED += $(OBJDIR)/DebugEvents.o
+GENERATED += $(OBJDIR)/Entity.o
+GENERATED += $(OBJDIR)/Event.o
+GENERATED += $(OBJDIR)/Game.o
+GENERATED += $(OBJDIR)/ImGuiLayer.o
+GENERATED += $(OBJDIR)/KeyEvents.o
 GENERATED += $(OBJDIR)/Manager.o
+GENERATED += $(OBJDIR)/MouseEvents.o
+GENERATED += $(OBJDIR)/Scene.o
+GENERATED += $(OBJDIR)/Subscriber.o
+GENERATED += $(OBJDIR)/UUID.o
 GENERATED += $(OBJDIR)/Window.o
+GENERATED += $(OBJDIR)/imgui_impl_glfw.o
+GENERATED += $(OBJDIR)/imgui_impl_opengl3.o
 GENERATED += $(OBJDIR)/main.o
+GENERATED += $(OBJDIR)/pch.o
+OBJECTS += $(OBJDIR)/ApplicationEvents.o
+OBJECTS += $(OBJDIR)/Components.o
 OBJECTS += $(OBJDIR)/Context.o
-OBJECTS += $(OBJDIR)/Input.o
-OBJECTS += $(OBJDIR)/Log.o
+OBJECTS += $(OBJDIR)/DebugEvents.o
+OBJECTS += $(OBJDIR)/Entity.o
+OBJECTS += $(OBJDIR)/Event.o
+OBJECTS += $(OBJDIR)/Game.o
+OBJECTS += $(OBJDIR)/ImGuiLayer.o
+OBJECTS += $(OBJDIR)/KeyEvents.o
 OBJECTS += $(OBJDIR)/Manager.o
+OBJECTS += $(OBJDIR)/MouseEvents.o
+OBJECTS += $(OBJDIR)/Scene.o
+OBJECTS += $(OBJDIR)/Subscriber.o
+OBJECTS += $(OBJDIR)/UUID.o
 OBJECTS += $(OBJDIR)/Window.o
+OBJECTS += $(OBJDIR)/imgui_impl_glfw.o
+OBJECTS += $(OBJDIR)/imgui_impl_opengl3.o
 OBJECTS += $(OBJDIR)/main.o
+OBJECTS += $(OBJDIR)/pch.o
 
 # Rules
 # #############################################
@@ -153,22 +182,61 @@ endif
 
 $(OBJDIR)/Manager.o: src/Asset/Manager.cpp
 	@echo "$(notdir $<)"
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Input.o: src/Core/Input.cpp
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Game.o: src/Core/Game.cpp
 	@echo "$(notdir $<)"
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Log.o: src/Core/Log.cpp
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/UUID.o: src/Core/UUID.cpp
 	@echo "$(notdir $<)"
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Window.o: src/Core/Window.cpp
 	@echo "$(notdir $<)"
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ApplicationEvents.o: src/Events/ApplicationEvents.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/DebugEvents.o: src/Events/DebugEvents.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Event.o: src/Events/Event.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/KeyEvents.o: src/Events/KeyEvents.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/MouseEvents.o: src/Events/MouseEvents.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Subscriber.o: src/Events/Subscriber.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ImGuiLayer.o: src/ImGui/ImGuiLayer.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/imgui_impl_glfw.o: src/ImGui/imgui_impl_glfw.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/imgui_impl_opengl3.o: src/ImGui/imgui_impl_opengl3.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Context.o: src/Renderer/Context.cpp
 	@echo "$(notdir $<)"
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Components.o: src/Scene/Components.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Entity.o: src/Scene/Entity.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Scene.o: src/Scene/Scene.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.cpp
 	@echo "$(notdir $<)"
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/pch.o: src/pch.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)
 ifneq (,$(PCH))

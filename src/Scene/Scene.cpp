@@ -16,15 +16,15 @@ namespace SOF {
 	UUID Scene::CreateEntity(const std::string& name)
 	{
 		UUID new_id = UUID();
-		m_EntityMap[new_id] = Entity(new_id, this);
-		m_EntityMap[new_id].AddComponent<TagComponent>(TagComponent(name));
+		m_EntityMap[new_id] = std::make_unique<Entity>(new_id, this);
+		m_EntityMap[new_id]->AddComponent<TagComponent>(TagComponent(name));
 		return new_id;
 	}
 
 	UUID Scene::CreateEntity(const std::string& name, UUID handle)
 	{
-		m_EntityMap[handle] = Entity(handle, this);
-		m_EntityMap[handle].AddComponent<TagComponent>(TagComponent(name));
+		m_EntityMap[handle] = std::make_unique<Entity>(handle, this);
+		m_EntityMap[handle]->AddComponent<TagComponent>(TagComponent(name));
 		return handle;
 	}
 
@@ -36,6 +36,6 @@ namespace SOF {
 
 	Entity* Scene::GetEntity(UUID id)
 	{
-		return &m_EntityMap[id];
+		return m_EntityMap[id].get();
 	}
 }

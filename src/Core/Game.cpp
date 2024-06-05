@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "Game.h"
 #include <glad/gl.h>
+#include "Game.h"
 #include "Events/DebugEvents.h"
 
 namespace SOF {

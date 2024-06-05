@@ -30,7 +30,7 @@ namespace SOF {
 	private:
 		UUID m_ID = UUID();
 		Registry m_ComponentRegistry;
-		std::unordered_map<UUID, Entity> m_EntityMap;
+		std::unordered_map<UUID, std::unique_ptr<Entity>> m_EntityMap;
 		std::string m_Name = "Untitled Level";
 	};
 }

@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "ImGui/ImGuiLayer.h"
 
-#include <GLFW/glfw3.h>
 #include <glad/gl.h>
+#include <GLFW/glfw3.h>
+
 
 #include "Core/Game.h"
 #include "imgui.h"
