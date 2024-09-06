@@ -2,6 +2,7 @@
 #include <glad/gl.h>
 #include "Game.h"
 #include "Events/DebugEvents.h"
+#include "Renderer/Renderer.h"
 
 namespace SOF {
 
@@ -13,7 +14,9 @@ namespace SOF {
 		m_Window = std::make_unique<Window>(props);
 		s_Instance = this;
 		m_Window->SetEventCallback(BIND_EVENT_FN(SOF::Game::OnEvent));
+		Renderer::Init();
 		ImGuiLayer::Init();
+
 	}
 
 	Game* Game::CreateGame(const WindowProps& props)
@@ -26,6 +29,8 @@ namespace SOF {
 		while (m_Running) {
 			glClearColor(1.f, 0.f, 0.f, 1.f);
 			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+			Renderer::DrawSquare();
 
 #ifdef DEBUG
 			ImGuiLayer::Begin();
@@ -41,6 +46,7 @@ namespace SOF {
 	{
 		SOF_INFO("Game", "Shutting down \n");
 		m_Running = false;
+		Renderer::Shutdown();
 		ImGuiLayer::Shutdown();
 		return true;
 	}

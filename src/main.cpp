@@ -5,7 +5,7 @@
 int main(){
    
     SOF::Log::Init();
-    SOF_WARN("Log initialized!");
+    SOF_WARN("Entrypoint", "Log initialized!");
     
     SOF::WindowProps window_settings{};
     window_settings.Title = "Shadow of the Forsaken";

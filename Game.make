@@ -38,7 +38,7 @@ ifeq ($(config),debug)
 TARGETDIR = bin/Debug-linux-x86_64/Game
 TARGET = $(TARGETDIR)/Game
 OBJDIR = bin-int/Debug-linux-x86_64/Game
-DEFINES += -D_CRT_SECURE_NO_WARNINGS -DROOT_PATH=\"/home/ivan/programming/opengl-2d-game/Game\" -DDEBUG
+DEFINES += -D_CRT_SECURE_NO_WARNINGS -DROOT_PATH=\"/home/warsay/Documents/Projects/ShadowOfTheForsaken/Game\" -DDEBUG
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c++17
 LIBS += vendor/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a vendor/Glad/bin/Debug-linux-x86_64/Glad/libGlad.a vendor/imgui/bin/Debug-linux-x86_64/ImGui/libImGui.a
@@ -49,7 +49,7 @@ else ifeq ($(config),release)
 TARGETDIR = bin/Release-linux-x86_64/Game
 TARGET = $(TARGETDIR)/Game
 OBJDIR = bin-int/Release-linux-x86_64/Game
-DEFINES += -D_CRT_SECURE_NO_WARNINGS -DROOT_PATH=\"/home/ivan/programming/opengl-2d-game/Game\" -DRELEASE
+DEFINES += -D_CRT_SECURE_NO_WARNINGS -DROOT_PATH=\"/home/warsay/Documents/Projects/ShadowOfTheForsaken/Game\" -DRELEASE
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++17
 LIBS += vendor/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a vendor/Glad/bin/Release-linux-x86_64/Glad/libGlad.a vendor/imgui/bin/Release-linux-x86_64/ImGui/libImGui.a
@@ -60,7 +60,7 @@ else ifeq ($(config),dist)
 TARGETDIR = bin/Dist-linux-x86_64/Game
 TARGET = $(TARGETDIR)/Game
 OBJDIR = bin-int/Dist-linux-x86_64/Game
-DEFINES += -D_CRT_SECURE_NO_WARNINGS -DROOT_PATH=\"/home/ivan/programming/opengl-2d-game/Game\" -DDIST
+DEFINES += -D_CRT_SECURE_NO_WARNINGS -DROOT_PATH=\"/home/warsay/Documents/Projects/ShadowOfTheForsaken/Game\" -DDIST
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++17
 LIBS += vendor/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a vendor/Glad/bin/Dist-linux-x86_64/Glad/libGlad.a vendor/imgui/bin/Dist-linux-x86_64/ImGui/libImGui.a
@@ -91,8 +91,11 @@ GENERATED += $(OBJDIR)/KeyEvents.o
 GENERATED += $(OBJDIR)/Log.o
 GENERATED += $(OBJDIR)/Manager.o
 GENERATED += $(OBJDIR)/MouseEvents.o
+GENERATED += $(OBJDIR)/Renderer.o
 GENERATED += $(OBJDIR)/Scene.o
+GENERATED += $(OBJDIR)/Shaderprogram.o
 GENERATED += $(OBJDIR)/Subscriber.o
+GENERATED += $(OBJDIR)/Transformator.o
 GENERATED += $(OBJDIR)/UUID.o
 GENERATED += $(OBJDIR)/Window.o
 GENERATED += $(OBJDIR)/imgui_impl_glfw.o
@@ -111,8 +114,11 @@ OBJECTS += $(OBJDIR)/KeyEvents.o
 OBJECTS += $(OBJDIR)/Log.o
 OBJECTS += $(OBJDIR)/Manager.o
 OBJECTS += $(OBJDIR)/MouseEvents.o
+OBJECTS += $(OBJDIR)/Renderer.o
 OBJECTS += $(OBJDIR)/Scene.o
+OBJECTS += $(OBJDIR)/Shaderprogram.o
 OBJECTS += $(OBJDIR)/Subscriber.o
+OBJECTS += $(OBJDIR)/Transformator.o
 OBJECTS += $(OBJDIR)/UUID.o
 OBJECTS += $(OBJDIR)/Window.o
 OBJECTS += $(OBJDIR)/imgui_impl_glfw.o
@@ -225,6 +231,15 @@ $(OBJDIR)/imgui_impl_opengl3.o: src/ImGui/imgui_impl_opengl3.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Context.o: src/Renderer/Context.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Renderer.o: src/Renderer/Renderer.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Shaderprogram.o: src/Renderer/Shaderprogram.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Transformator.o: src/Renderer/Transformator.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) -include $(PCH_PLACEHOLDER) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Components.o: src/Scene/Components.cpp
