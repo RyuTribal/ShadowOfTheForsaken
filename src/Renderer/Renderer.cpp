@@ -19,6 +19,18 @@ namespace SOF{
     {
         s_Props.RendererInstance = nullptr;
     }
+    void Renderer::BeginFrame()
+    {
+        SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
+        glClearColor(s_Props.RendererInstance->m_BackgroundColor.r, s_Props.RendererInstance->m_BackgroundColor.g, s_Props.RendererInstance->m_BackgroundColor.b, 1.f);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    }
+
+    void Renderer::EndFrame()
+    {
+        SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
+    }
+
     void Renderer::DrawSquare()
     {
         DrawTriangle();
@@ -64,5 +76,11 @@ namespace SOF{
         program.Use();
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
+    void Renderer::ChangeBackgroundColor(glm::vec3 &color)
+    {
+        SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
+
+        s_Props.RendererInstance->m_BackgroundColor = color;
     }
 }

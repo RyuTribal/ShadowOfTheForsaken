@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Events/DebugEvents.h"
 #include "Renderer/Renderer.h"
+#include <imgui.h>
 
 namespace SOF {
 
@@ -26,15 +27,23 @@ namespace SOF {
 
 	void Game::Start()
 	{
+		float color[3] = { 0.f,  0.f, 0.f };
 		while (m_Running) {
-			glClearColor(1.f, 0.f, 0.f, 1.f);
-			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
+			Renderer::BeginFrame();
 			Renderer::DrawSquare();
+			Renderer::EndFrame();
 
 #ifdef DEBUG
 			ImGuiLayer::Begin();
 			ImGuiUpdateEvent debug_event{};
+			ImGui::Begin("WArsay");
+			
+			if(ImGui::ColorEdit3("Warsay color", color)){
+				glm::vec3 color_vec(color[0], color[1], color[2]);
+				Renderer::ChangeBackgroundColor(color_vec);
+			}
+
+			ImGui::End();
 			OnEvent(debug_event);
 			ImGuiLayer::End();
 #endif
@@ -51,7 +60,7 @@ namespace SOF {
 		return true;
 	}
 
-	void Game::OnEvent(Event& event)
+    void Game::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(SOF::Game::OnShutDown));
