@@ -43,6 +43,12 @@ namespace SOF {
 				Renderer::ChangeBackgroundColor(color_vec);
 			}
 
+			float box_color[4] = {Renderer::color_test.r, Renderer::color_test.g, Renderer::color_test.b, Renderer::color_test.a};
+			if (ImGui::ColorEdit4("Box color", box_color)) {
+				glm::vec4 color_vec(box_color[0], box_color[1], box_color[2], box_color[3]);
+				Renderer::color_test = color_vec;
+			}
+
 			ImGui::End();
 			OnEvent(debug_event);
 			ImGuiLayer::End();

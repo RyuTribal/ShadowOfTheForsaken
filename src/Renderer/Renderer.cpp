@@ -2,6 +2,8 @@
 
 #include "Renderer.h"
 #include "Shaderprogram.h"
+#include "VertexArray.h"
+#include "Buffer.h"
 #include <glad/gl.h>
 
 namespace SOF{
@@ -9,11 +11,41 @@ namespace SOF{
         Renderer* RendererInstance = nullptr;
     };
 
+    glm::vec4 Renderer::color_test = glm::vec4(1.f, 0.f, 0.f, 1.f);
+
+    void MessageCallback(
+        unsigned source,
+        unsigned type,
+        unsigned id,
+        unsigned severity,
+        int length,
+        const char* message,
+        const void* userParam)
+    {
+        switch (severity)
+        {
+        case GL_DEBUG_SEVERITY_HIGH:		 SOF_FATAL("Renderer", message); return;
+        case GL_DEBUG_SEVERITY_MEDIUM:       SOF_ERROR("Renderer", message);  return;
+        case GL_DEBUG_SEVERITY_LOW:          SOF_WARN("Renderer", message);  return;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: SOF_TRACE("Renderer", message);  return;
+        }
+
+        SOF_ASSERT(false, "Unknown severity level!");
+    }
+
     static RendererProps s_Props{};
 
     void Renderer::Init()
     {
         s_Props.RendererInstance = new Renderer();
+
+#ifdef DEBUG
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(MessageCallback, nullptr);
+
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+#endif
     }
     void Renderer::Shutdown()
     {
@@ -33,8 +65,45 @@ namespace SOF{
 
     void Renderer::DrawSquare()
     {
-        DrawTriangle();
+        SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
+        Shaderprogram program = Shaderprogram("assets/shaders/triangle.vert", "assets/shaders/triangle.frag");
+
+        std::vector<Vertex> vertices = {
+            {glm::vec3(0.5f,  0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f)},
+            {glm::vec3(0.5f, -0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f)},
+            {glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f)},
+            {glm::vec3(-0.5f,  0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f)},
+        };
+
+        std::vector<uint32_t> indices = {
+            0, 1, 3,
+            1, 2, 3
+        };
+
+        auto vertex_array = VertexArray::Create();
+
+        auto vertexBuffer = VertexBuffer::Create(vertices.size() * sizeof(Vertex));
+        vertexBuffer->SetLayout({
+            {ShaderDataType::Float3, "aPos"},
+            {ShaderDataType::Float4, "aColor"},
+        });
+        vertexBuffer->SetData(vertices.data(), vertices.size() * sizeof(Vertex));
+
+        auto indexBuffer = IndexBuffer::Create(indices.data(), indices.size());
+
+        vertex_array->SetVertexBuffer(vertexBuffer);
+        vertex_array->SetIndexBuffer(indexBuffer);
+
+        program.Set("u_Color", color_test);
+        program.Activate();
+        vertex_array->Bind();
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        vertex_array->Unbind();
     }
+
+
     void Renderer::DrawTriangle()
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
@@ -46,35 +115,8 @@ namespace SOF{
             0.0f,  0.5f, 0.0f
         };
 
-        unsigned int VBO;
-        glCreateBuffers(1, &VBO);
-        
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);  
-
-        // 0. copy our vertices array in a buffer for OpenGL to use
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        // 1. then set the vertex attributes pointers
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);  
-
-        unsigned int VAO;
-        glGenVertexArrays(1, &VAO);  
-
-        glBindVertexArray(VAO);
-        // 2. copy our vertices array in a buffer for OpenGL to use
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        // 3. then set our vertex attributes pointers
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);  
-
         // 2. use our shader program when we want to render an object
-        program.Use();
-        glBindVertexArray(VAO);
+        program.Activate();
         glDrawArrays(GL_TRIANGLES, 0, 3);
     }
     void Renderer::ChangeBackgroundColor(glm::vec3 &color)

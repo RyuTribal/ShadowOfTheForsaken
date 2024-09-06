@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Shaderprogram.h"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace SOF{
     Shaderprogram::Shaderprogram(std::string vert, std::string frags) : m_VertPath(vert), m_FragPath(frags)
@@ -90,8 +91,84 @@ namespace SOF{
         glDeleteShader(m_VertexId);
         glDeleteShader(m_FragmentId);
     }
-    void Shaderprogram::Use()
+    void Shaderprogram::Activate()
     {
         glUseProgram(m_ShaderProgram);
+    }
+    void Shaderprogram::Deactivate()
+    {
+        glUseProgram(0);
+    }
+    void Shaderprogram::Set(const std::string& name, float value)
+    {
+        Activate();
+        glUniform1f(glGetUniformLocation(m_ShaderProgram, name.c_str()), value);
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, int value)
+    {
+        Activate();
+        glUniform1i(glGetUniformLocation(m_ShaderProgram, name.c_str()), value);
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, uint32_t value)
+    {
+        Activate();
+        glUniform1ui(glGetUniformLocation(m_ShaderProgram, name.c_str()), value);
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, bool value)
+    {
+        Activate();
+        glUniform1i(glGetUniformLocation(m_ShaderProgram, name.c_str()), (int)value);
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, const glm::ivec2& value)
+    {
+        Activate();
+        glUniform2iv(glGetUniformLocation(m_ShaderProgram, name.c_str()), 1, glm::value_ptr(value));
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, const glm::ivec3& value)
+    {
+        Activate();
+        glUniform3iv(glGetUniformLocation(m_ShaderProgram, name.c_str()), 1, glm::value_ptr(value));
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, const glm::ivec4& value)
+    {
+        Activate();
+        glUniform4iv(glGetUniformLocation(m_ShaderProgram, name.c_str()), 1, glm::value_ptr(value));
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, const glm::vec2& value)
+    {
+        Activate();
+        glUniform2fv(glGetUniformLocation(m_ShaderProgram, name.c_str()), 1, glm::value_ptr(value));
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, const glm::vec3& value)
+    {
+        Activate();
+        glUniform3fv(glGetUniformLocation(m_ShaderProgram, name.c_str()), 1, glm::value_ptr(value));
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, const glm::vec4& value)
+    {
+        Activate();
+        glUniform4fv(glGetUniformLocation(m_ShaderProgram, name.c_str()), 1, glm::value_ptr(value));
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, const glm::mat3& value)
+    {
+        Activate();
+        glUniformMatrix3fv(glGetUniformLocation(m_ShaderProgram, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+        Deactivate();
+    }
+    void Shaderprogram::Set(const std::string& name, const glm::mat4& value)
+    {
+        Activate();
+        glUniformMatrix4fv(glGetUniformLocation(m_ShaderProgram, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+        Deactivate();
     }
 }

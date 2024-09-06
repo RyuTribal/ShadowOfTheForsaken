@@ -11,6 +11,31 @@ configurations({
 	"Dist",
 })
 
+filter "action:vs*"
+	linkoptions { "/ignore:4099" }
+	disablewarnings { "4068" }
+
+	filter "language:C++ or language:C"
+	architecture "x86_64"
+
+	filter "configurations:Debug or configurations:Debug-AS"
+	optimize "Off"
+	symbols "On"
+
+	filter { "system:windows", "configurations:Debug-AS" }	
+	flags { "NoRuntimeChecks", "NoIncrementalLink" }
+
+	filter "configurations:Release"
+	optimize "On"
+	symbols "Default"
+
+	filter "configurations:Dist"
+	optimize "Full"
+	symbols "Off"
+
+	filter "system:windows"
+	buildoptions { "/EHsc", "/Zc:preprocessor", "/Zc:__cplusplus" }
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 pchheader "pch.h"
@@ -33,7 +58,7 @@ location("./")
 kind("ConsoleApp")
 staticruntime("off")
 language("C++")
-cppdialect("C++17")
+cppdialect("C++20")
 targetdir("bin/" .. outputdir .. "/%{prj.name}")
 objdir("bin-int/" .. outputdir .. "/%{prj.name}")
 
