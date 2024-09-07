@@ -2,6 +2,7 @@
 #include "Events/ApplicationEvents.h"
 #include "Window.h"
 #include "ImGui/ImGuiLayer.h"
+#include <Scene/Scene.h>
 
 namespace SOF {
 
@@ -35,5 +36,8 @@ namespace SOF {
 		std::unique_ptr<Window> m_Window;
 		static Game* s_Instance;
 		std::unordered_map<UUID, std::function<void(Event&)>> m_Subscribers{};
+		std::shared_ptr<Scene> m_Scene;
+
+		UUID m_WarsayID;
 	};
 }

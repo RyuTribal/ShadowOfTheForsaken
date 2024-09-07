@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "Entity.h"
 #include "Components.h"
+#include "Renderer/Renderer.h"
 
 namespace SOF {
 	std::shared_ptr<Scene> Scene::CreateScene(const std::string& name)
@@ -26,6 +27,27 @@ namespace SOF {
 		m_EntityMap[handle] = std::make_unique<Entity>(handle, this);
 		m_EntityMap[handle]->AddComponent<TagComponent>(TagComponent(name));
 		return handle;
+	}
+
+	void Scene::Begin()
+	{
+		Renderer::BeginFrame();
+	}
+
+	void Scene::Update()
+	{
+		// Draw all entities
+		auto sprite_registry = m_ComponentRegistry.GetComponentRegistry<SpriteComponent>();
+		for (auto [id, sprite] : *sprite_registry) {
+			auto transform = m_ComponentRegistry.Get<TransformComponent>(id);
+			auto transform_mat = transform->CreateMat4x4();
+			Renderer::DrawSquare(sprite.Color, transform_mat);
+		}
+	}
+
+	void Scene::End()
+	{
+		Renderer::EndFrame();
 	}
 
 	void Scene::DestroyEntity(UUID handle)

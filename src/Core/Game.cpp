@@ -2,8 +2,10 @@
 #include <glad/gl.h>
 #include "Game.h"
 #include "Events/DebugEvents.h"
+#include "Scene/Entity.h"
 #include "Renderer/Renderer.h"
 #include <imgui.h>
+#include <Scene/Components.h>
 
 namespace SOF {
 
@@ -18,6 +20,15 @@ namespace SOF {
 		Renderer::Init();
 		ImGuiLayer::Init();
 
+		m_Scene = std::make_shared<Scene>("Test scene");
+
+		m_WarsayID = m_Scene->CreateEntity("WarsayBox");
+		auto warsay_entity = m_Scene->GetEntity(m_WarsayID);
+		TransformComponent warsay_transform = TransformComponent();
+		SpriteComponent warsay_sprite = SpriteComponent(glm::vec4(0.f, 0.f, 0.f, 1.f));
+		warsay_entity->AddComponent<TransformComponent>(warsay_transform);
+		warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
+
 	}
 
 	Game* Game::CreateGame(const WindowProps& props)
@@ -27,26 +38,20 @@ namespace SOF {
 
 	void Game::Start()
 	{
-		float color[3] = { 0.f,  0.f, 0.f };
+		float bg_color[3] = { 0.f,  0.f, 0.f };
 		while (m_Running) {
-			Renderer::BeginFrame();
-			Renderer::DrawSquare();
-			Renderer::EndFrame();
+			m_Scene->Begin();
+			m_Scene->Update();
+			m_Scene->End();
 
 #ifdef DEBUG
 			ImGuiLayer::Begin();
 			ImGuiUpdateEvent debug_event{};
-			ImGui::Begin("WArsay");
+			ImGui::Begin("Debug");
 			
-			if(ImGui::ColorEdit3("Warsay color", color)){
-				glm::vec3 color_vec(color[0], color[1], color[2]);
+			if(ImGui::ColorEdit3("Background color", bg_color)){
+				glm::vec3 color_vec(bg_color[0], bg_color[1], bg_color[2]);
 				Renderer::ChangeBackgroundColor(color_vec);
-			}
-
-			float box_color[4] = {Renderer::color_test.r, Renderer::color_test.g, Renderer::color_test.b, Renderer::color_test.a};
-			if (ImGui::ColorEdit4("Box color", box_color)) {
-				glm::vec4 color_vec(box_color[0], box_color[1], box_color[2], box_color[3]);
-				Renderer::color_test = color_vec;
 			}
 
 			ImGui::End();

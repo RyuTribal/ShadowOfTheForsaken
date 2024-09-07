@@ -1,7 +1,6 @@
 #include "pch.h"
 
 #include "Renderer.h"
-#include "Shaderprogram.h"
 #include "VertexArray.h"
 #include "Buffer.h"
 #include <glad/gl.h>
@@ -10,8 +9,6 @@ namespace SOF{
     struct RendererProps{
         Renderer* RendererInstance = nullptr;
     };
-
-    glm::vec4 Renderer::color_test = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
     void MessageCallback(
         unsigned source,
@@ -38,6 +35,8 @@ namespace SOF{
     void Renderer::Init()
     {
         s_Props.RendererInstance = new Renderer();
+        
+        s_Props.RendererInstance->m_ShaderLibrary.Load("sprite", "assets/shaders/sprite");
 
 #ifdef DEBUG
         glEnable(GL_DEBUG_OUTPUT);
@@ -63,10 +62,10 @@ namespace SOF{
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
     }
 
-    void Renderer::DrawSquare()
+    void Renderer::DrawSquare(glm::vec4& color, glm::mat4& transform)
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
-        Shaderprogram program = Shaderprogram("assets/shaders/triangle.vert", "assets/shaders/triangle.frag");
+        auto program = s_Props.RendererInstance->m_ShaderLibrary.Get("sprite");
 
         std::vector<Vertex> vertices = {
             {glm::vec3(0.5f,  0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f)},
@@ -94,8 +93,9 @@ namespace SOF{
         vertex_array->SetVertexBuffer(vertexBuffer);
         vertex_array->SetIndexBuffer(indexBuffer);
 
-        program.Set("u_Color", color_test);
-        program.Activate();
+        program->Set("u_Transform", transform);
+        program->Set("u_Color", color);
+        program->Activate();
         vertex_array->Bind();
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -107,17 +107,7 @@ namespace SOF{
     void Renderer::DrawTriangle()
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
-        Shaderprogram program = Shaderprogram("assets/shaders/triangle.vert", "assets/shaders/triangle.frag");
-
-        float vertices[] = {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f,  0.5f, 0.0f
-        };
-
-        // 2. use our shader program when we want to render an object
-        program.Activate();
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+       
     }
     void Renderer::ChangeBackgroundColor(glm::vec3 &color)
     {

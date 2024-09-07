@@ -171,4 +171,33 @@ namespace SOF{
         glUniformMatrix4fv(glGetUniformLocation(m_ShaderProgram, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
         Deactivate();
     }
+
+
+    ShaderLibrary::ShaderLibrary()
+    {
+    }
+    ShaderLibrary::~ShaderLibrary()
+    {
+    }
+    void ShaderLibrary::Load(std::string_view name, const std::string& path)
+    {
+        SOF_ASSERT(m_Shaders.find(std::string(name)) == m_Shaders.end());
+        m_Shaders[std::string(name)] = Shaderprogram::Create(path+".vert", path+".frag");
+    }
+    const std::shared_ptr<Shaderprogram>& ShaderLibrary::Get(const std::string& name) const
+    {
+        SOF_ASSERT(m_Shaders.find(name) != m_Shaders.end());
+        return m_Shaders.at(name);
+    }
+    const std::shared_ptr<Shaderprogram>& ShaderLibrary::GetByShaderID(uint32_t id) const
+    {
+        for (auto [name, shader] : m_Shaders)
+        {
+            if (shader->GetProgramID() == id)
+            {
+                return shader;
+            }
+        }
+        SOF_ASSERT(false);
+    }
 }
