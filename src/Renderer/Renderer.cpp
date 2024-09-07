@@ -68,10 +68,10 @@ namespace SOF{
         auto program = s_Props.RendererInstance->m_ShaderLibrary.Get("sprite");
 
         std::vector<Vertex> vertices = {
-            {glm::vec3(0.5f,  0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f)},
-            {glm::vec3(0.5f, -0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f)},
-            {glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f)},
-            {glm::vec3(-0.5f,  0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f)},
+            {glm::vec3(0.5f,  0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f), glm::vec2(1.0f, 1.0f)},
+            {glm::vec3(0.5f, -0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f), glm::vec2(1.0f, 0.0f)},
+            {glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f), glm::vec2(0.0f, 0.0f)},
+            {glm::vec3(-0.5f,  0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f), glm::vec2(0.0f, 1.0f)},
         };
 
         std::vector<uint32_t> indices = {
@@ -85,6 +85,7 @@ namespace SOF{
         vertexBuffer->SetLayout({
             {ShaderDataType::Float3, "aPos"},
             {ShaderDataType::Float4, "aColor"},
+            {ShaderDataType::Float2, "aTex"}
         });
         vertexBuffer->SetData(vertices.data(), vertices.size() * sizeof(Vertex));
 

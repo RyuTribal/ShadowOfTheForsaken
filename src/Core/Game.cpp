@@ -26,6 +26,7 @@ namespace SOF {
 		auto warsay_entity = m_Scene->GetEntity(m_WarsayID);
 		TransformComponent warsay_transform = TransformComponent();
 		SpriteComponent warsay_sprite = SpriteComponent(glm::vec4(0.f, 0.f, 0.f, 1.f));
+		
 		warsay_entity->AddComponent<TransformComponent>(warsay_transform);
 		warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
 
