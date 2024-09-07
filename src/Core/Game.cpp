@@ -4,6 +4,7 @@
 #include "Events/DebugEvents.h"
 #include "Scene/Entity.h"
 #include "Renderer/Renderer.h"
+#include "Renderer/Texture.h"
 #include <imgui.h>
 #include <Scene/Components.h>
 
@@ -26,7 +27,7 @@ namespace SOF {
 		auto warsay_entity = m_Scene->GetEntity(m_WarsayID);
 		TransformComponent warsay_transform = TransformComponent();
 		SpriteComponent warsay_sprite = SpriteComponent(glm::vec4(0.f, 0.f, 0.f, 1.f));
-		
+		warsay_sprite.Texture = Texture::Create("assets/Images/black.jpg");
 		warsay_entity->AddComponent<TransformComponent>(warsay_transform);
 		warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
 

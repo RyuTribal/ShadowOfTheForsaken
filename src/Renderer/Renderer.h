@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Shaderprogram.h"
+#include "Texture.h"
 
 namespace SOF {
 
@@ -20,7 +21,7 @@ namespace SOF {
 
         static void EndFrame();
 
-        static void DrawSquare(glm::vec4& color, glm::mat4& transform);
+        static void DrawSquare(glm::vec4& color, Texture* texture, glm::mat4& transform);
 
         static void DrawTriangle();
 

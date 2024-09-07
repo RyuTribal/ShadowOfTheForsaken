@@ -92,6 +92,7 @@ defines({
 
 includedirs({
 	"vendor/spdlog/include",
+	"vendor/stb",
 	"%{IncludeDir.GLFW}",
 	"%{IncludeDir.Glad}",
 	"%{IncludeDir.ImGui}",

@@ -5,6 +5,7 @@
 #include "Buffer.h"
 #include <glad/gl.h>
 
+
 namespace SOF{
     struct RendererProps{
         Renderer* RendererInstance = nullptr;
@@ -62,7 +63,7 @@ namespace SOF{
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
     }
 
-    void Renderer::DrawSquare(glm::vec4& color, glm::mat4& transform)
+    void Renderer::DrawSquare(glm::vec4& color, Texture* texture, glm::mat4& transform)
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         auto program = s_Props.RendererInstance->m_ShaderLibrary.Get("sprite");
@@ -97,6 +98,9 @@ namespace SOF{
         program->Set("u_Transform", transform);
         program->Set("u_Color", color);
         program->Activate();
+        if (texture != nullptr) {
+            texture->Bind(0);
+        }
         vertex_array->Bind();
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

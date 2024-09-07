@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/gtx/quaternion.hpp>
-#include <Texture.h>
+#include "Renderer/Texture.h"
 
 namespace SOF {
 
@@ -37,7 +37,7 @@ namespace SOF {
 
 	struct SpriteComponent {
 		glm::vec4 Color = { 1.f, 1.f, 1.f, 1.f };
-		std::shared_ptr<Texture> texture = nullptr;
+		std::shared_ptr<Texture> Texture = nullptr;
 
 		SpriteComponent() = default;
 		SpriteComponent(const SpriteComponent&) = default;

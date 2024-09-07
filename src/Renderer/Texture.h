@@ -1,14 +1,22 @@
+#pragma once
+
 namespace SOF{
     class Texture {
         public:
-            void CreateTexture();
-            void Bind();
-            void UnBind();
+            static std::shared_ptr<Texture> Create(const char* file_path) {
+                return std::make_shared<Texture>(file_path);
+            }
 
-            void ApplyTexture();
+
+            Texture(const char* file_path);
+            ~Texture();
+            void SetData(unsigned char* data);
+            void Bind(uint8_t slot);
 
         private:
-            unsigned int texture;
+            uint32_t m_ID;
+            int m_Width, m_Height;
+            int m_Channels;
 
     };
 }

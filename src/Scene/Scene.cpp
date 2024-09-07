@@ -41,7 +41,7 @@ namespace SOF {
 		for (auto [id, sprite] : *sprite_registry) {
 			auto transform = m_ComponentRegistry.Get<TransformComponent>(id);
 			auto transform_mat = transform->CreateMat4x4();
-			Renderer::DrawSquare(sprite.Color, transform_mat);
+			Renderer::DrawSquare(sprite.Color, sprite.Texture.get(), transform_mat);
 		}
 	}
 
