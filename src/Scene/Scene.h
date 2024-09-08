@@ -33,6 +33,8 @@ namespace SOF {
 		void DestroyEntity(UUID handle);
 
 		Entity* GetEntity(UUID id);
+
+		uint32_t EntitySize() { return (uint32_t)m_EntityMap.size(); }
 	private:
 		UUID m_ID = UUID();
 		Registry m_ComponentRegistry;

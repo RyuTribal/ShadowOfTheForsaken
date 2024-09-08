@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/gtx/quaternion.hpp>
 #include "Renderer/Texture.h"
+#include <Renderer/Camera.h>
 
 namespace SOF {
 
@@ -42,5 +43,13 @@ namespace SOF {
 		SpriteComponent() = default;
 		SpriteComponent(const SpriteComponent&) = default;
 		SpriteComponent(const glm::vec4& new_color) : Color(new_color){}
+	};
+
+	struct CameraComponent {
+		std::shared_ptr<Camera> Camera = nullptr;
+		bool IsActive = false;
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
+		CameraComponent(bool is_active) : IsActive(is_active) {}
 	};
 }

@@ -23,14 +23,18 @@ namespace SOF {
 
 		m_Scene = std::make_shared<Scene>("Test scene");
 
+		// cReating warsay
 		m_WarsayID = m_Scene->CreateEntity("WarsayBox");
 		auto warsay_entity = m_Scene->GetEntity(m_WarsayID);
 		TransformComponent warsay_transform = TransformComponent();
 		SpriteComponent warsay_sprite = SpriteComponent(glm::vec4(0.f, 0.f, 0.f, 1.f));
 		warsay_sprite.Texture = Texture::Create("assets/Images/black.jpg");
+		CameraComponent warsay_camera = CameraComponent(true);
+		warsay_camera.Camera = Camera::Create(m_Window->GetWidth(), m_Window->GetHeight());
 		warsay_entity->AddComponent<TransformComponent>(warsay_transform);
 		warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
-
+		warsay_entity->AddComponent<CameraComponent>(warsay_camera);
+		
 	}
 
 	Game* Game::CreateGame(const WindowProps& props)
@@ -41,7 +45,17 @@ namespace SOF {
 	void Game::Start()
 	{
 		float bg_color[3] = { 0.f,  0.f, 0.f };
+
+		auto last_frame = std::chrono::high_resolution_clock::now();
+
 		while (m_Running) {
+
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - last_frame).count();
+			last_frame = newTime;
+			double currentTime = std::chrono::duration<double>(newTime.time_since_epoch()).count();
+			m_FrameStats.UpdateFPS(currentTime, frameTime);
+
 			m_Scene->Begin();
 			m_Scene->Update();
 			m_Scene->End();
@@ -55,6 +69,12 @@ namespace SOF {
 				glm::vec3 color_vec(bg_color[0], bg_color[1], bg_color[2]);
 				Renderer::ChangeBackgroundColor(color_vec);
 			}
+
+			ImGui::Text("Scene stats:");
+			ImGui::Text("	- Entity count: %i", m_Scene->EntitySize());
+
+			ImGui::Text("Renderer stats:");
+			ImGui::Text("	- Draw calls: %i", Renderer::GetStats().DrawCalls);
 
 			ImGui::End();
 			OnEvent(debug_event);
@@ -73,10 +93,38 @@ namespace SOF {
 		return true;
 	}
 
+	bool Game::OnWindowResize(WindowResizeEvent& event)
+	{
+		Renderer::ResizeWindow();
+		return true;
+	}
+
+	bool Game::OnKeyPressed(KeyPressedEvent& event)
+	{
+		glm::vec3 velocity = { 0.f, 0.f, 0.f };
+		if (event.GetKeyCode() == GLFW_KEY_W) {
+			velocity.y += 10.f * m_FrameStats.DeltaTime;
+		}
+		if (event.GetKeyCode() == GLFW_KEY_S) {
+			velocity.y -= 10.f * m_FrameStats.DeltaTime;
+		}
+		if (event.GetKeyCode() == GLFW_KEY_A) {
+			velocity.x -= 10.f * m_FrameStats.DeltaTime;
+		}
+		if (event.GetKeyCode() == GLFW_KEY_D) {
+			velocity.x += 10.f * m_FrameStats.DeltaTime;
+		}
+
+		Renderer::GetCurrentCamera()->Move(velocity);
+		return true;
+	}
+
     void Game::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(SOF::Game::OnShutDown));
+		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(SOF::Game::OnWindowResize));
+		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(SOF::Game::OnKeyPressed));
 
 		for (auto [subscriber, callback] : m_Subscribers) {
 			callback(event);

@@ -8,9 +8,11 @@ out vec4 vertColor;
 out vec2 vertTex;
 
 uniform mat4 u_Transform;
+uniform mat4 u_ViewMatrix;
+uniform mat4 u_ProjectionMatrix;
 
 void main(){
-    gl_Position = u_Transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_Transform * vec4(aPos, 1.0);
 
     vertColor = aColor;
     vertTex = aTex; 

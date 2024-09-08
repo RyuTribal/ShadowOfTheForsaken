@@ -14,12 +14,37 @@ namespace SOF {
 		unsigned int Width = 1280, Height = 720;
 	};
 
+	struct FrameStats {
+		float DeltaTime = 0.0f;
+		double FPS = 0.0;
+		double FrameTimeAccumulator = 0.0;
+		int FrameCount = 0;
+		double LastFPSCalculationTime = 0.0;
+
+		void UpdateFPS(double currentTime, double frameTime) {
+			DeltaTime = frameTime;
+			FrameTimeAccumulator += frameTime;
+			FrameCount++;
+
+			if (currentTime - LastFPSCalculationTime >= 1.0) {
+				double avgFrameTime = FrameTimeAccumulator / FrameCount;
+				FPS = 1.0 / avgFrameTime;
+
+				FrameTimeAccumulator = 0.0;
+				FrameCount = 0;
+				LastFPSCalculationTime = currentTime;
+			}
+		}
+	};
+
 	class Game {
 	public:
 		static Game* CreateGame(const WindowProps& props);
 
 		void Start();
 		bool OnShutDown(WindowCloseEvent& event);
+		bool OnWindowResize(WindowResizeEvent& event);
+		bool OnKeyPressed(KeyPressedEvent& event);
 
 		void OnEvent(Event& event);
 
@@ -30,6 +55,8 @@ namespace SOF {
 		UUID SubscribeOnEvents(std::function<void(Event&)> callback);
 		void RevokeSubscription(UUID subscriber);
 
+		FrameStats& GetFrameStats() { return m_FrameStats; }
+
 	private:
 		Game(const WindowProps& props);
 		bool m_Running = true;
@@ -37,6 +64,7 @@ namespace SOF {
 		static Game* s_Instance;
 		std::unordered_map<UUID, std::function<void(Event&)>> m_Subscribers{};
 		std::shared_ptr<Scene> m_Scene;
+		FrameStats m_FrameStats{};
 
 		UUID m_WarsayID;
 	};
