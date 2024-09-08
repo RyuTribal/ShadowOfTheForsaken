@@ -13,3 +13,4 @@ compile_commands.json
 Makefile
 **.make
 **.log
+imgui.ini

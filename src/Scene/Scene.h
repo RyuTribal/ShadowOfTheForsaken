@@ -17,6 +17,12 @@ namespace SOF {
 		UUID CreateEntity(const std::string& name);
 		UUID CreateEntity(const std::string& name, UUID handle);
 
+		void Begin();
+
+		void Update();
+
+		void End();
+
 		template<typename T>
 		std::unordered_map<UUID, T> GetAllEntitiesByType() { return m_ComponentRegistry.Get<T>(); }
 
@@ -27,6 +33,8 @@ namespace SOF {
 		void DestroyEntity(UUID handle);
 
 		Entity* GetEntity(UUID id);
+
+		uint32_t EntitySize() { return (uint32_t)m_EntityMap.size(); }
 	private:
 		UUID m_ID = UUID();
 		Registry m_ComponentRegistry;
