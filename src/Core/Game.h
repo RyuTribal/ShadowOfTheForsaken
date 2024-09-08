@@ -67,5 +67,6 @@ namespace SOF {
 		FrameStats m_FrameStats{};
 
 		UUID m_WarsayID;
+		std::vector<UUID> m_WarsayHome{};
 	};
 }

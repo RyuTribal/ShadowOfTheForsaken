@@ -7,13 +7,14 @@
 namespace SOF {
 
     struct Vertex {
-        glm::vec3 Position = { 0.f, 0.f, 0.f };
+        glm::vec4 Position = { 0.f, 0.f, 0.f, 1.f };
         glm::vec4 Color = { 1.f, 1.f, 1.f, 1.f };
         glm::vec2 TexCords = {1.f, 1.f};
     };
 
     struct RendererStats {
-        int DrawCalls = 0;
+        uint32_t DrawCalls = 0;
+        uint32_t QuadsDrawn = 0;
     };
 
     class Renderer{
@@ -37,6 +38,10 @@ namespace SOF {
         static Camera* GetCurrentCamera();
 
         static RendererStats& GetStats();
+
+    private:
+        static void RecreateVertexBuffers();
+        static void Draw();
 
     private:
         glm::vec3 m_BackgroundColor{0.f, 0.f, 0.f};

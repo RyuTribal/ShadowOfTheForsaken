@@ -34,6 +34,31 @@ namespace SOF {
 		warsay_entity->AddComponent<TransformComponent>(warsay_transform);
 		warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
 		warsay_entity->AddComponent<CameraComponent>(warsay_camera);
+
+
+		// cReating warsay home
+		int gridWidth = 10;
+		int gridHeight = 10;
+		float spacing = 1.0f;
+
+		for (int x = 0; x < gridWidth; ++x) {
+			for (int y = 0; y < gridHeight; ++y) {
+				UUID entityID = m_Scene->CreateEntity("GridEntity_"+std::to_string(x) + "_" + std::to_string(y));
+				auto entity = m_Scene->GetEntity(entityID);
+				m_WarsayHome.push_back(entityID);
+				TransformComponent transform;
+				transform.Translation = glm::vec3(x * spacing, y * spacing, 0.0f);
+				transform.Scale = glm::vec3(0.9f);
+
+				SpriteComponent sprite;
+				sprite.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+				sprite.Texture = Texture::Create("assets/Images/black.jpg");
+
+				entity->AddComponent<TransformComponent>(transform);
+				entity->AddComponent<SpriteComponent>(sprite);
+			}
+		}
+		
 		
 	}
 
@@ -74,6 +99,8 @@ namespace SOF {
 			ImGui::Text("	- Entity count: %i", m_Scene->EntitySize());
 
 			ImGui::Text("Renderer stats:");
+			ImGui::Text("	- FPS: %f", m_FrameStats.FPS);
+			ImGui::Text("	- Quads drawn: %i", Renderer::GetStats().QuadsDrawn);
 			ImGui::Text("	- Draw calls: %i", Renderer::GetStats().DrawCalls);
 
 			ImGui::End();

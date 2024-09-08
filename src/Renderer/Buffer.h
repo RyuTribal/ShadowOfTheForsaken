@@ -93,7 +93,7 @@ namespace SOF {
 
 	class VertexBuffer {
 	public:
-		VertexBuffer(uint32_t size);
+		VertexBuffer(uint32_t max_size);
 		~VertexBuffer();
 
 		static std::shared_ptr<VertexBuffer> Create(uint32_t size);
@@ -103,12 +103,19 @@ namespace SOF {
 
 		void SetData(const void* data, uint32_t size);
 
+		uint32_t MaxSize() { return m_MaxSize; }
+		uint32_t Size() { return m_Size; }
+		void Resize(uint32_t new_size);
+
 		const BufferLayout& GetLayout() { return m_Layout; }
 		void SetLayout(const BufferLayout& layout) { m_Layout = layout; }
 
 	private:
 		uint32_t m_ID;
 		BufferLayout m_Layout;
+		uint32_t m_MaxSize = 0;
+		uint32_t m_Size = 0;
+		uint32_t m_Index = 0;
 	};
 
 	class IndexBuffer {

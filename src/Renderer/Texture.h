@@ -7,7 +7,6 @@ namespace SOF{
                 return std::make_shared<Texture>(file_path);
             }
 
-
             Texture(const char* file_path);
             ~Texture();
             void SetData(unsigned char* data);
@@ -17,6 +16,5 @@ namespace SOF{
             uint32_t m_ID;
             int m_Width, m_Height;
             int m_Channels;
-
     };
 }

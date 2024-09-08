@@ -14,6 +14,12 @@ namespace SOF{
         Renderer* RendererInstance = nullptr;
         bool FrameBegun = false;
         bool ResizeWindow = false;
+        std::shared_ptr<VertexBuffer> QuadBuffer;
+        std::vector<uint32_t> QuadIndices{};
+        uint32_t IndexPtr = 0;
+
+        // TODO REMOVE
+        Texture* test_tex = nullptr;
     };
 
     void MessageCallback(
@@ -43,6 +49,8 @@ namespace SOF{
         s_Props.RendererInstance = new Renderer();
         
         s_Props.RendererInstance->m_ShaderLibrary.Load("sprite", "assets/shaders/sprite");
+
+        RecreateVertexBuffers();
 
 #ifdef DEBUG
         glEnable(GL_DEBUG_OUTPUT);
@@ -75,62 +83,85 @@ namespace SOF{
         }
     }
 
+    void Renderer::Draw()
+    {
+        SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
+
+        if (s_Props.QuadBuffer->Size() > 0) {
+            auto vertex_array = VertexArray::Create();
+            auto indexBuffer = IndexBuffer::Create(s_Props.QuadIndices.data(), s_Props.QuadIndices.size());
+
+            vertex_array->SetVertexBuffer(s_Props.QuadBuffer);
+            vertex_array->SetIndexBuffer(indexBuffer);
+
+            vertex_array->Bind();
+
+            auto program = s_Props.RendererInstance->m_ShaderLibrary.Get("sprite");
+
+            program->Set("u_ViewMatrix", s_Props.RendererInstance->m_CurrentActiveCamera->GetViewMatrix());
+            program->Set("u_ProjectionMatrix", s_Props.RendererInstance->m_CurrentActiveCamera->GetProjectionMatrix());
+
+            program->Activate();
+            if (s_Props.test_tex != nullptr) {
+                s_Props.test_tex->Bind(0);
+            }
+
+            glDrawElements(GL_TRIANGLES, s_Props.QuadIndices.size(), GL_UNSIGNED_INT, 0);
+
+            s_Props.RendererInstance->GetStats().DrawCalls++;
+
+            vertex_array->Unbind();
+        }
+
+        s_Props.IndexPtr = 0;
+        RecreateVertexBuffers();
+        s_Props.QuadIndices.clear();
+    }
+
+
     void Renderer::EndFrame()
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
+        Draw();
         s_Props.FrameBegun = false;
+    }
+
+    void Renderer::RecreateVertexBuffers()
+    {
+        s_Props.QuadBuffer = VertexBuffer::Create(s_Props.QuadBuffer ? s_Props.QuadBuffer->MaxSize() : 1000000);
+        s_Props.QuadBuffer->SetLayout({
+            {ShaderDataType::Float4, "aPos"},
+            {ShaderDataType::Float4, "aColor"},
+            {ShaderDataType::Float2, "aTex"}
+            });
     }
 
     void Renderer::DrawSquare(glm::vec4& color, Texture* texture, glm::mat4& transform)
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         SOF_ASSERT(s_Props.FrameBegun, "Please run BeginFrame() before running any frame specific commands!");
-        auto program = s_Props.RendererInstance->m_ShaderLibrary.Get("sprite");
 
         std::vector<Vertex> vertices = {
-            {glm::vec3(0.5f,  0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f), glm::vec2(1.0f, 1.0f)},
-            {glm::vec3(0.5f, -0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f), glm::vec2(1.0f, 0.0f)},
-            {glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f), glm::vec2(0.0f, 0.0f)},
-            {glm::vec3(-0.5f,  0.5f, 0.0f), glm::vec4(1.0f, 1.f, 1.f, 1.f), glm::vec2(0.0f, 1.0f)},
+            {transform * glm::vec4(0.5f,  0.5f, 0.0f, 1.f), color, glm::vec2(1.0f, 1.0f)},
+            {transform * glm::vec4(0.5f, -0.5f, 0.0f, 1.f), color, glm::vec2(1.0f, 0.0f)},
+            {transform * glm::vec4(-0.5f, -0.5f, 0.0f, 1.f), color, glm::vec2(0.0f, 0.0f)},
+            {transform * glm::vec4(-0.5f,  0.5f, 0.0f, 1.f), color, glm::vec2(0.0f, 1.0f)},
         };
 
-        std::vector<uint32_t> indices = {
-            0, 1, 3,
-            1, 2, 3
-        };
+        s_Props.test_tex = texture;
 
-        auto vertex_array = VertexArray::Create();
+        s_Props.QuadIndices.push_back(s_Props.IndexPtr);
+        s_Props.QuadIndices.push_back(s_Props.IndexPtr + 1);
+        s_Props.QuadIndices.push_back(s_Props.IndexPtr + 3);
+        s_Props.QuadIndices.push_back(s_Props.IndexPtr + 1);
+        s_Props.QuadIndices.push_back(s_Props.IndexPtr + 2);
+        s_Props.QuadIndices.push_back(s_Props.IndexPtr + 3);
 
-        auto vertexBuffer = VertexBuffer::Create(vertices.size() * sizeof(Vertex));
-        vertexBuffer->SetLayout({
-            {ShaderDataType::Float3, "aPos"},
-            {ShaderDataType::Float4, "aColor"},
-            {ShaderDataType::Float2, "aTex"}
-        });
-        vertexBuffer->SetData(vertices.data(), vertices.size() * sizeof(Vertex));
+        s_Props.IndexPtr += 4;
+        s_Props.QuadBuffer->SetData(vertices.data(), vertices.size() * sizeof(Vertex));
+        
 
-        auto indexBuffer = IndexBuffer::Create(indices.data(), indices.size());
-
-        vertex_array->SetVertexBuffer(vertexBuffer);
-        vertex_array->SetIndexBuffer(indexBuffer);
-
-        program->Set("u_Transform", transform);
-        program->Set("u_Color", color);
-        program->Set("u_ViewMatrix", s_Props.RendererInstance->m_CurrentActiveCamera->GetViewMatrix());
-        program->Set("u_ProjectionMatrix", s_Props.RendererInstance->m_CurrentActiveCamera->GetProjectionMatrix());
-
-
-        program->Activate();
-        if (texture != nullptr) {
-            texture->Bind(0);
-        }
-        vertex_array->Bind();
-
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        vertex_array->Unbind();
-
-        s_Props.RendererInstance->m_Stats.DrawCalls += 1;
+        s_Props.RendererInstance->m_Stats.QuadsDrawn++;
     }
 
 
