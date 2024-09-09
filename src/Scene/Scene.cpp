@@ -31,6 +31,7 @@ namespace SOF {
 
 	void Scene::Begin()
 	{
+		Renderer::ClearScreen();
 		auto camera_registry = m_ComponentRegistry.GetComponentRegistry<CameraComponent>();
 		if (camera_registry) {
 			for (auto [id, camera] : *camera_registry) {

@@ -18,6 +18,7 @@
 #include <stdexcept>
 #include <limits>
 #include <fstream>
+#include <filesystem>
 
 #include <string>
 #include <string_view>

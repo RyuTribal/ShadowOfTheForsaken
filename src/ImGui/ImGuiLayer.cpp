@@ -60,8 +60,8 @@ namespace SOF
 		if (s_Data && s_Data->BlockEvents)
 		{
 			ImGuiIO& io = ImGui::GetIO();
-			e.Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
-			e.Handled |= e.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+			e.Handled |= e.IsInCategory(EventCategoryMouse) && io.WantCaptureMouse;
+			e.Handled |= e.IsInCategory(EventCategoryKeyboard) && io.WantCaptureKeyboard;
 		}
 	}
 

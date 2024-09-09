@@ -2,17 +2,11 @@
 #include "Texture.h"
 #include <glad/gl.h>
 
-#define STBI_NO_SIMD
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 
 namespace SOF{
    
-        SOF::Texture::Texture(const char* file_path)
+        SOF::Texture::Texture(const char* data, uint32_t width, uint32_t height, uint32_t channels) : m_Width(width), m_Height(height), m_Channels(channels)
         {
-            stbi_set_flip_vertically_on_load(1);
-            unsigned char* data = stbi_load(file_path, &m_Width, &m_Height, &m_Channels, 0);
             glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
 
             glTextureStorage2D(m_ID, 1, m_Channels > 3 ? GL_RGBA8 : GL_RGB8, m_Width, m_Height);
@@ -24,8 +18,6 @@ namespace SOF{
             if (data) {
                 SetData(data);
             }
-
-            stbi_image_free(data);
         }
 
         Texture::~Texture()
@@ -33,7 +25,7 @@ namespace SOF{
             glDeleteTextures(1, &m_ID);
         }
 
-        void Texture::SetData(unsigned char* data)
+        void Texture::SetData(const char* data)
         {
             //SOF_ASSERT(sizeof(*data) == m_Width * m_Height * m_Channels * sizeof(unsigned char), "Texture is not correct!");
             glTextureSubImage2D(m_ID, 0, 0, 0, m_Width, m_Height, m_Channels > 3 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
