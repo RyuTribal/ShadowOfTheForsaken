@@ -23,6 +23,8 @@ namespace SOF {
 
         static void Shutdown();
 
+        static void ClearScreen();
+
         static void BeginFrame(Camera* camera);
 
         static void EndFrame();

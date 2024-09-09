@@ -62,15 +62,21 @@ namespace SOF{
     }
     void Renderer::Shutdown()
     {
+        delete s_Props.RendererInstance;
         s_Props.RendererInstance = nullptr;
     }
+    void Renderer::ClearScreen()
+    {
+        SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
+        glClearColor(s_Props.RendererInstance->m_BackgroundColor.r, s_Props.RendererInstance->m_BackgroundColor.g, s_Props.RendererInstance->m_BackgroundColor.b, 1.f);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    }
+
     void Renderer::BeginFrame(Camera* camera)
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         s_Props.RendererInstance->m_Stats = RendererStats();
         SOF_ASSERT(camera != nullptr, "Cannot start a frame without a valid camera!");
-        glClearColor(s_Props.RendererInstance->m_BackgroundColor.r, s_Props.RendererInstance->m_BackgroundColor.g, s_Props.RendererInstance->m_BackgroundColor.b, 1.f);
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         s_Props.RendererInstance->m_CurrentActiveCamera = camera;
         s_Props.FrameBegun = true;
