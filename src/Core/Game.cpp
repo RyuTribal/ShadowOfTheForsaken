@@ -39,6 +39,8 @@ namespace SOF
         warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
         warsay_entity->AddComponent<CameraComponent>(warsay_camera);
 
+		SOF_WARN("Game", "Hardware thread count: {0}", std::thread::hardware_concurrency());
+
 
         // cReating warsay home
         int gridWidth = 10;

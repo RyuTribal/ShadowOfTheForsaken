@@ -37,6 +37,7 @@
 
 #include <chrono>
 #include <future>
+#include <thread>
 
 #include <glm/glm.hpp>
 #include "Core/UUID.h"
