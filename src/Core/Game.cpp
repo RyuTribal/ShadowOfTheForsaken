@@ -9,9 +9,11 @@
 #include "Scene/Components.h"
 #include "Scene/Entity.h"
 
-namespace SOF {
 
-                                Game *Game::s_Instance = nullptr;
+namespace SOF
+{
+
+    Game *Game::s_Instance = nullptr;
 
     Game::Game(const WindowProps &props)
     {
@@ -39,6 +41,7 @@ namespace SOF {
         warsay_entity->AddComponent<CameraComponent>(warsay_camera);
 
         SOF_WARN("Game", "Hardware thread count: {0}", std::thread::hardware_concurrency());
+
 
         // cReating warsay home
         int gridWidth = 10;
@@ -137,6 +140,7 @@ namespace SOF {
 #endif
             m_Window->OnUpdate();
         }
+
     }
 
     bool Game::OnShutDown(WindowCloseEvent &event)

@@ -4,20 +4,21 @@
 #include "Events/KeyEvents.h"
 #include "Events/MouseEvents.h"
 
-namespace SOF {
-
-class ImGuiLayer
+namespace SOF
 {
-  public:
-    static void Init();
-    static void Shutdown();
 
-    static void OnEvent(Event &e);
+    class ImGuiLayer
+    {
+        public:
+        static void Init();
+        static void Shutdown();
 
-    static void Begin();
-    static void End();
+        static void OnEvent(Event &e);
 
-    static void BlockEvents(bool block);
-};
+        static void Begin();
+        static void End();
+
+        static void BlockEvents(bool block);
+    };
 
 }// namespace SOF

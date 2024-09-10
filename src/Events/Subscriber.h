@@ -1,14 +1,15 @@
 #pragma once
 #include "Event.h"
 
-namespace SOF {
-class Subscriber
+namespace SOF
 {
-  public:
-    ~Subscriber();
-    void Subscribe(std::function<void(Event &)>);
+    class Subscriber
+    {
+        public:
+        ~Subscriber();
+        void Subscribe(std::function<void(Event &)>);
 
-  private:
-    UUID m_ID = 0;
-};
+        private:
+        UUID m_ID = 0;
+    };
 }// namespace SOF

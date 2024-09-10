@@ -1,6 +1,8 @@
 #pragma once
 
 namespace SOF {
+
+
     enum class EventType {
         None = 0,
         WindowClose,
@@ -42,7 +44,6 @@ namespace SOF {
     {
       public:
         virtual ~Event() = default;
-
         bool Handled = false;
 
         virtual EventType GetEventType() const = 0;
@@ -56,7 +57,7 @@ namespace SOF {
 
     class EventDispatcher
     {
-      public:
+        public:
         EventDispatcher(Event &event) : m_Event(event) {}
         template<typename T, typename F> bool Dispatch(const F &func)
         {
@@ -67,7 +68,7 @@ namespace SOF {
             return false;
         }
 
-      private:
+        private:
         Event &m_Event;
     };
 

@@ -1,4 +1,4 @@
-AccessModifierOffset: -2
+AccessModifierOffset: 0 
 AlignAfterOpenBracket: DontAlign
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
@@ -22,7 +22,7 @@ BraceWrapping:
   AfterControlStatement: false
   AfterEnum: false
   AfterFunction: true
-  AfterNamespace: false
+  AfterNamespace: true
   AfterStruct: true
   AfterUnion: false
   BeforeCatch: false
@@ -65,7 +65,7 @@ IncludeCategories:
     Priority: 4
 IncludeIsMainRegex: (Test)?$
 IndentCaseLabels: false
-IndentWidth: 4
+IndentWidth: 4 
 IndentWrappedFunctionNames: true
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
@@ -80,7 +80,7 @@ ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: false
 PointerAlignment: Right
 ReflowComments: true
-SortIncludes: false
+SortIncludes: false  
 SortUsingDeclarations: false
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: false
