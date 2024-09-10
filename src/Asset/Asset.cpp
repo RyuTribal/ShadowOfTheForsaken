@@ -1,6 +1,4 @@
 #include "pch.h"
 #include "Asset.h"
 
-namespace SOF {
-
-}
+namespace SOF {}
