@@ -4,11 +4,11 @@
 namespace SOF {
 class Subscriber
 {
-public:
-  ~Subscriber();
-  void Subscribe(std::function<void(Event &)>);
+  public:
+    ~Subscriber();
+    void Subscribe(std::function<void(Event &)>);
 
-private:
-  UUID m_ID = 0;
+  private:
+    UUID m_ID = 0;
 };
 }// namespace SOF
