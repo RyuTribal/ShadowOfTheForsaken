@@ -8,10 +8,11 @@
 #include "Core/Game.h"
 
 
-
-namespace SOF{
-    struct RendererProps{
-        Renderer* RendererInstance = nullptr;
+namespace SOF
+{
+    struct RendererProps
+    {
+        Renderer *RendererInstance = nullptr;
         bool FrameBegun = false;
         bool ResizeWindow = false;
         std::shared_ptr<VertexBuffer> QuadBuffer;
@@ -19,24 +20,30 @@ namespace SOF{
         uint32_t IndexPtr = 0;
 
         // TODO REMOVE
-        Texture* test_tex = nullptr;
+        Texture *test_tex = nullptr;
     };
 
-    void MessageCallback(
-        unsigned source,
-        unsigned type,
-        unsigned id,
-        unsigned severity,
-        int length,
-        const char* message,
-        const void* userParam)
+    void MessageCallback(unsigned source,
+      unsigned type,
+      unsigned id,
+      unsigned severity,
+      int length,
+      const char *message,
+      const void *userParam)
     {
-        switch (severity)
-        {
-        case GL_DEBUG_SEVERITY_HIGH:		 SOF_FATAL("Renderer", message); return;
-        case GL_DEBUG_SEVERITY_MEDIUM:       SOF_ERROR("Renderer", message);  return;
-        case GL_DEBUG_SEVERITY_LOW:          SOF_WARN("Renderer", message);  return;
-        case GL_DEBUG_SEVERITY_NOTIFICATION: SOF_TRACE("Renderer", message);  return;
+        switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:
+            SOF_FATAL("Renderer", message);
+            return;
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            SOF_ERROR("Renderer", message);
+            return;
+        case GL_DEBUG_SEVERITY_LOW:
+            SOF_WARN("Renderer", message);
+            return;
+        case GL_DEBUG_SEVERITY_NOTIFICATION:
+            SOF_TRACE("Renderer", message);
+            return;
         }
 
         SOF_ASSERT(false, "Unknown severity level!");
@@ -47,7 +54,7 @@ namespace SOF{
     void Renderer::Init()
     {
         s_Props.RendererInstance = new Renderer();
-        
+
         s_Props.RendererInstance->m_ShaderLibrary.Load("sprite", "assets/shaders/sprite");
 
         RecreateVertexBuffers();
@@ -68,11 +75,14 @@ namespace SOF{
     void Renderer::ClearScreen()
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
-        glClearColor(s_Props.RendererInstance->m_BackgroundColor.r, s_Props.RendererInstance->m_BackgroundColor.g, s_Props.RendererInstance->m_BackgroundColor.b, 1.f);
+        glClearColor(s_Props.RendererInstance->m_BackgroundColor.r,
+          s_Props.RendererInstance->m_BackgroundColor.g,
+          s_Props.RendererInstance->m_BackgroundColor.b,
+          1.f);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     }
 
-    void Renderer::BeginFrame(Camera* camera)
+    void Renderer::BeginFrame(Camera *camera)
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         s_Props.RendererInstance->m_Stats = RendererStats();
@@ -108,9 +118,7 @@ namespace SOF{
             program->Set("u_ProjectionMatrix", s_Props.RendererInstance->m_CurrentActiveCamera->GetProjectionMatrix());
 
             program->Activate();
-            if (s_Props.test_tex != nullptr) {
-                s_Props.test_tex->Bind(0);
-            }
+            if (s_Props.test_tex != nullptr) { s_Props.test_tex->Bind(0); }
 
             glDrawElements(GL_TRIANGLES, s_Props.QuadIndices.size(), GL_UNSIGNED_INT, 0);
 
@@ -135,23 +143,21 @@ namespace SOF{
     void Renderer::RecreateVertexBuffers()
     {
         s_Props.QuadBuffer = VertexBuffer::Create(s_Props.QuadBuffer ? s_Props.QuadBuffer->MaxSize() : 1000000);
-        s_Props.QuadBuffer->SetLayout({
-            {ShaderDataType::Float4, "aPos"},
-            {ShaderDataType::Float4, "aColor"},
-            {ShaderDataType::Float2, "aTex"}
-            });
+        s_Props.QuadBuffer->SetLayout({ { ShaderDataType::Float4, "aPos" },
+          { ShaderDataType::Float4, "aColor" },
+          { ShaderDataType::Float2, "aTex" } });
     }
 
-    void Renderer::DrawSquare(glm::vec4& color, Texture* texture, glm::mat4& transform)
+    void Renderer::DrawSquare(glm::vec4 &color, Texture *texture, glm::mat4 &transform)
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         SOF_ASSERT(s_Props.FrameBegun, "Please run BeginFrame() before running any frame specific commands!");
 
         std::vector<Vertex> vertices = {
-            {transform * glm::vec4(0.5f,  0.5f, 0.0f, 1.f), color, glm::vec2(1.0f, 1.0f)},
-            {transform * glm::vec4(0.5f, -0.5f, 0.0f, 1.f), color, glm::vec2(1.0f, 0.0f)},
-            {transform * glm::vec4(-0.5f, -0.5f, 0.0f, 1.f), color, glm::vec2(0.0f, 0.0f)},
-            {transform * glm::vec4(-0.5f,  0.5f, 0.0f, 1.f), color, glm::vec2(0.0f, 1.0f)},
+            { transform * glm::vec4(0.5f, 0.5f, 0.0f, 1.f), color, glm::vec2(1.0f, 1.0f) },
+            { transform * glm::vec4(0.5f, -0.5f, 0.0f, 1.f), color, glm::vec2(1.0f, 0.0f) },
+            { transform * glm::vec4(-0.5f, -0.5f, 0.0f, 1.f), color, glm::vec2(0.0f, 0.0f) },
+            { transform * glm::vec4(-0.5f, 0.5f, 0.0f, 1.f), color, glm::vec2(0.0f, 1.0f) },
         };
 
         s_Props.test_tex = texture;
@@ -165,7 +171,7 @@ namespace SOF{
 
         s_Props.IndexPtr += 4;
         s_Props.QuadBuffer->SetData(vertices.data(), vertices.size() * sizeof(Vertex));
-        
+
 
         s_Props.RendererInstance->m_Stats.QuadsDrawn++;
     }
@@ -175,7 +181,6 @@ namespace SOF{
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         SOF_ASSERT(s_Props.FrameBegun, "Please run BeginFrame() before running any frame specific commands!");
-       
     }
     void Renderer::ChangeBackgroundColor(glm::vec3 &color)
     {
@@ -183,18 +188,15 @@ namespace SOF{
 
         s_Props.RendererInstance->m_BackgroundColor = color;
     }
-    void Renderer::ResizeWindow()
-    {
-        s_Props.ResizeWindow = true;
-    }
-    Camera* Renderer::GetCurrentCamera()
+    void Renderer::ResizeWindow() { s_Props.ResizeWindow = true; }
+    Camera *Renderer::GetCurrentCamera()
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         return s_Props.RendererInstance->m_CurrentActiveCamera;
     }
-    RendererStats& Renderer::GetStats()
+    RendererStats &Renderer::GetStats()
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         return s_Props.RendererInstance->m_Stats;
     }
-}
+}// namespace SOF

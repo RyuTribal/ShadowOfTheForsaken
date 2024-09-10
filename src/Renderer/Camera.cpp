@@ -3,7 +3,8 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
-namespace SOF {
+namespace SOF
+{
     Camera::Camera(float width, float height)
     {
         m_Width = width;
@@ -26,4 +27,4 @@ namespace SOF {
 
         m_ProjectionMatrix = glm::ortho(-half_width, half_width, -half_height, half_height, -1.0f, 1.0f);
     }
-}
+}// namespace SOF

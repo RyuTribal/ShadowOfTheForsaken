@@ -13,90 +13,88 @@
 
 namespace SOF
 {
-	struct ImGuiGlobals {
-		bool BlockEvents = true;
-	};
 
-	ImGuiGlobals* s_Data = nullptr;
+    struct ImGuiGlobals
+    {
+        bool BlockEvents = true;
+    };
 
-	void ImGuiLayer::Init()
-	{
-		IMGUI_CHECKVERSION();
-		s_Data = new ImGuiGlobals();
-		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    ImGuiGlobals *s_Data = nullptr;
 
-		ImGui::StyleColorsDark();
+    void ImGuiLayer::Init()
+    {
+        IMGUI_CHECKVERSION();
+        s_Data = new ImGuiGlobals();
+        ImGui::CreateContext();
+        ImGuiIO &io = ImGui::GetIO();
+        (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		ImGuiStyle& style = ImGui::GetStyle();
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			style.WindowRounding = 0.0f;
-			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-		}
+        ImGui::StyleColorsDark();
 
-		Game* game = Game::Get();
-		GLFWwindow* window = static_cast<GLFWwindow*>(game->GetWindow().GetNativeWindow());
+        ImGuiStyle &style = ImGui::GetStyle();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            style.WindowRounding = 0.0f;
+            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        }
 
-		ImGui_ImplGlfw_InitForOpenGL(window, true);
-		ImGui_ImplOpenGL3_Init("#version 410");
-	}
+        Game *game = Game::Get();
+        GLFWwindow *window = static_cast<GLFWwindow *>(game->GetWindow().GetNativeWindow());
 
-	void ImGuiLayer::Shutdown()
-	{
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 410");
+    }
 
-		delete s_Data;
-		s_Data = nullptr;
-	}
+    void ImGuiLayer::Shutdown()
+    {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
 
-	void ImGuiLayer::OnEvent(Event& e)
-	{
-		if (s_Data && s_Data->BlockEvents)
-		{
-			ImGuiIO& io = ImGui::GetIO();
-			e.Handled |= e.IsInCategory(EventCategoryMouse) && io.WantCaptureMouse;
-			e.Handled |= e.IsInCategory(EventCategoryKeyboard) && io.WantCaptureKeyboard;
-		}
-	}
+        delete s_Data;
+        s_Data = nullptr;
+    }
 
-	void ImGuiLayer::Begin()
-	{
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-	}
+    void ImGuiLayer::OnEvent(Event &e)
+    {
+        if (s_Data && s_Data->BlockEvents) {
+            ImGuiIO &io = ImGui::GetIO();
+            e.Handled |= e.IsInCategory(EventCategoryMouse) && io.WantCaptureMouse;
+            e.Handled |= e.IsInCategory(EventCategoryKeyboard) && io.WantCaptureKeyboard;
+        }
+    }
 
-	void ImGuiLayer::End()
-	{
-		ImGuiIO& io = ImGui::GetIO();
-		Game* game = Game::Get();
-		game->GetWindow();
+    void ImGuiLayer::Begin()
+    {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+    }
 
-		io.DisplaySize = ImVec2((float)(game->GetWindow().GetWidth()), (float)game->GetWindow().GetHeight());
+    void ImGuiLayer::End()
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        Game *game = Game::Get();
+        game->GetWindow();
 
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        io.DisplaySize = ImVec2((float)(game->GetWindow().GetWidth()), (float)game->GetWindow().GetHeight());
 
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			GLFWwindow* backup_current_context = glfwGetCurrentContext();
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(backup_current_context);
-		}
-	}
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-	void ImGuiLayer::BlockEvents(bool block)
-	{
-		if (s_Data) {
-			s_Data->BlockEvents = block;
-		}
-	}
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            GLFWwindow *backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
+    }
 
-}
+    void ImGuiLayer::BlockEvents(bool block)
+    {
+        if (s_Data) { s_Data->BlockEvents = block; }
+    }
+
+}// namespace SOF
