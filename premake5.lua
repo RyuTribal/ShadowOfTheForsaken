@@ -101,17 +101,30 @@ includedirs({
 })
 
 filter("system:windows")
-systemversion("latest")
-defines({
-	"PLATFORM_WINDOWS",
-	"BUILD_DLL",
-	"GLFW_INCLUDE_NONE",
-	"WIN32_LEAN_AND_MEAN",
-})
+    systemversion("latest")
+    defines({
+        "PLATFORM_WINDOWS",
+        "BUILD_DLL",
+        "GLFW_INCLUDE_NONE",
+        "WIN32_LEAN_AND_MEAN",
+    })
 
-links({
-	"opengl32.lib",
-})
+    links({
+        "opengl32.lib",
+    })
+
+filter("system:linux")
+    systemversion("latest")
+    defines({
+        "PLATFORM_LINUX",
+        "GLFW_INCLUDE_NONE",
+    })
+
+    links({
+        "GL",
+        "pthread",
+        "X11",
+    })
 
 filter("configurations:Debug")
 defines("DEBUG")

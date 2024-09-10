@@ -42,7 +42,6 @@ namespace SOF
 
         SOF_WARN("Game", "Hardware thread count: {0}", std::thread::hardware_concurrency());
 
-
         // cReating warsay home
         int gridWidth = 10;
         int gridHeight = 10;
@@ -140,7 +139,6 @@ namespace SOF
 #endif
             m_Window->OnUpdate();
         }
-
     }
 
     bool Game::OnShutDown(WindowCloseEvent &event)
