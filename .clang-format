@@ -23,7 +23,6 @@ BraceWrapping:
   AfterEnum: false
   AfterFunction: true
   AfterNamespace: false
-  AfterObjCDeclaration: false
   AfterStruct: true
   AfterUnion: false
   BeforeCatch: false
@@ -66,7 +65,7 @@ IncludeCategories:
     Priority: 4
 IncludeIsMainRegex: (Test)?$
 IndentCaseLabels: false
-IndentWidth: 2
+IndentWidth: 4
 IndentWrappedFunctionNames: true
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
@@ -81,7 +80,7 @@ ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: false
 PointerAlignment: Right
 ReflowComments: true
-SortIncludes: false
+SortIncludes: true
 SortUsingDeclarations: false
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: false
