@@ -262,7 +262,6 @@ namespace SOF
             buffer_ptr += sizeof(TOCEntry);
 
             m_TOCEntries[std::string(entry.Handle)] = entry;
-            SOF_TRACE_NOTAG(entry.Handle);
         }
     }
 }// namespace SOF

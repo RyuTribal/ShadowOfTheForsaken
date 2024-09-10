@@ -81,4 +81,19 @@ cat > $PROJECT_ROOT/.vscode/c_cpp_properties.json << EOF
 }
 EOF
 
+cat > "$PROJECT_ROOT/.vscode/settings.json" << EOF
+{
+    "C_Cpp.clang_format_path": "/usr/bin/clang-format",
+    "C_Cpp.clang_format_style": "file",
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "[c]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    }
+}
+EOF
+
 echo "VS Code configuration files have been created/updated."

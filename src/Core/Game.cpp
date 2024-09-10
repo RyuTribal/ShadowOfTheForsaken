@@ -1,13 +1,14 @@
 #include "pch.h"
-#include <glad/gl.h>
 #include "Game.h"
+#include <glad/gl.h>
+#include <imgui.h>
+#include "Asset/Manager.h"
 #include "Events/DebugEvents.h"
-#include "Scene/Entity.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Texture.h"
-#include <imgui.h>
 #include "Scene/Components.h"
-#include "Asset/Manager.h"
+#include "Scene/Entity.h"
+
 
 namespace SOF
 {
@@ -39,8 +40,7 @@ namespace SOF
         warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
         warsay_entity->AddComponent<CameraComponent>(warsay_camera);
 
-		SOF_WARN("Game", "Hardware thread count: {0}", std::thread::hardware_concurrency());
-
+        SOF_WARN("Game", "Hardware thread count: {0}", std::thread::hardware_concurrency());
 
         // cReating warsay home
         int gridWidth = 10;
