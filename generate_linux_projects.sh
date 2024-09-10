@@ -72,7 +72,7 @@ cat > $PROJECT_ROOT/.vscode/c_cpp_properties.json << EOF
             ],
             "compilerPath": "/usr/bin/gcc", 
             "cStandard": "c11",
-            "cppStandard": "c++17",
+            "cppStandard": "c++20",
             "intelliSenseMode": "\${default}",
             "compileCommands": "${workspaceFolder}/compile_commands.json"
         }
