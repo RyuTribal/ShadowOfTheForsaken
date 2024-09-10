@@ -2,44 +2,45 @@
 #include "Registry.h"
 
 
-namespace SOF {
-
-class Entity;
-
-class Scene
+namespace SOF
 {
-  public:
-    static std::shared_ptr<Scene> CreateScene(const std::string &name);
 
-    Scene(const std::string &name);
+    class Entity;
 
-    Registry *GetRegistry() { return &m_ComponentRegistry; }
+    class Scene
+    {
+        public:
+        static std::shared_ptr<Scene> CreateScene(const std::string &name);
 
-    UUID CreateEntity(const std::string &name);
-    UUID CreateEntity(const std::string &name, UUID handle);
+        Scene(const std::string &name);
 
-    void Begin();
+        Registry *GetRegistry() { return &m_ComponentRegistry; }
 
-    void Update();
+        UUID CreateEntity(const std::string &name);
+        UUID CreateEntity(const std::string &name, UUID handle);
 
-    void End();
+        void Begin();
 
-    template<typename T> std::unordered_map<UUID, T> GetAllEntitiesByType() { return m_ComponentRegistry.Get<T>(); }
+        void Update();
 
-    UUID GetID() { return m_ID; }
+        void End();
 
-    const std::string &GetName() { return m_Name; }
+        template<typename T> std::unordered_map<UUID, T> GetAllEntitiesByType() { return m_ComponentRegistry.Get<T>(); }
 
-    void DestroyEntity(UUID handle);
+        UUID GetID() { return m_ID; }
 
-    Entity *GetEntity(UUID id);
+        const std::string &GetName() { return m_Name; }
 
-    uint32_t EntitySize() { return (uint32_t)m_EntityMap.size(); }
+        void DestroyEntity(UUID handle);
 
-  private:
-    UUID m_ID = UUID();
-    Registry m_ComponentRegistry;
-    std::unordered_map<UUID, std::unique_ptr<Entity>> m_EntityMap;
-    std::string m_Name = "Untitled Level";
-};
+        Entity *GetEntity(UUID id);
+
+        uint32_t EntitySize() { return (uint32_t)m_EntityMap.size(); }
+
+        private:
+        UUID m_ID = UUID();
+        Registry m_ComponentRegistry;
+        std::unordered_map<UUID, std::unique_ptr<Entity>> m_EntityMap;
+        std::string m_Name = "Untitled Level";
+    };
 }// namespace SOF

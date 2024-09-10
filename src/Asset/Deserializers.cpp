@@ -3,46 +3,47 @@
 #include "Manager.h"
 #include "Renderer/Texture.h"
 
-namespace SOF {
-
-struct TextureMetadata
+namespace SOF
 {
-    uint32_t Width, Height, Channels;
-};
 
-static void DeserializeTextureMetadata(char *metadata_buffer, TextureMetadata &destination)
-{
-    std::string metadata_str(metadata_buffer);
+    struct TextureMetadata
+    {
+        uint32_t Width, Height, Channels;
+    };
 
-    std::stringstream ss(metadata_str);
-    std::string token;
+    static void DeserializeTextureMetadata(char *metadata_buffer, TextureMetadata &destination)
+    {
+        std::string metadata_str(metadata_buffer);
 
-    while (std::getline(ss, token, ';')) {
-        if (token.empty()) continue;
+        std::stringstream ss(metadata_str);
+        std::string token;
 
-        size_t pos = token.find('=');
-        if (pos != std::string::npos) {
-            std::string key = token.substr(0, pos);
-            std::string value = token.substr(pos + 1);
+        while (std::getline(ss, token, ';')) {
+            if (token.empty()) continue;
 
-            if (key == "Width") {
-                destination.Width = std::stoi(value);
-            } else if (key == "Height") {
-                destination.Height = std::stoi(value);
-            } else if (key == "Channels") {
-                destination.Channels = std::stoi(value);
+            size_t pos = token.find('=');
+            if (pos != std::string::npos) {
+                std::string key = token.substr(0, pos);
+                std::string value = token.substr(pos + 1);
+
+                if (key == "Width") {
+                    destination.Width = std::stoi(value);
+                } else if (key == "Height") {
+                    destination.Height = std::stoi(value);
+                } else if (key == "Channels") {
+                    destination.Channels = std::stoi(value);
+                }
             }
         }
     }
-}
 
 
-std::shared_ptr<Asset> TextureDeserializer::Load(TOCEntry &toc, std::vector<char> &data) const
-{
-    TextureMetadata metadata{};
-    DeserializeTextureMetadata(toc.MetaData, metadata);
-    auto texture = new Texture(data.data(), metadata.Width, metadata.Height, metadata.Channels);
+    std::shared_ptr<Asset> TextureDeserializer::Load(TOCEntry &toc, std::vector<char> &data) const
+    {
+        TextureMetadata metadata{};
+        DeserializeTextureMetadata(toc.MetaData, metadata);
+        auto texture = new Texture(data.data(), metadata.Width, metadata.Height, metadata.Channels);
 
-    return std::shared_ptr<Asset>(texture, [toc](Asset *asset) { AssetManager::RefDeleter(asset, toc.Handle); });
-}
+        return std::shared_ptr<Asset>(texture, [toc](Asset *asset) { AssetManager::RefDeleter(asset, toc.Handle); });
+    }
 }// namespace SOF
