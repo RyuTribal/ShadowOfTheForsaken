@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Game.h"
+#include <glad/gl.h>
 #include <imgui.h>
 #include "Asset/Manager.h"
 #include "Events/DebugEvents.h"

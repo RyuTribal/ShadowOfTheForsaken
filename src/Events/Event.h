@@ -1,7 +1,8 @@
 #pragma once
 
-namespace SOF
-{
+namespace SOF {
+
+
     enum class EventType {
         None = 0,
         WindowClose,
@@ -41,9 +42,8 @@ namespace SOF
     virtual int GetCategoryFlags() const override { return category; }
     class Event
     {
-        public:
+      public:
         virtual ~Event() = default;
-
         bool Handled = false;
 
         virtual EventType GetEventType() const = 0;
