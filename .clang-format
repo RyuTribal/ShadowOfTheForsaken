@@ -94,6 +94,6 @@ SpacesInContainerLiterals: true
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: c++20
-TabWidth: 8
+TabWidth: 4
 UseTab: Never
 
