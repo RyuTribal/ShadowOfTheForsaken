@@ -66,35 +66,44 @@ namespace SOF
         }
     }
 
-    void ImGuiLayer::Begin()
+    void ImGuiLayer::BeginRenderer()
     {
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
     }
+
+    void ImGuiLayer::BeginWindow() { ImGui_ImplGlfw_NewFrame(); }
 
     void ImGuiLayer::End()
     {
         ImGuiIO &io = ImGui::GetIO();
         Game *game = Game::Get();
-        game->GetWindow();
+        Thread<RenderBufferData> &renderer_thread = game->GetRenderingThread();
 
         io.DisplaySize = ImVec2((float)(game->GetWindow().GetWidth()), (float)game->GetWindow().GetHeight());
 
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        renderer_thread.Run(ImGuiLayer::Render);
+        renderer_thread.WaitForAllTasks();
 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             GLFWwindow *backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
+            renderer_thread.Run(glfwMakeContextCurrent, backup_current_context);
         }
     }
+
 
     void ImGuiLayer::BlockEvents(bool block)
     {
         if (s_Data) { s_Data->BlockEvents = block; }
+    }
+
+    void ImGuiLayer::Render()
+    {
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
 }// namespace SOF

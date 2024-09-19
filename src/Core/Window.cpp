@@ -18,8 +18,6 @@ namespace SOF
         int success = glfwInit();
         SOF_ASSERT(success, "Could not initialize GLFW!");
         m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, props.Title.c_str(), nullptr, nullptr);
-        m_Context = Context::Create(m_Window);
-        m_Context->Init();
         glfwSwapInterval(props.VSync ? 1 : 0);
         glfwSetWindowUserPointer(m_Window, &m_Data);
         glfwSetWindowSizeCallback(m_Window, [](GLFWwindow *window, int width, int height) {
@@ -93,9 +91,5 @@ namespace SOF
     }
     Window::~Window() { glfwDestroyWindow(m_Window); }
 
-    void Window::OnUpdate()
-    {
-        glfwPollEvents();
-        m_Context->SwapBuffers();
-    }
+    void Window::OnUpdate() { glfwPollEvents(); }
 }// namespace SOF

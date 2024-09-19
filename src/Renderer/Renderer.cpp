@@ -6,6 +6,7 @@
 #include <glad/gl.h>
 #include <glm/gtx/string_cast.hpp>
 #include "Core/Game.h"
+#include "Core/Window.h"
 
 
 namespace SOF
@@ -51,9 +52,11 @@ namespace SOF
 
     static RendererProps s_Props{};
 
-    void Renderer::Init()
+    void Renderer::Init(Window *window)
     {
         s_Props.RendererInstance = new Renderer();
+        s_Props.RendererInstance->m_Context = Context::Create(window->GetNativeWindow());
+        s_Props.RendererInstance->m_Context->Init();
 
         s_Props.RendererInstance->m_ShaderLibrary.Load("sprite", "assets/shaders/sprite");
 
@@ -67,11 +70,13 @@ namespace SOF
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
 #endif
     }
+
     void Renderer::Shutdown()
     {
         delete s_Props.RendererInstance;
         s_Props.RendererInstance = nullptr;
     }
+
     void Renderer::ClearScreen()
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
@@ -140,6 +145,12 @@ namespace SOF
         s_Props.FrameBegun = false;
     }
 
+    void Renderer::SwapBuffers()
+    {
+        SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
+        s_Props.RendererInstance->m_Context->SwapBuffers();
+    }
+
     void Renderer::RecreateVertexBuffers()
     {
         s_Props.QuadBuffer = VertexBuffer::Create(s_Props.QuadBuffer ? s_Props.QuadBuffer->MaxSize() : 1000000);
@@ -189,6 +200,7 @@ namespace SOF
         s_Props.RendererInstance->m_BackgroundColor = color;
     }
     void Renderer::ResizeWindow() { s_Props.ResizeWindow = true; }
+
     Camera *Renderer::GetCurrentCamera()
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
@@ -198,5 +210,10 @@ namespace SOF
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         return s_Props.RendererInstance->m_Stats;
+    }
+    Context *Renderer::GetContext()
+    {
+        SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
+        return s_Props.RendererInstance->m_Context.get();
     }
 }// namespace SOF

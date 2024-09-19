@@ -27,8 +27,6 @@ namespace SOF
             unsigned int Width = 1280, Height = 720;
             std::function<void(Event &)> EventCallback;
         };
-
-        std::unique_ptr<Context> m_Context;
         GLFWwindow *m_Window;
         WindowData m_Data;
     };

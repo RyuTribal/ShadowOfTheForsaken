@@ -2,7 +2,10 @@
 #include "Events/ApplicationEvents.h"
 #include "Window.h"
 #include "ImGui/ImGuiLayer.h"
+#include "Thread.h"
+#include "Renderer/Renderer.h"
 #include <Scene/Scene.h>
+#include "ImGui/DebugWindow.h"
 
 namespace SOF
 {
@@ -56,15 +59,20 @@ namespace SOF
         static Game *Get() { return s_Instance; }
 
         Window &GetWindow();
+        Thread<RenderBufferData> &GetRenderingThread() { return m_RendererThread; }
 
         UUID SubscribeOnEvents(std::function<void(Event &)> callback);
         void RevokeSubscription(UUID subscriber);
 
         FrameStats &GetFrameStats() { return m_FrameStats; }
 
+        Scene *GetCurrentScene() { return m_Scene.get(); }
+
         private:
         Game(const WindowProps &props);
         bool m_Running = true;
+        ThreadData m_ThreadData;
+        Thread<RenderBufferData> m_RendererThread;
         std::unique_ptr<Window> m_Window;
         static Game *s_Instance;
         std::unordered_map<UUID, std::function<void(Event &)>> m_Subscribers{};
@@ -73,5 +81,6 @@ namespace SOF
 
         UUID m_WarsayID;
         std::vector<UUID> m_WarsayHome{};
+        DebugWindow m_DebugWindow{};
     };
 }// namespace SOF

@@ -15,10 +15,14 @@ namespace SOF
 
         static void OnEvent(Event &e);
 
-        static void Begin();
+        static void BeginRenderer();
+        static void BeginWindow();
         static void End();
 
         static void BlockEvents(bool block);
+
+        private:
+        static void Render();
     };
 
 }// namespace SOF
