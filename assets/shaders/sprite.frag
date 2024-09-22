@@ -6,9 +6,14 @@ in vec2 vertTex;
 out vec4 FragColor;
 
 uniform vec4 u_Color;
+uniform int u_UsingTexture;
 layout(binding = 0) uniform sampler2D u_SpriteTexture;
 
 void main(){
-    FragColor = texture(u_SpriteTexture, vertTex);
+    if(u_UsingTexture == 1){
+        FragColor = texture(u_SpriteTexture, vertTex);
+    } else{
+        FragColor = vertColor;
+    }
     
 }

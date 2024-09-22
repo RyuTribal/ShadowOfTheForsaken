@@ -3,6 +3,7 @@
 #include "Entity.h"
 #include "Components.h"
 #include "Renderer/Renderer.h"
+#include "Core/Game.h"
 
 namespace SOF
 {
@@ -26,12 +27,12 @@ namespace SOF
 
     void Scene::Begin()
     {
-        Renderer::ClearScreen();
+        auto write_buffer = Game::Get()->GetRenderingThread().GetWriteBuffer();
         auto camera_registry = m_ComponentRegistry.GetComponentRegistry<CameraComponent>();
         if (camera_registry) {
             for (auto [id, camera] : *camera_registry) {
                 if (camera.IsActive) {
-                    Renderer::BeginFrame(camera.Camera.get());
+                    write_buffer->FrameCamera = camera.Camera.get();
                     break;
                 }
             }
@@ -42,7 +43,8 @@ namespace SOF
     {
         // Draw all entities
         auto sprite_registry = m_ComponentRegistry.GetComponentRegistry<SpriteComponent>();
-        Camera *curr_camera = Renderer::GetCurrentCamera();
+        auto write_buffer = Game::Get()->GetRenderingThread().GetWriteBuffer();
+        Camera *curr_camera = write_buffer->FrameCamera;
         if (sprite_registry) {
             glm::vec3 &camera_pos = curr_camera->GetPosition();
             float half_width = curr_camera->GetWidth() * 0.5f / curr_camera->GetZoomLevel();
@@ -52,7 +54,6 @@ namespace SOF
             float camera_right = camera_pos.x + half_width;
             float camera_up = camera_pos.y + half_height;
             float camera_down = camera_pos.y - half_height;
-
             for (auto [id, sprite] : *sprite_registry) {
                 auto transform = m_ComponentRegistry.Get<TransformComponent>(id);
                 glm::vec2 half_extents = glm::vec2(transform->Scale.x * 0.5f, transform->Scale.y * 0.5f);
@@ -64,14 +65,14 @@ namespace SOF
 
                 if (right >= camera_left && left <= camera_right && top >= camera_down && bottom <= camera_up) {
                     auto transform_mat = transform->CreateMat4x4();
-                    Renderer::DrawSquare(sprite.Color, sprite.Texture.get(), transform_mat);
+                    Renderer::SubmitSquare(sprite.Color, sprite.Texture.get(), transform_mat);
                 }
             }
         }
     }
 
 
-    void Scene::End() { Renderer::EndFrame(); }
+    void Scene::End() {}
 
     void Scene::DestroyEntity(UUID handle)
     {

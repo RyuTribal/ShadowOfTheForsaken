@@ -26,7 +26,6 @@ namespace SOF
             Renderer::ChangeBackgroundColor(color_vec);
         }
 
-
         ImGui::Text("Register asset into the asset pack:");
         ImGui::InputText("File path", m_AssetFilePath, 255);
         ImGui::InputText("Asset handle##register", m_AssetHandle, 255);

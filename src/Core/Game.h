@@ -6,6 +6,7 @@
 #include "Renderer/Renderer.h"
 #include <Scene/Scene.h>
 #include "ImGui/DebugWindow.h"
+#include "ThreadPool.h"
 
 namespace SOF
 {
@@ -70,14 +71,17 @@ namespace SOF
 
         private:
         Game(const WindowProps &props);
+
+        private:
         bool m_Running = true;
         ThreadData m_ThreadData;
         Thread<RenderBufferData> m_RendererThread;
-        std::unique_ptr<Window> m_Window;
+        Window m_Window;
         static Game *s_Instance;
         std::unordered_map<UUID, std::function<void(Event &)>> m_Subscribers{};
         std::shared_ptr<Scene> m_Scene;
         FrameStats m_FrameStats{};
+        ThreadPool m_ThreadPool{};
 
         UUID m_WarsayID;
         std::vector<UUID> m_WarsayHome{};

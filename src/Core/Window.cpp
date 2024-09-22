@@ -18,8 +18,16 @@ namespace SOF
         int success = glfwInit();
         SOF_ASSERT(success, "Could not initialize GLFW!");
         m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, props.Title.c_str(), nullptr, nullptr);
-        glfwSwapInterval(props.VSync ? 1 : 0);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+#ifdef DEBUG
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
         glfwSetWindowUserPointer(m_Window, &m_Data);
+        glfwSetErrorCallback(
+          [](int error, const char *msg) { SOF_ERROR("Window", "GLFW error {0}: {1}", error, msg); });
+
         glfwSetWindowSizeCallback(m_Window, [](GLFWwindow *window, int width, int height) {
             WindowData &data = *(WindowData *)glfwGetWindowUserPointer(window);
             data.Width = width;

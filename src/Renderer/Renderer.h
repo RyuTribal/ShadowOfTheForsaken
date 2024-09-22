@@ -16,11 +16,25 @@ namespace SOF
         glm::vec2 TexCords = { 1.f, 1.f };
     };
 
-    struct RenderBufferData
+    struct BatchData
     {
-        std::shared_ptr<Vertex> QuadBuffer;
+        std::vector<Vertex> QuadBuffer{};
         std::vector<uint32_t> QuadIndices{};
         uint32_t IndexPtr = 0;
+    };
+
+    struct RenderBufferData
+    {
+        Camera *FrameCamera = nullptr;
+        std::unordered_map<Texture *, BatchData> BatchData{};
+        bool ValidFrame = false;
+
+        void Clear()
+        {
+            FrameCamera = nullptr;
+            BatchData.clear();
+            ValidFrame = false;
+        }
     };
 
     struct RendererStats
@@ -38,19 +52,19 @@ namespace SOF
 
         static void ClearScreen();
 
-        static void BeginFrame(Camera *camera);
-
-        static void EndFrame();
-
         static void SwapBuffers();
 
-        static void DrawSquare(glm::vec4 &color, Texture *texture, glm::mat4 &transform);
+        static void SubmitSquare(glm::vec4 &color, Texture *texture, glm::mat4 &transform);
 
-        static void DrawTriangle();
+        static void SubmitTriangle();
+
+        static void DrawFrame();
 
         static void ChangeBackgroundColor(glm::vec3 &color);
 
         static void ResizeWindow();
+
+        static void SetVSync(bool vsync);
 
         static Camera *GetCurrentCamera();
 
@@ -59,8 +73,9 @@ namespace SOF
         static Context *GetContext();
 
         private:
-        static void RecreateVertexBuffers();
-        static void Draw();
+        static void BeginFrame();
+        static void EndFrame();
+        static void DrawObjects();
 
         private:
         std::unique_ptr<Context> m_Context;

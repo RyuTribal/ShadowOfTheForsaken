@@ -33,6 +33,8 @@ namespace SOF
         }
 
         glm::quat RotationVecToQuat() const { return glm::quat(Rotation); }
+
+        glm::vec2 Get2DPosition() const { return glm::vec2(Translation.x, Translation.y); }
     };
 
     struct SpriteComponent

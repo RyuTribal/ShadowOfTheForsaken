@@ -10,7 +10,7 @@ int main()
 
     SOF::WindowProps window_settings{};
     window_settings.Title = "Shadow of the Forsaken";
-    window_settings.VSync = true;
+    window_settings.VSync = false;
     window_settings.Height = 720;
     window_settings.Width = 1280;
 

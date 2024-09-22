@@ -2,6 +2,7 @@
 #include "Deserializers.h"
 #include "Manager.h"
 #include "Renderer/Texture.h"
+#include "Core/Game.h"
 
 namespace SOF
 {
@@ -40,10 +41,15 @@ namespace SOF
 
     std::shared_ptr<Asset> TextureDeserializer::Load(TOCEntry &toc, std::vector<char> &data) const
     {
-        TextureMetadata metadata{};
-        DeserializeTextureMetadata(toc.MetaData, metadata);
-        auto texture = new Texture(data.data(), metadata.Width, metadata.Height, metadata.Channels);
-
-        return std::shared_ptr<Asset>(texture, [toc](Asset *asset) { AssetManager::RefDeleter(asset, toc.Handle); });
+        std::promise<std::shared_ptr<Asset>> texture_promise;
+        std::future<std::shared_ptr<Asset>> texture_future = texture_promise.get_future();
+        Game::Get()->GetRenderingThread().Run([&texture_promise, &toc, &data]() {
+            TextureMetadata metadata{};
+            DeserializeTextureMetadata(toc.MetaData, metadata);
+            auto texture = new Texture(data.data(), metadata.Width, metadata.Height, metadata.Channels);
+            texture_promise.set_value(
+              std::shared_ptr<Asset>(texture, [toc](Asset *asset) { AssetManager::RefDeleter(asset, toc.Handle); }));
+        });
+        return texture_future.get();
     }
 }// namespace SOF

@@ -9,6 +9,9 @@ namespace SOF
         std::atomic<bool> DoneFlag{ false };
     };
 
+    // Use this class directly if you have a need of a continous thread like our render thread.
+    // If you wanna use a one off task or multiple simple one of tasks, refer to the ThreadPool class
+
     template<typename BufferData> class Thread
     {
         public:
@@ -18,6 +21,7 @@ namespace SOF
             m_Thread = std::thread(&Thread::ThreadMain, this);
             SOF_INFO("Thread", "Spun up thread \"{0}\"", m_ThreadName);
         }
+
         ~Thread()
         {
             SOF_INFO("Thread", "Shutting down thread \"{0}\"", m_ThreadName);
@@ -47,6 +51,17 @@ namespace SOF
             if (m_Thread.joinable()) { m_Thread.join(); }
         }
 
+        template<typename F, typename... Args> void SetShutdownTask(F &&func, Args &&...args)
+        {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            if (!m_ExitFlag) {
+                m_ShutdownTask = [func = std::forward<F>(func),
+                                   args_tuple = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+                    std::apply(func, std::move(args_tuple));
+                };
+            }
+        }
+
         void WaitForAllTasks()
         {
             std::unique_lock<std::mutex> lock(m_Mutex);
@@ -54,8 +69,8 @@ namespace SOF
             m_QueueEmptyCondition.wait(lock, [this]() { return m_QueueEmptyFlag && m_TaskQueue.empty(); });
         }
 
-        const BufferData *GetReadBuffer() const { return m_ReadPtr; }
-        const BufferData *GetWriteBuffer() const { return m_WritePtr; }
+        BufferData *GetReadBuffer() { return m_ReadPtr; }
+        BufferData *GetWriteBuffer() const { return m_WritePtr; }
 
         void SwapBuffers() { std::swap(m_ReadPtr, m_WritePtr); }
 
@@ -83,6 +98,9 @@ namespace SOF
                     }
                 }
             }
+
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            if (m_ShutdownTask) { m_ShutdownTask(); }
         }
 
         private:
@@ -96,6 +114,7 @@ namespace SOF
         BufferData *m_ReadPtr = nullptr, *m_WritePtr = nullptr;
         std::condition_variable m_Condition;
         std::queue<std::function<void()>> m_TaskQueue;
+        std::function<void()> m_ShutdownTask;
         std::condition_variable m_QueueEmptyCondition;
         std::atomic<bool> m_QueueEmptyFlag{ true };
     };

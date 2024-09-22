@@ -4,6 +4,7 @@
 #include "Loaders.h"
 #include "Deserializers.h"
 #include "Asset.h"
+#include "Core/ThreadPool.h"
 
 namespace SOF
 {
@@ -65,10 +66,12 @@ namespace SOF
             }
 
             TOCEntry &toc_entry = Instance()->m_TOCEntries[asset_handle];
-            Instance()->m_OutputFile.seekg(toc_entry.Offset, std::ios::beg);
-
             std::vector<char> buffer(toc_entry.Length);
-            Instance()->m_OutputFile.read(buffer.data(), buffer.size());
+            {
+                std::lock<std::mutex> lock(m_FileMutex);
+                Instance()->m_OutputFile.seekg(toc_entry.Offset, std::ios::beg);
+                Instance()->m_OutputFile.read(buffer.data(), buffer.size());
+            }
 
             std::shared_ptr<Asset> asset =
               Instance()->m_Deserializers[static_cast<AssetType>(toc_entry.Type)]->Load(toc_entry, buffer);
@@ -99,6 +102,7 @@ namespace SOF
         std::fstream m_OutputFile;
         GlobalHeader m_GlobalHeader{};
         std::filesystem::path m_FilePath;
+        std::mutex m_FileMutex;
     };
 
 }// namespace SOF

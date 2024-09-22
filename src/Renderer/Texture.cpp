@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Texture.h"
 #include <glad/gl.h>
+#include "Core/Game.h"
 
 
 namespace SOF
@@ -9,6 +10,7 @@ namespace SOF
     SOF::Texture::Texture(const char *data, uint32_t width, uint32_t height, uint32_t channels)
       : m_Width(width), m_Height(height), m_Channels(channels)
     {
+
         glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
 
         glTextureStorage2D(m_ID, 1, m_Channels > 3 ? GL_RGBA8 : GL_RGB8, m_Width, m_Height);

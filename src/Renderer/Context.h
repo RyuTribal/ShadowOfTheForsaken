@@ -9,6 +9,7 @@ namespace SOF
         Context(GLFWwindow *window_context);
 
         void Init();
+        GLFWwindow *Handle() { return m_WindowHandle; }
         void SwapBuffers();
         void SetVSync(bool vsync);
         static std::unique_ptr<Context> Create(void *window);

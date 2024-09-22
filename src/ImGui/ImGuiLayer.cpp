@@ -29,8 +29,8 @@ namespace SOF
         ImGuiIO &io = ImGui::GetIO();
         (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        /*io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;*/
 
         ImGui::StyleColorsDark();
 
@@ -44,11 +44,12 @@ namespace SOF
         GLFWwindow *window = static_cast<GLFWwindow *>(game->GetWindow().GetNativeWindow());
 
         ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 410");
+        game->GetRenderingThread().Run(ImGui_ImplOpenGL3_Init, "#version 410");
     }
 
     void ImGuiLayer::Shutdown()
     {
+
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
@@ -66,13 +67,15 @@ namespace SOF
         }
     }
 
-    void ImGuiLayer::BeginRenderer()
+    void ImGuiLayer::Begin()
     {
-        ImGui_ImplOpenGL3_NewFrame();
+        Game *game = Game::Get();
+        Thread<RenderBufferData> &renderer_thread = game->GetRenderingThread();
+        renderer_thread.Run(ImGui_ImplOpenGL3_NewFrame);
+        renderer_thread.WaitForAllTasks();
+        ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
     }
-
-    void ImGuiLayer::BeginWindow() { ImGui_ImplGlfw_NewFrame(); }
 
     void ImGuiLayer::End()
     {
@@ -83,14 +86,21 @@ namespace SOF
         io.DisplaySize = ImVec2((float)(game->GetWindow().GetWidth()), (float)game->GetWindow().GetHeight());
 
 
-        renderer_thread.Run(ImGuiLayer::Render);
+        ImGui::Render();
+        renderer_thread.Run(ImGui_ImplOpenGL3_RenderDrawData, ImGui::GetDrawData());
         renderer_thread.WaitForAllTasks();
 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            GLFWwindow *backup_current_context = glfwGetCurrentContext();
+
+
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
-            renderer_thread.Run(glfwMakeContextCurrent, backup_current_context);
+
+            renderer_thread.Run([&]() {
+                auto context = Renderer::GetContext()->Handle();
+                glfwMakeContextCurrent(context);
+            });
+            renderer_thread.WaitForAllTasks();
         }
     }
 
@@ -98,12 +108,6 @@ namespace SOF
     void ImGuiLayer::BlockEvents(bool block)
     {
         if (s_Data) { s_Data->BlockEvents = block; }
-    }
-
-    void ImGuiLayer::Render()
-    {
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
 }// namespace SOF

@@ -13,8 +13,11 @@ namespace SOF
 
         Texture(const char *data, uint32_t width, uint32_t height, uint32_t channels);
         ~Texture();
+        void UploadTextureToGPU(const char *data);
         void SetData(const char *data);
         void Bind(uint8_t slot);
+
+        static void CreateTextureArray(const std::vector<Texture *> textures);
 
         virtual AssetType GetType() const override { return AssetType::Texture; };
 

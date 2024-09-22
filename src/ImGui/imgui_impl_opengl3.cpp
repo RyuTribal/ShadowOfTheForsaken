@@ -26,44 +26,45 @@
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
 //  2024-XX-XX: Platform: Added support for multiple windows via the ImGuiPlatformIO interface.
-//  2024-05-07: OpenGL: Update loader for Linux to support EGL/GLVND. (#7562)
-//  2024-04-16: OpenGL: Detect ES3 contexts on desktop based on version string, to e.g. avoid calling glPolygonMode() on
-//  them. (#7447) 2024-01-09: OpenGL: Update GL3W based imgui_impl_opengl3_loader.h to load "libGL.so" and variants,
-//  fixing regression on distros missing a symlink. 2023-11-08: OpenGL: Update GL3W based imgui_impl_opengl3_loader.h to
-//  load "libGL.so" instead of "libGL.so.1", accommodating for NetBSD systems having only "libGL.so.3" available.
-//  (#6983) 2023-10-05: OpenGL: Rename symbols in our internal loader so that LTO compilation with another copy of gl3w
-//  is possible. (#6875, #6668, #4445) 2023-06-20: OpenGL: Fixed erroneous use glGetIntegerv(GL_CONTEXT_PROFILE_MASK) on
-//  contexts lower than 3.2. (#6539, #6333) 2023-05-09: OpenGL: Support for glBindSampler() backup/restore on ES3.
-//  (#6375) 2023-04-18: OpenGL: Restore front and back polygon mode separately when supported by context. (#6333)
-//  2023-03-23: OpenGL: Properly restoring "no shader program bound" if it was the case prior to running the rendering
-//  function. (#6267, #6220, #6224) 2023-03-15: OpenGL: Fixed GL loader crash when GL_VERSION returns NULL. (#6154,
-//  #4445, #3530) 2023-03-06: OpenGL: Fixed restoration of a potentially deleted OpenGL program, by calling
-//  glIsProgram(). (#6220, #6224) 2022-11-09: OpenGL: Reverted use of glBufferSubData(), too many corruptions issues +
-//  old issues seemingly can't be reproed with Intel drivers nowadays (revert 2021-12-15 and 2022-05-23 changes).
-//  2022-10-11: Using 'nullptr' instead of 'NULL' as per our switch to C++11.
-//  2022-09-27: OpenGL: Added ability to '#define IMGUI_IMPL_OPENGL_DEBUG'.
-//  2022-05-23: OpenGL: Reworking 2021-12-15 "Using buffer orphaning" so it only happens on Intel GPU, seems to cause
-//  problems otherwise. (#4468, #4825, #4832, #5127). 2022-05-13: OpenGL: Fixed state corruption on OpenGL ES 2.0 due to
-//  not preserving GL_ELEMENT_ARRAY_BUFFER_BINDING and vertex attribute states. 2021-12-15: OpenGL: Using buffer
-//  orphaning + glBufferSubData(), seems to fix leaks with multi-viewports with some Intel HD drivers. 2021-08-23:
-//  OpenGL: Fixed ES 3.0 shader ("#version 300 es") use normal precision floats to avoid wobbly rendering at HD
-//  resolutions. 2021-08-19: OpenGL: Embed and use our own minimal GL loader (imgui_impl_opengl3_loader.h), removing
-//  requirement and support for third-party loader. 2021-06-29: Reorganized backend to pull data from a single structure
-//  to facilitate usage with multiple-contexts (all g_XXXX access changed to bd->XXXX). 2021-06-25: OpenGL: Use
-//  OES_vertex_array extension on Emscripten + backup/restore current state. 2021-06-21: OpenGL: Destroy individual
-//  vertex/fragment shader objects right after they are linked into the main shader. 2021-05-24: OpenGL: Access
-//  GL_CLIP_ORIGIN when "GL_ARB_clip_control" extension is detected, inside of just OpenGL 4.5 version. 2021-05-19:
-//  OpenGL: Replaced direct access to ImDrawCmd::TextureId with a call to ImDrawCmd::GetTexID(). (will become a
-//  requirement) 2021-04-06: OpenGL: Don't try to read GL_CLIP_ORIGIN unless we're OpenGL 4.5 or greater. 2021-02-18:
-//  OpenGL: Change blending equation to preserve alpha in output buffer. 2021-01-03: OpenGL: Backup, setup and restore
-//  GL_STENCIL_TEST state. 2020-10-23: OpenGL: Backup, setup and restore GL_PRIMITIVE_RESTART state. 2020-10-15: OpenGL:
-//  Use glGetString(GL_VERSION) instead of glGetIntegerv(GL_MAJOR_VERSION, ...) when the later returns zero (e.g.
-//  Desktop GL 2.x) 2020-09-17: OpenGL: Fix to avoid compiling/calling glBindSampler() on ES or pre 3.3 context which
-//  have the defines set by a loader. 2020-07-10: OpenGL: Added support for glad2 OpenGL loader. 2020-05-08: OpenGL:
-//  Made default GLSL version 150 (instead of 130) on OSX. 2020-04-21: OpenGL: Fixed handling of
-//  glClipControl(GL_UPPER_LEFT) by inverting projection matrix. 2020-04-12: OpenGL: Fixed context version check
-//  mistakenly testing for 4.0+ instead of 3.2+ to enable ImGuiBackendFlags_RendererHasVtxOffset. 2020-03-24: OpenGL:
-//  Added support for glbinding 2.x OpenGL loader. 2020-01-07: OpenGL: Added support for glbinding 3.x OpenGL loader.
+//  2024-06-28: OpenGL: ImGui_ImplOpenGL3_NewFrame() recreates font texture if it has been destroyed by
+//  ImGui_ImplOpenGL3_DestroyFontsTexture(). (#7748) 2024-05-07: OpenGL: Update loader for Linux to support EGL/GLVND.
+//  (#7562) 2024-04-16: OpenGL: Detect ES3 contexts on desktop based on version string, to e.g. avoid calling
+//  glPolygonMode() on them. (#7447) 2024-01-09: OpenGL: Update GL3W based imgui_impl_opengl3_loader.h to load
+//  "libGL.so" and variants, fixing regression on distros missing a symlink. 2023-11-08: OpenGL: Update GL3W based
+//  imgui_impl_opengl3_loader.h to load "libGL.so" instead of "libGL.so.1", accommodating for NetBSD systems having only
+//  "libGL.so.3" available. (#6983) 2023-10-05: OpenGL: Rename symbols in our internal loader so that LTO compilation
+//  with another copy of gl3w is possible. (#6875, #6668, #4445) 2023-06-20: OpenGL: Fixed erroneous use
+//  glGetIntegerv(GL_CONTEXT_PROFILE_MASK) on contexts lower than 3.2. (#6539, #6333) 2023-05-09: OpenGL: Support for
+//  glBindSampler() backup/restore on ES3. (#6375) 2023-04-18: OpenGL: Restore front and back polygon mode separately
+//  when supported by context. (#6333) 2023-03-23: OpenGL: Properly restoring "no shader program bound" if it was the
+//  case prior to running the rendering function. (#6267, #6220, #6224) 2023-03-15: OpenGL: Fixed GL loader crash when
+//  GL_VERSION returns NULL. (#6154, #4445, #3530) 2023-03-06: OpenGL: Fixed restoration of a potentially deleted OpenGL
+//  program, by calling glIsProgram(). (#6220, #6224) 2022-11-09: OpenGL: Reverted use of glBufferSubData(), too many
+//  corruptions issues + old issues seemingly can't be reproed with Intel drivers nowadays (revert 2021-12-15 and
+//  2022-05-23 changes). 2022-10-11: Using 'nullptr' instead of 'NULL' as per our switch to C++11. 2022-09-27: OpenGL:
+//  Added ability to '#define IMGUI_IMPL_OPENGL_DEBUG'. 2022-05-23: OpenGL: Reworking 2021-12-15 "Using buffer
+//  orphaning" so it only happens on Intel GPU, seems to cause problems otherwise. (#4468, #4825, #4832, #5127).
+//  2022-05-13: OpenGL: Fixed state corruption on OpenGL ES 2.0 due to not preserving GL_ELEMENT_ARRAY_BUFFER_BINDING
+//  and vertex attribute states. 2021-12-15: OpenGL: Using buffer orphaning + glBufferSubData(), seems to fix leaks with
+//  multi-viewports with some Intel HD drivers. 2021-08-23: OpenGL: Fixed ES 3.0 shader ("#version 300 es") use normal
+//  precision floats to avoid wobbly rendering at HD resolutions. 2021-08-19: OpenGL: Embed and use our own minimal GL
+//  loader (imgui_impl_opengl3_loader.h), removing requirement and support for third-party loader. 2021-06-29:
+//  Reorganized backend to pull data from a single structure to facilitate usage with multiple-contexts (all g_XXXX
+//  access changed to bd->XXXX). 2021-06-25: OpenGL: Use OES_vertex_array extension on Emscripten + backup/restore
+//  current state. 2021-06-21: OpenGL: Destroy individual vertex/fragment shader objects right after they are linked
+//  into the main shader. 2021-05-24: OpenGL: Access GL_CLIP_ORIGIN when "GL_ARB_clip_control" extension is detected,
+//  inside of just OpenGL 4.5 version. 2021-05-19: OpenGL: Replaced direct access to ImDrawCmd::TextureId with a call to
+//  ImDrawCmd::GetTexID(). (will become a requirement) 2021-04-06: OpenGL: Don't try to read GL_CLIP_ORIGIN unless we're
+//  OpenGL 4.5 or greater. 2021-02-18: OpenGL: Change blending equation to preserve alpha in output buffer. 2021-01-03:
+//  OpenGL: Backup, setup and restore GL_STENCIL_TEST state. 2020-10-23: OpenGL: Backup, setup and restore
+//  GL_PRIMITIVE_RESTART state. 2020-10-15: OpenGL: Use glGetString(GL_VERSION) instead of
+//  glGetIntegerv(GL_MAJOR_VERSION, ...) when the later returns zero (e.g. Desktop GL 2.x) 2020-09-17: OpenGL: Fix to
+//  avoid compiling/calling glBindSampler() on ES or pre 3.3 context which have the defines set by a loader. 2020-07-10:
+//  OpenGL: Added support for glad2 OpenGL loader. 2020-05-08: OpenGL: Made default GLSL version 150 (instead of 130) on
+//  OSX. 2020-04-21: OpenGL: Fixed handling of glClipControl(GL_UPPER_LEFT) by inverting projection matrix. 2020-04-12:
+//  OpenGL: Fixed context version check mistakenly testing for 4.0+ instead of 3.2+ to enable
+//  ImGuiBackendFlags_RendererHasVtxOffset. 2020-03-24: OpenGL: Added support for glbinding 2.x OpenGL loader.
+//  2020-01-07: OpenGL: Added support for glbinding 3.x OpenGL loader.
 //  2019-10-25: OpenGL: Using a combination of GL define and runtime GL version to decide whether to use
 //  glDrawElementsBaseVertex(). Fix building with pre-3.2 GL loaders. 2019-09-22: OpenGL: Detect default GL loader using
 //  __has_include compiler facility. 2019-09-16: OpenGL: Tweak initialization code to allow application calling
@@ -112,9 +113,8 @@
 //  ES 2.0    100       "#version 100"      = WebGL 1.0
 //  ES 3.0    300       "#version 300 es"   = WebGL 2.0
 //----------------------------------------
+
 #include "pch.h"
-
-
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -131,6 +131,7 @@
 // Clang/GCC warnings with -Weverything
 #if defined(__clang__)
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"// warning: ignore unknown flags
 #pragma clang diagnostic ignored "-Wold-style-cast"// warning: use of old-style cast
 #pragma clang diagnostic ignored "-Wsign-conversion"// warning: implicit conversion changes signedness
 #pragma clang diagnostic ignored "-Wunused-macros"// warning: macro is not used
@@ -215,7 +216,7 @@
 #endif
 
 // [Debugging]
-//#define IMGUI_IMPL_OPENGL_DEBUG
+// #define IMGUI_IMPL_OPENGL_DEBUG
 #ifdef IMGUI_IMPL_OPENGL_DEBUG
 #include <stdio.h>
 #define GL_CALL(_CALL)                                                                           \
@@ -297,6 +298,7 @@ struct ImGui_ImplOpenGL3_VtxAttribState
 bool ImGui_ImplOpenGL3_Init(const char *glsl_version)
 {
     ImGuiIO &io = ImGui::GetIO();
+    IMGUI_CHECKVERSION();
     IM_ASSERT(io.BackendRendererUserData == nullptr && "Already initialized a renderer backend!");
 
     // Initialize our loader
@@ -435,6 +437,7 @@ void ImGui_ImplOpenGL3_NewFrame()
     IM_ASSERT(bd != nullptr && "Context or backend not initialized! Did you call ImGui_ImplOpenGL3_Init()?");
 
     if (!bd->ShaderHandle) ImGui_ImplOpenGL3_CreateDeviceObjects();
+    if (!bd->FontTexture) ImGui_ImplOpenGL3_CreateFontsTexture();
 }
 
 static void
@@ -861,7 +864,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
 #ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_BUFFER_PIXEL_UNPACK
-    GLint last_pixel_unpack_buffer;
+    GLint last_pixel_unpack_buffer = 0;
     if (bd->GlVersion >= 210) {
         glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING, &last_pixel_unpack_buffer);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
