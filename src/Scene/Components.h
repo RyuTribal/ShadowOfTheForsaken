@@ -41,10 +41,16 @@ namespace SOF
     {
         glm::vec4 Color = { 1.f, 1.f, 1.f, 1.f };
         std::shared_ptr<Texture> Texture = nullptr;
+        glm::vec2 SpriteCoordinates = { 0.f, 0.f };
+        glm::vec2 SpriteSize = { 32.f, 32.f };
+        int32_t Layer = 0;
 
         SpriteComponent() = default;
         SpriteComponent(const SpriteComponent &) = default;
         SpriteComponent(const glm::vec4 &new_color) : Color(new_color) {}
+        SpriteComponent(const glm::vec4 &new_color, glm::vec2 &sprite_coords, glm::vec2 &sprite_size)
+          : Color(new_color), SpriteCoordinates(sprite_coords), SpriteSize(sprite_size)
+        {}
     };
 
     struct CameraComponent

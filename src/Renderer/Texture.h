@@ -21,6 +21,9 @@ namespace SOF
 
         virtual AssetType GetType() const override { return AssetType::Texture; };
 
+        uint32_t GetWidth() { return m_Width; }
+        uint32_t GetHeight() { return m_Height; }
+
         private:
         uint32_t m_ID;
         uint32_t m_Width, m_Height;

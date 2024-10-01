@@ -7,14 +7,8 @@
 
 namespace SOF
 {
-    Window::Window(const WindowProps &props)
+    Window::Window(const WindowData &props) : m_Data(props)
     {
-
-        m_Data.Title = props.Title;
-        m_Data.VSync = props.VSync;
-        m_Data.Width = props.Width;
-        m_Data.Height = props.Height;
-
         int success = glfwInit();
         SOF_ASSERT(success, "Could not initialize GLFW!");
         m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, props.Title.c_str(), nullptr, nullptr);
@@ -34,6 +28,11 @@ namespace SOF
             data.Height = height;
             WindowResizeEvent event(width, height);
             data.EventCallback(event);
+        });
+        glfwSetWindowMaximizeCallback(m_Window, [](GLFWwindow *window, int maximized) {
+            WindowData &data = *(WindowData *)glfwGetWindowUserPointer(window);
+            data.Fullscreen = (bool)maximized;
+            data.FullScreenType = FullscreenType::WINDOWED;
         });
         glfwSetWindowCloseCallback(m_Window, [](GLFWwindow *window) {
             WindowData &data = *(WindowData *)glfwGetWindowUserPointer(window);
@@ -100,4 +99,42 @@ namespace SOF
     Window::~Window() { glfwDestroyWindow(m_Window); }
 
     void Window::OnUpdate() { glfwPollEvents(); }
+
+    void Window::SetFullscreen(bool fullscreen, FullscreenType type)
+    {
+        m_Data.Fullscreen = fullscreen;
+        m_Data.FullScreenType = type;
+        if (!fullscreen || type == FullscreenType::WINDOWED) {
+            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GLFW_TRUE);
+            glfwSetWindowAttrib(m_Window, GLFW_RESIZABLE, GLFW_TRUE);
+        }
+        if (!fullscreen) {
+            glfwSetWindowMonitor(m_Window, nullptr, m_XPos, m_YPos, m_PrevWidth, m_PrevHeight, 0);
+        } else {
+            GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+            switch (type) {
+            case FullscreenType::FULLSCREEN:
+
+                glfwGetWindowPos(m_Window, &m_XPos, &m_YPos);
+                glfwGetWindowSize(m_Window, &m_PrevWidth, &m_PrevHeight);
+                glfwSetWindowMonitor(m_Window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+                break;
+            case FullscreenType::BORDERLESS:
+                glfwGetWindowPos(m_Window, &m_XPos, &m_YPos);
+                glfwGetWindowSize(m_Window, &m_PrevWidth, &m_PrevHeight);
+                monitor = glfwGetPrimaryMonitor();
+                mode = glfwGetVideoMode(monitor);
+                if (!mode) return;
+                glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GLFW_FALSE);
+                glfwSetWindowAttrib(m_Window, GLFW_RESIZABLE, GLFW_FALSE);
+                glfwSetWindowMonitor(m_Window, NULL, 0, 0, mode->width, mode->height, 0);
+                break;
+            case FullscreenType::WINDOWED:
+                if (fullscreen) { glfwMaximizeWindow(m_Window); }
+                break;
+            }
+        }
+    }
 }// namespace SOF

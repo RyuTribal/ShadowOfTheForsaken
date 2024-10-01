@@ -14,10 +14,10 @@ namespace SOF
         glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
 
         glTextureStorage2D(m_ID, 1, m_Channels > 3 ? GL_RGBA8 : GL_RGB8, m_Width, m_Height);
-        glTextureParameteri(m_ID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTextureParameteri(m_ID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         if (data) { SetData(data); }
     }

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "DebugWindow.h"
 #include <imgui.h>
+#include <imgui_internal.h>
 #include "Renderer/Renderer.h"
 #include "Asset/Manager.h"
 #include "Core/Game.h"
@@ -19,7 +20,11 @@ namespace SOF
         Scene *current_scene = Game::Get()->GetCurrentScene();
         FrameStats &frame_stats = Game::Get()->GetFrameStats();
 
+
+        m_WindowActive = ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantCaptureMouse;
+
         ImGui::Begin("Debug");
+        m_WindowActive = ImGui::IsWindowFocused();
 
         if (ImGui::ColorEdit3("Background color", m_BgColor)) {
             glm::vec3 color_vec(m_BgColor[0], m_BgColor[1], m_BgColor[2]);
@@ -54,6 +59,27 @@ namespace SOF
         ImGui::Text("	- FPS: %f", frame_stats.FPS);
         ImGui::Text("	- Quads drawn: %i", Renderer::GetStats().QuadsDrawn);
         ImGui::Text("	- Draw calls: %i", Renderer::GetStats().DrawCalls);
+        ImGui::End();
+
+
+        ImGui::Begin("Asset manager");
+        ImGui::Text("Asset count count: %i", AssetManager::GetGlobalHeader().NumAssets);
+        ImGui::Text("Assets:");
+        for (auto &[handle, toc] : AssetManager::GetTOCEntries()) {
+            if (ImGui::TreeNode(handle.c_str())) {
+                std::string uuid = fmt::format("UUID: {}", toc.UUID);
+                std::string length = fmt::format("Length: {}", toc.Length);
+                std::string offset = fmt::format("Offset: {}", toc.Offset);
+                std::string type = fmt::format("Asset Type: {}", AssetTypeToString((AssetType)toc.Type));
+
+                ImGui::Text(uuid.c_str());
+                ImGui::Text(length.c_str());
+                ImGui::Text(offset.c_str());
+                ImGui::Text(type.c_str());
+
+                ImGui::TreePop();
+            }
+        }
         ImGui::End();
     }
 

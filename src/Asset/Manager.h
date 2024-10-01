@@ -68,7 +68,7 @@ namespace SOF
             TOCEntry &toc_entry = Instance()->m_TOCEntries[asset_handle];
             std::vector<char> buffer(toc_entry.Length);
             {
-                std::lock<std::mutex> lock(m_FileMutex);
+                std::lock_guard<std::mutex> lock(Instance()->m_FileMutex);
                 Instance()->m_OutputFile.seekg(toc_entry.Offset, std::ios::beg);
                 Instance()->m_OutputFile.read(buffer.data(), buffer.size());
             }
@@ -85,14 +85,15 @@ namespace SOF
 
         static void RefDeleter(Asset *asset, const std::string &asset_handle);
 
+        static GlobalHeader &GetGlobalHeader() { return Instance()->m_GlobalHeader; }
+        static std::map<std::string, TOCEntry> &GetTOCEntries() { return Instance()->m_TOCEntries; }
+
         private:
         AssetManager(std::filesystem::path path_to_assetpack) : m_FilePath(path_to_assetpack) {}
         void AssetPackInit(std::filesystem::path path_to_assetpack);
-        void UpdateTOCOffsets(bool add = true);
+        void UpdateTOCOffsets();
         std::string SerializeMetadata(const std::map<std::string, std::string> &metadata);
-        void WriteTOC(uint64_t deleted_offset = 0,
-          uint64_t deleted_length = 0);// if both are 0 means no entry was deleted
-
+        void WriteTOC();
 
         private:
         std::unordered_map<AssetType, std::unique_ptr<IAssetLoaderStrategy>> m_Loaders;

@@ -11,6 +11,7 @@ namespace SOF
         std::unordered_map<std::filesystem::path, AssetType> FileExtensions = {
             { ".png", AssetType::Texture },
             { ".jpg", AssetType::Texture },
+            { ".gif", AssetType::Texture },
             { ".jpeg", AssetType::Texture },
         };
     };
@@ -62,6 +63,7 @@ namespace SOF
 
         if (s_Data->Manager->m_TOCEntries.find(asset_handle) != s_Data->Manager->m_TOCEntries.end()) {
             SOF_ERROR("AssetManager", "The handle {0} already exists!", asset_handle);
+            return;
         }
 
         SOF_TRACE("AssetManager", "Registering file {0}...", path_to_file);
@@ -74,11 +76,11 @@ namespace SOF
 
         std::shared_ptr<AssetData> data = loader->second->Load(path_to_file);
 
+        // Seek to the end of the file for writing the new asset data
         s_Data->Manager->m_OutputFile.seekp(0, std::ios::end);
         uint64_t dataOffset = s_Data->Manager->m_OutputFile.tellp();
         s_Data->Manager->m_OutputFile.write(data->RawData.data(), data->RawData.size());
-
-        s_Data->Manager->UpdateTOCOffsets();
+        s_Data->Manager->m_OutputFile.flush();// Ensure the data is written to the file
 
         TOCEntry newEntry;
         newEntry.UUID = UUID();
@@ -90,6 +92,9 @@ namespace SOF
         strncpy(newEntry.MetaData, metadataSerialized.c_str(), sizeof(newEntry.MetaData) - 1);
         newEntry.MetaData[sizeof(newEntry.MetaData) - 1] = '\0';
         s_Data->Manager->m_TOCEntries[asset_handle] = newEntry;
+
+        // Update TOC and write it
+        s_Data->Manager->UpdateTOCOffsets();
         s_Data->Manager->WriteTOC();
 
         SOF_INFO("AssetManager", "Registered file: {0}", path_to_file);
@@ -116,19 +121,17 @@ namespace SOF
         uint64_t deleted_offset = s_Data->Manager->m_TOCEntries[asset_handle].Offset;
         uint64_t deleted_length = s_Data->Manager->m_TOCEntries[asset_handle].Length;
 
-        auto it = s_Data->Manager->m_TOCEntries.find(asset_handle);
-        s_Data->Manager->m_TOCEntries.erase(it);
-        s_Data->Manager->UpdateTOCOffsets(false);
+        s_Data->Manager->m_TOCEntries.erase(asset_handle);
+        s_Data->Manager->UpdateTOCOffsets();
 
-        s_Data->Manager->WriteTOC(deleted_offset, deleted_length);
+        s_Data->Manager->WriteTOC();
         SOF_INFO("AssetManager", "Deleted asset: {0}", asset_handle);
     }
 
-    void AssetManager::UpdateTOCOffsets(bool add)
+    void AssetManager::UpdateTOCOffsets()
     {
-        for (auto &[handle, entry] : s_Data->Manager->m_TOCEntries) {
-            entry.Offset += add ? sizeof(TOCEntry) : -sizeof(TOCEntry);
-        }
+        m_GlobalHeader.NumAssets = m_TOCEntries.size();
+        m_GlobalHeader.TOCOffset = sizeof(GlobalHeader);// TOC starts after the global header
     }
 
     std::string AssetManager::SerializeMetadata(const std::map<std::string, std::string> &metadata)
@@ -138,53 +141,16 @@ namespace SOF
         return ss.str();
     }
 
-    void AssetManager::WriteTOC(uint64_t deleted_offset, uint64_t deleted_length)
+    void AssetManager::WriteTOC()
     {
-        std::filesystem::copy(m_FilePath, "temp.sofp");
-        std::fstream temp_file("temp.sofp", std::ios::in | std::ios::binary);
-        SOF_ASSERT(temp_file.is_open(), "Temp file failed to open!");
-
-        m_OutputFile.close();
-        m_OutputFile.open(m_FilePath, std::ios::out | std::ios::trunc | std::ios::binary);
-        SOF_ASSERT(m_OutputFile.is_open(), "Failed to open the asset pack for writing!");
-
-        m_GlobalHeader.NumAssets += deleted_offset > 0 && deleted_length > 0 ? -1 : 1;
-
         m_OutputFile.seekp(0, std::ios::beg);
         m_OutputFile.write(reinterpret_cast<char *>(&m_GlobalHeader), sizeof(GlobalHeader));
 
-        for (auto &[handle, entry] : m_TOCEntries) {
-            m_OutputFile.write(reinterpret_cast<char *>(&entry), sizeof(TOCEntry));
+        for (const auto &[handle, entry] : m_TOCEntries) {
+            m_OutputFile.write(reinterpret_cast<const char *>(&entry), sizeof(TOCEntry));
         }
 
         m_OutputFile.flush();
-
-        std::streampos data_block_start = m_OutputFile.tellp();
-        temp_file.seekg(data_block_start);
-
-        const size_t buffer_size = 2048 * 2048;
-        std::vector<char> buffer(buffer_size);
-        while (!temp_file.eof()) {
-            std::streampos current_pos = temp_file.tellg();
-
-            if (deleted_offset > 0 && deleted_length > 0 && current_pos >= std::streampos(deleted_offset)
-                && current_pos < std::streampos(deleted_offset + deleted_length)) {
-                // Skip over the deleted block
-                temp_file.seekg(deleted_offset + deleted_length);
-                continue;
-            }
-
-            temp_file.read(buffer.data(), buffer.size());
-            std::streamsize bytesRead = temp_file.gcount();
-            m_OutputFile.write(buffer.data(), bytesRead);
-        }
-        m_OutputFile.close();
-        temp_file.close();
-
-        std::filesystem::remove("temp.sofp");
-
-        m_OutputFile.open(m_FilePath, std::ios::binary | std::ios::in | std::ios::out);
-        SOF_ASSERT(m_OutputFile.is_open(), "Failed to reopen the asset pack after writing TOC!");
     }
 
     AssetType AssetManager::FileToAssetType(std::filesystem::path path_to_file)
@@ -197,15 +163,10 @@ namespace SOF
         if (!s_Data || !s_Data->Manager) { return; }
         if (asset) {
             std::shared_ptr<Asset> temp = s_Data->Manager->m_Assets[asset_handle];
-            SOF_WARN_NOTAG("{0}", temp.use_count());
-            if (temp.use_count() == 1) {
-                SOF_WARN("AssetManager", "Nobody is using the asset {0}, removing from memory", asset_handle);
-                s_Data->Manager->m_Assets.erase(asset_handle);
-            }
+            if (temp.use_count() == 1) { s_Data->Manager->m_Assets.erase(asset_handle); }
             delete asset;
         }
     }
-
 
     void AssetManager::AssetPackInit(std::filesystem::path path_to_assetpack)
     {
@@ -239,7 +200,6 @@ namespace SOF
           "Failed to read the global header from file: {0}",
           path_to_assetpack.string());
 
-
         SOF_ASSERT(std::strncmp(m_GlobalHeader.Signature, "SOFP", 4) == 0,
           "Invalid file format: {0}",
           path_to_assetpack.string());
@@ -264,4 +224,5 @@ namespace SOF
             m_TOCEntries[std::string(entry.Handle)] = entry;
         }
     }
+
 }// namespace SOF

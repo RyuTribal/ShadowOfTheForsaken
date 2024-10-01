@@ -13,13 +13,6 @@ namespace SOF
 
     class Window;
 
-    struct WindowProps
-    {
-        std::string Title = "Untitled Window";
-        bool VSync = true;
-        unsigned int Width = 1280, Height = 720;
-    };
-
     struct FrameStats
     {
         float DeltaTime = 0.0f;
@@ -48,7 +41,7 @@ namespace SOF
     class Game
     {
         public:
-        static Game *CreateGame(const WindowProps &props);
+        static Game *CreateGame(const Window::WindowData &props);
 
         void Start();
         bool OnShutDown(WindowCloseEvent &event);
@@ -70,7 +63,7 @@ namespace SOF
         Scene *GetCurrentScene() { return m_Scene.get(); }
 
         private:
-        Game(const WindowProps &props);
+        Game(const Window::WindowData &props);
 
         private:
         bool m_Running = true;

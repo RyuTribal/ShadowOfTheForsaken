@@ -15,7 +15,7 @@ namespace SOF
 
     Game *Game::s_Instance = nullptr;
 
-    Game::Game(const WindowProps &props) : m_RendererThread("Render Thread"), m_Window(props)
+    Game::Game(const Window::WindowData &props) : m_RendererThread("Render Thread"), m_Window(props)
     {
         SOF_ASSERT(!s_Instance, "Can only have one instance of a game!");
         m_RendererThread.SetShutdownTask(&Renderer::Shutdown);
@@ -32,19 +32,14 @@ namespace SOF
 
         m_Scene = std::make_shared<Scene>("Test scene");
 
-        // cReating warsay
-        m_WarsayID = m_Scene->CreateEntity("WarsayBox");
-        std::string warsay_asset_handle = "warsay_sprite";
-        auto warsay_entity = m_Scene->GetEntity(m_WarsayID);
-        auto warsay_texture = m_ThreadPool.AddTask(AssetManager::Load<Texture>, warsay_asset_handle).get();
-        TransformComponent warsay_transform = TransformComponent();
-        SpriteComponent warsay_sprite = SpriteComponent(glm::vec4(1.f, 0.f, 0.f, 1.f));
-        warsay_sprite.Texture = warsay_texture;
-        CameraComponent warsay_camera = CameraComponent(true);
-        warsay_camera.Camera = Camera::Create(m_Window.GetWidth(), m_Window.GetHeight());
-        warsay_entity->AddComponent<TransformComponent>(warsay_transform);
-        warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
-        warsay_entity->AddComponent<CameraComponent>(warsay_camera);
+        // Load textures
+        std::string warsay_asset_handle = "black_idle";
+        std::string grounds_asset_handle = "grounds";
+        auto warsay_texture_promise = m_ThreadPool.AddTask(AssetManager::Load<Texture>, warsay_asset_handle);
+        auto grounds_texture_promise = m_ThreadPool.AddTask(AssetManager::Load<Texture>, grounds_asset_handle);
+        m_ThreadPool.Await();
+        auto warsay_texture = warsay_texture_promise.get();
+        auto grounds_texture = grounds_texture_promise.get();
 
         // cReating warsay home
         int gridWidth = 100;
@@ -58,24 +53,37 @@ namespace SOF
                 m_WarsayHome.push_back(entityID);
                 TransformComponent transform;
                 transform.Translation = glm::vec3(x * spacing, y * spacing, 0.0f);
-                transform.Scale = glm::vec3(0.9f);
 
                 SpriteComponent sprite;
                 sprite.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-                sprite.Texture = warsay_texture;
-
+                sprite.Texture = grounds_texture;
+                sprite.SpriteCoordinates = glm::vec2(3.f, 4.f);
                 entity->AddComponent<TransformComponent>(transform);
                 entity->AddComponent<SpriteComponent>(sprite);
             }
         }
+
+        // cReating warsay
+        m_WarsayID = m_Scene->CreateEntity("WarsayBox");
+
+        auto warsay_entity = m_Scene->GetEntity(m_WarsayID);
+        TransformComponent warsay_transform = TransformComponent();
+        SpriteComponent warsay_sprite = SpriteComponent(glm::vec4(1.f, 0.f, 0.f, 1.f));
+        warsay_sprite.Texture = warsay_texture;
+        warsay_sprite.SpriteSize = glm::vec2(128.f, 128.f);
+        warsay_sprite.Layer = 1;
+        CameraComponent warsay_camera = CameraComponent(true);
+        warsay_camera.Camera = Camera::Create(m_Window.GetWidth(), m_Window.GetHeight());
+        warsay_entity->AddComponent<TransformComponent>(warsay_transform);
+        warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
+        warsay_entity->AddComponent<CameraComponent>(warsay_camera);
     }
 
-    Game *Game::CreateGame(const WindowProps &props) { return new Game(props); }
+    Game *Game::CreateGame(const Window::WindowData &props) { return new Game(props); }
 
     void Game::Start()
     {
-
-
+        m_Window.SetFullscreen(m_Window.GetFullScreen(), m_Window.GetFullScreenType());
         auto last_frame = std::chrono::high_resolution_clock::now();
         while (m_Running) {
 
@@ -133,6 +141,7 @@ namespace SOF
 
     bool Game::OnKeyPressed(KeyPressedEvent &event)
     {
+        if (m_DebugWindow.IsWindowActive()) { return false; }
         glm::vec3 velocity = { 0.f, 0.f, 0.f };
         if (event.GetKeyCode() == GLFW_KEY_W) { velocity.y += 10.f * m_FrameStats.DeltaTime; }
         if (event.GetKeyCode() == GLFW_KEY_S) { velocity.y -= 10.f * m_FrameStats.DeltaTime; }

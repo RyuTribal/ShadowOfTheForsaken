@@ -19,8 +19,8 @@ namespace SOF
         stbi_set_flip_vertically_on_load(true);
         unsigned char *data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
         if (data) {
-            assetData->RawData.assign(
-              reinterpret_cast<char *>(data), reinterpret_cast<char *>(data) + width * height * channels);
+            assetData->RawData.assign(reinterpret_cast<unsigned char *>(data),
+              reinterpret_cast<unsigned char *>(data) + width * height * channels);
             stbi_image_free(data);
 
 
