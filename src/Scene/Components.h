@@ -1,10 +1,18 @@
 #pragma once
 #include <glm/gtx/quaternion.hpp>
 #include "Renderer/Texture.h"
-#include <Renderer/Camera.h>
+#include "Renderer/Camera.h"
+#include "box2d/box2d.h"
 
 namespace SOF
 {
+
+    enum ColliderType {
+        STATIC,// Something that isn't affected by forces but can be collided with such as walls
+        DYNAMIC,// Something that is affected by forces and can be collided with, such as players
+        KINEMATIC// Something that is affected by a set velocity but can't be collided with
+    };
+
 
     struct TagComponent
     {
@@ -60,5 +68,63 @@ namespace SOF
         CameraComponent() = default;
         CameraComponent(const CameraComponent &) = default;
         CameraComponent(bool is_active) : IsActive(is_active) {}
+    };
+
+    struct Rigidbody2DComponent
+    {
+        ColliderType Type = ColliderType::STATIC;
+        bool FixedRotation = false;
+        b2ShapeId ShapeID;
+        b2BodyId RuntimeBodyID;
+
+        Rigidbody2DComponent() = default;
+        Rigidbody2DComponent(const Rigidbody2DComponent &) = default;
+    };
+
+    struct BoxCollider2DComponent
+    {
+        glm::vec2 Offset = { 0.0f, 0.0f };
+        glm::vec2 Size = { 0.5f, 0.5f };
+        float Density = 1.0f;
+        float Friction = 0.5f;
+        float Restitution = 0.0f;
+        float RestitutionThreshold = 0.5f;
+        b2ShapeId RuntimeShapeID;
+        b2Polygon Shape;
+
+
+        BoxCollider2DComponent() = default;
+        BoxCollider2DComponent(const BoxCollider2DComponent &) = default;
+    };
+
+    struct CapsuleCollider2DComponent
+    {
+        glm::vec2 Offset = { 0.0f, 0.0f };
+        float Radius = 0.5f;
+        float Height = 1.0f;
+        float Density = 1.0f;
+        float Friction = 0.5f;
+        float Restitution = 0.0f;
+        float RestitutionThreshold = 0.5f;
+        b2ShapeId RuntimeShapeID;
+        b2Capsule Shape;
+
+        CapsuleCollider2DComponent() = default;
+        CapsuleCollider2DComponent(const CapsuleCollider2DComponent &) = default;
+    };
+
+    struct CircleCollider2DComponent
+    {
+        glm::vec2 Offset = { 0.0f, 0.0f };
+        float Radius = 0.5f;
+        float Density = 1.0f;
+        float Friction = 0.5f;
+        float Restitution = 0.0f;
+        float RestitutionThreshold = 0.5f;
+        b2ShapeId RuntimeShapeID;
+        b2Circle Shape;
+
+        CircleCollider2DComponent() = default;
+        CircleCollider2DComponent(const CircleCollider2DComponent &) = default;
     };
 }// namespace SOF

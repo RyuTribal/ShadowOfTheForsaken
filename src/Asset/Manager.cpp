@@ -130,7 +130,7 @@ namespace SOF
 
     void AssetManager::UpdateTOCOffsets()
     {
-        m_GlobalHeader.NumAssets = m_TOCEntries.size();
+        m_GlobalHeader.NumAssets = (uint32_t)m_TOCEntries.size();
         m_GlobalHeader.TOCOffset = sizeof(GlobalHeader);// TOC starts after the global header
     }
 

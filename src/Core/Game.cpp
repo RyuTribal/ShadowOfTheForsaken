@@ -23,7 +23,7 @@ namespace SOF
         s_Instance = this;
         m_Window.SetEventCallback(BIND_EVENT_FN(SOF::Game::OnEvent));
         m_RendererThread.Run(&Renderer::Init, &m_Window);
-        m_RendererThread.Run(Renderer::SetVSync, false);
+        m_RendererThread.Run(Renderer::SetVSync, props.VSync);
 #ifdef DEBUG
         ImGuiLayer::Init();
 #endif
@@ -73,10 +73,20 @@ namespace SOF
         warsay_sprite.SpriteSize = glm::vec2(128.f, 128.f);
         warsay_sprite.Layer = 1;
         CameraComponent warsay_camera = CameraComponent(true);
-        warsay_camera.Camera = Camera::Create(m_Window.GetWidth(), m_Window.GetHeight());
+        warsay_camera.Camera = Camera::Create((float)m_Window.GetWidth(), (float)m_Window.GetHeight());
+        Rigidbody2DComponent rigid_body{};
+        rigid_body.Type = ColliderType::DYNAMIC;// Currently just falls so keep this commented
+        CapsuleCollider2DComponent capsule_collider{};
+        capsule_collider.Height = warsay_sprite.SpriteSize.y;
         warsay_entity->AddComponent<TransformComponent>(warsay_transform);
         warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
         warsay_entity->AddComponent<CameraComponent>(warsay_camera);
+        warsay_entity->AddComponent<Rigidbody2DComponent>(rigid_body);
+        warsay_entity->AddComponent<CapsuleCollider2DComponent>(capsule_collider);
+
+        m_Scene->CreatePhysicsWorld();
+
+        m_Scene->SetGravity({ 0.f, 0.f });// We won't really have a gravity in a jrpg like world
     }
 
     Game *Game::CreateGame(const Window::WindowData &props) { return new Game(props); }

@@ -97,9 +97,9 @@ namespace SOF
         read_buffer->ValidFrame = true;
         if (s_Props.ResizeWindow) {
             Window &window = Game::Get()->GetWindow();
-            read_buffer->FrameCamera->SetWidth(window.GetWidth());
-            read_buffer->FrameCamera->SetHeight(window.GetHeight());
-            glViewport(0, 0, (int)window.GetWidth(), (int)window.GetHeight());
+            read_buffer->FrameCamera->SetWidth((float)window.GetWidth());
+            read_buffer->FrameCamera->SetHeight((float)window.GetHeight());
+            glViewport(0, 0, (GLsizei)window.GetWidth(), (GLsizei)window.GetHeight());
             s_Props.ResizeWindow = false;
         }
     }
@@ -115,15 +115,17 @@ namespace SOF
                 if (buffers.QuadBuffer.size() > 0) {
                     auto vertex_array = VertexArray::Create();
 
-                    auto vertex_buffer = VertexBuffer::Create(buffers.QuadBuffer.size() * sizeof(Vertex));
+                    auto vertex_buffer = VertexBuffer::Create((uint32_t)buffers.QuadBuffer.size() * sizeof(Vertex));
                     vertex_buffer->SetLayout({ { ShaderDataType::Float4, "aPos" },
                       { ShaderDataType::Float4, "aColor" },
                       { ShaderDataType::Float2, "aTex" },
                       { ShaderDataType::Float2, "aSpriteCoords" },
                       { ShaderDataType::Float2, "aSpriteSize" } });
-                    vertex_buffer->SetData(buffers.QuadBuffer.data(), buffers.QuadBuffer.size() * sizeof(Vertex));
+                    vertex_buffer->SetData(
+                      buffers.QuadBuffer.data(), (uint32_t)buffers.QuadBuffer.size() * sizeof(Vertex));
 
-                    auto index_buffer = IndexBuffer::Create(buffers.QuadIndices.data(), buffers.QuadIndices.size());
+                    auto index_buffer =
+                      IndexBuffer::Create(buffers.QuadIndices.data(), (uint32_t)buffers.QuadIndices.size());
 
                     vertex_array->SetVertexBuffer(vertex_buffer);
                     vertex_array->SetIndexBuffer(index_buffer);
@@ -138,7 +140,7 @@ namespace SOF
                     program->Activate();
 
                     if (texture != nullptr) { texture->Bind(0); }
-                    glDrawElements(GL_TRIANGLES, buffers.QuadIndices.size(), GL_UNSIGNED_INT, 0);
+                    glDrawElements(GL_TRIANGLES, (GLsizei)buffers.QuadIndices.size(), GL_UNSIGNED_INT, 0);
                     s_Props.RendererInstance->GetStats().DrawCalls++;
 
                     vertex_array->Unbind();

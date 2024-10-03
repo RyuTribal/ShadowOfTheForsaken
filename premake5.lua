@@ -46,11 +46,13 @@ IncludeDir["GLFW"] = "vendor/GLFW/include"
 IncludeDir["Glad"] = "vendor/Glad/include"
 IncludeDir["ImGui"] = "vendor/imgui"
 IncludeDir["glm"] = "vendor/glm"
+IncludeDir["Box2D"] = "vendor/box2d/include"
 
 group("Dependencies")
 include("vendor/GLFW")
 include("vendor/Glad")
 include("vendor/imgui")
+include("vendor/box2d")
 
 group("")
 project("Game")
@@ -83,6 +85,7 @@ links({
 	"GLFW",
 	"Glad",
 	"ImGui",
+	"Box2D"
 })
 
 defines({
@@ -97,6 +100,7 @@ includedirs({
 	"%{IncludeDir.Glad}",
 	"%{IncludeDir.ImGui}",
 	"%{IncludeDir.glm}",
+	"%{IncludeDir.Box2D}",
 	"src/",
 })
 

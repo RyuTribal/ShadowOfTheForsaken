@@ -30,6 +30,8 @@ namespace SOF
             return GL_INT;
         case ShaderDataType::Bool:
             return GL_BOOL;
+        default:
+            return GL_INT;
         }
     }
 

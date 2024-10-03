@@ -1,6 +1,6 @@
 #pragma once
 #include "Registry.h"
-
+#include "box2d/box2d.h"
 
 namespace SOF
 {
@@ -10,9 +10,11 @@ namespace SOF
     class Scene
     {
         public:
+        static constexpr glm::vec2 DefaultGravity = { 0.f, -9.82f };
         static std::shared_ptr<Scene> CreateScene(const std::string &name);
 
         Scene(const std::string &name);
+        ~Scene();
 
         Registry *GetRegistry() { return &m_ComponentRegistry; }
 
@@ -20,6 +22,9 @@ namespace SOF
         UUID CreateEntity(const std::string &name, UUID handle);
 
         void Begin();
+        void CreatePhysicsWorld();
+        void DestroyPhysicsWorld();
+        void SetGravity(const glm::vec2 &gravity);
 
         void Update();
 
@@ -42,5 +47,11 @@ namespace SOF
         Registry m_ComponentRegistry;
         std::unordered_map<UUID, std::unique_ptr<Entity>> m_EntityMap;
         std::string m_Name = "Untitled Level";
+
+        // Physics stuff, mnight be good to move this into it's own thing
+        b2WorldId m_PhysicsWorldID;
+        glm::vec2 m_Gravity = DefaultGravity;
+        float m_PhysicsTimeStep = 1.0f / 60.0f;
+        int8_t m_PhysicsSubStep = 4;
     };
 }// namespace SOF

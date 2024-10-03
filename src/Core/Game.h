@@ -23,7 +23,7 @@ namespace SOF
 
         void UpdateFPS(double currentTime, double frameTime)
         {
-            DeltaTime = frameTime;
+            DeltaTime = (float)frameTime;
             FrameTimeAccumulator += frameTime;
             FrameCount++;
 

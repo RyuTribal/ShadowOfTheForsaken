@@ -47,7 +47,7 @@ namespace SOF
 
         BufferElement() = default;
         BufferElement(ShaderDataType type, const std::string &name, bool normalized = false)
-          : Name(name), Type(type), Size(ShaderDataTypeSizes(type)), Normalized(normalized)
+          : Name(name), Type(type), Size(ShaderDataTypeSizes(type)), Normalized(normalized), Offset(0)
         {}
 
         uint32_t GetComponentCount() const
