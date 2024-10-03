@@ -10,7 +10,11 @@ namespace SOF
     class SoundEngine
     {
         public:
-        enum SoundAttentuation { LINEAR, EXPONENTIAL };
+        enum SoundAttenuation { LINEAR, EXPONENTIAL };
+        struct AttenuationSettings
+        {
+            float RolloffFactor = 1.0f, ReferenceDistance = 1.0f, MaxDistance = 100.f;
+        };
         static void Init();
         static void Shutdown();
 
@@ -21,7 +25,13 @@ namespace SOF
         static void SetVolume(float volume);
         static float GetVolume();
 
+        static AttenuationSettings &GetAttenuationSettings() { return Instance()->m_AttenuationSettings; }
+        static void SetAttenuationSettings(const AttenuationSettings &settings);
+
         static void Update(const glm::vec3 &focal_point, Scene *active_scene);
+
+        static SoundAttenuation GetAttenuation();
+        static void SetAttenuation(SoundAttenuation model);
 
         private:
         struct SoundInstance
@@ -49,7 +59,7 @@ namespace SOF
         static void DataCallback(ma_device *pDevice, void *pOutput, const void *pInput, ma_uint32 frameCount);
         static float CalculatePan(const glm::vec3 &sourcePosition, const glm::vec3 &listenerPosition);
         static float CalculateAttenuation(float distance,
-          SoundAttentuation model,
+          SoundAttenuation model,
           float rolloffFactor,
           float referenceDistance,
           float maxDistance);
@@ -62,7 +72,7 @@ namespace SOF
         std::unordered_map<UUID, SoundInstance> m_ActiveSounds;
         float m_GlobalVolume = 1.0f;
         glm::vec3 m_FocalPoint = { 0.f, 0.f, 0.f };
-        SoundAttentuation m_Attentuation = SoundAttentuation::LINEAR;
-        float m_RolloffFactor = 1.0f, m_ReferenceDistance = 1.0f, m_MaxDistance = 100.f;
+        SoundAttenuation m_Attenuation = SoundAttenuation::EXPONENTIAL;
+        AttenuationSettings m_AttenuationSettings;
     };
 }// namespace SOF

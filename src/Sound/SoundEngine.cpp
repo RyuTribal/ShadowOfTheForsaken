@@ -84,8 +84,14 @@ namespace SOF
     float SoundEngine::GetVolume()
     {
         SoundEngine *instance = Instance();
-        std::lock_guard<std::mutex> lock(instance->m_SoundMutex);
         return instance->m_GlobalVolume;
+    }
+
+    void SoundEngine::SetAttenuationSettings(const AttenuationSettings &settings)
+    {
+        SoundEngine *instance = Instance();
+        std::lock_guard<std::mutex> lock(instance->m_SoundMutex);
+        instance->m_AttenuationSettings = settings;
     }
 
     void SoundEngine::Update(const glm::vec3 &focal_point, Scene *active_scene)
@@ -110,6 +116,19 @@ namespace SOF
                 }
             }
         }
+    }
+
+    SoundEngine::SoundAttenuation SoundEngine::GetAttenuation()
+    {
+        SoundEngine *instance = Instance();
+        return instance->m_Attenuation;
+    }
+
+    void SoundEngine::SetAttenuation(SoundAttenuation model)
+    {
+        SoundEngine *instance = Instance();
+        std::lock_guard<std::mutex> lock(instance->m_SoundMutex);
+        instance->m_Attenuation = model;
     }
 
     SoundEngine::SoundEngine()
@@ -154,10 +173,10 @@ namespace SOF
                         glm::vec3 direction = audio_instance.Position - instance->m_FocalPoint;
                         float distance = glm::length(direction);
                         float attenuation = CalculateAttenuation(distance,
-                          instance->m_Attentuation,
-                          instance->m_RolloffFactor,
-                          instance->m_ReferenceDistance,
-                          instance->m_MaxDistance);
+                          instance->m_Attenuation,
+                          instance->m_AttenuationSettings.RolloffFactor,
+                          instance->m_AttenuationSettings.ReferenceDistance,
+                          instance->m_AttenuationSettings.MaxDistance);
                         float pan = CalculatePan(audio_instance.Position, instance->m_FocalPoint);
                         float finalVolume = attenuation * instance->m_GlobalVolume;
                         pOutputF32[frameIndex * pDevice->playback.channels + channelIndex] += sample * finalVolume;
@@ -189,7 +208,7 @@ namespace SOF
     }
 
     float SoundEngine::CalculateAttenuation(float distance,
-      SoundAttentuation model,
+      SoundAttenuation model,
       float rolloffFactor,
       float referenceDistance,
       float maxDistance)
@@ -197,7 +216,7 @@ namespace SOF
         float attenuation = 1.0f;
 
         switch (model) {
-        case SoundAttentuation::LINEAR: {
+        case SoundAttenuation::LINEAR: {
             // Linear attenuation: volume decreases linearly with distance
             if (distance <= referenceDistance) {
                 attenuation = 1.0f;
@@ -210,7 +229,7 @@ namespace SOF
             break;
         }
 
-        case SoundAttentuation::EXPONENTIAL: {
+        case SoundAttenuation::EXPONENTIAL: {
             // Exponential attenuation: volume decreases exponentially with distance
             if (distance <= referenceDistance) {
                 attenuation = 1.0f;
