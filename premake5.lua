@@ -47,6 +47,7 @@ IncludeDir["Glad"] = "vendor/Glad/include"
 IncludeDir["ImGui"] = "vendor/imgui"
 IncludeDir["glm"] = "vendor/glm"
 IncludeDir["Box2D"] = "vendor/box2d/include"
+IncludeDir["miniaudio"] = "vendor/miniaudio/include"
 
 group("Dependencies")
 include("vendor/GLFW")
@@ -101,6 +102,7 @@ includedirs({
 	"%{IncludeDir.ImGui}",
 	"%{IncludeDir.glm}",
 	"%{IncludeDir.Box2D}",
+	"%{IncludeDir.miniaudio}",
 	"src/",
 })
 

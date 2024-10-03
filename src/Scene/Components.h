@@ -13,6 +13,11 @@ namespace SOF
         KINEMATIC// Something that is affected by a set velocity but can't be collided with
     };
 
+    enum SoundType {
+        DEFAULT,// Will just play at the volume set in the sound engine
+        SPATIAL// Will vary in volume depending on the transform component of the entity
+    };
+
 
     struct TagComponent
     {
@@ -127,4 +132,16 @@ namespace SOF
         CircleCollider2DComponent() = default;
         CircleCollider2DComponent(const CircleCollider2DComponent &) = default;
     };
+
+    struct SoundComponent
+    {
+        std::string AssetHandle = "";
+        UUID InstanceID;
+        bool Loop = false;
+        SoundType Type = SoundType::DEFAULT;
+
+        SoundComponent() = default;
+        SoundComponent(const SoundComponent &) = default;
+    };
+
 }// namespace SOF

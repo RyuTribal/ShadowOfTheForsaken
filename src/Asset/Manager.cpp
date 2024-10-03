@@ -13,6 +13,9 @@ namespace SOF
             { ".jpg", AssetType::Texture },
             { ".gif", AssetType::Texture },
             { ".jpeg", AssetType::Texture },
+            { ".mp3", AssetType::Audio },
+            { ".ogg", AssetType::Audio },
+            { ".wav", AssetType::Audio },
         };
     };
 
@@ -27,8 +30,10 @@ namespace SOF
         s_Data->Manager->AssetPackInit(path_to_assetpack);
 
         s_Data->Manager->m_Loaders[AssetType::Texture] = std::make_unique<TextureLoader>();
+        s_Data->Manager->m_Loaders[AssetType::Audio] = std::make_unique<AudioLoader>();
 
         s_Data->Manager->m_Deserializers[AssetType::Texture] = std::make_unique<TextureDeserializer>();
+        s_Data->Manager->m_Deserializers[AssetType::Audio] = std::make_unique<AudioDeserializer>();
     }
 
     void AssetManager::Shutdown()

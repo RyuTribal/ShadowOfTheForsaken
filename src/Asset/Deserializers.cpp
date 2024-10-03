@@ -3,6 +3,7 @@
 #include "Manager.h"
 #include "Renderer/Texture.h"
 #include "Core/Game.h"
+#include "Sound/Audio.h"
 
 namespace SOF
 {
@@ -10,6 +11,11 @@ namespace SOF
     struct TextureMetadata
     {
         uint32_t Width, Height, Channels;
+    };
+
+    struct AudioMetadata
+    {
+        double Duration;
     };
 
     static void DeserializeTextureMetadata(char *metadata_buffer, TextureMetadata &destination)
@@ -38,6 +44,26 @@ namespace SOF
         }
     }
 
+    static void DeserializeAudioMetadata(char *metadata_buffer, AudioMetadata &destination)
+    {
+        std::string metadata_str(metadata_buffer);
+
+        std::stringstream ss(metadata_str);
+        std::string token;
+
+        while (std::getline(ss, token, ';')) {
+            if (token.empty()) continue;
+
+            size_t pos = token.find('=');
+            if (pos != std::string::npos) {
+                std::string key = token.substr(0, pos);
+                std::string value = token.substr(pos + 1);
+
+                if (key == "Duration") { destination.Duration = std::stod(value); }
+            }
+        }
+    }
+
 
     std::shared_ptr<Asset> TextureDeserializer::Load(TOCEntry &toc, std::vector<char> &data) const
     {
@@ -51,5 +77,13 @@ namespace SOF
               std::shared_ptr<Asset>(texture, [toc](Asset *asset) { AssetManager::RefDeleter(asset, toc.Handle); }));
         });
         return texture_future.get();
+    }
+
+    std::shared_ptr<Asset> AudioDeserializer::Load(TOCEntry &toc, std::vector<char> &data) const
+    {
+        AudioMetadata metadata{};
+        DeserializeAudioMetadata(toc.MetaData, metadata);
+        auto audio = new Audio(data.data(), data.size(), metadata.Duration);
+        return std::shared_ptr<Asset>(audio, [toc](Asset *asset) { AssetManager::RefDeleter(asset, toc.Handle); });
     }
 }// namespace SOF

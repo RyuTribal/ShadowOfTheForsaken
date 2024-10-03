@@ -18,4 +18,10 @@ namespace SOF
         public:
         virtual std::shared_ptr<AssetData> Load(const std::filesystem::path &path) const override;
     };
+
+    class AudioLoader : public IAssetLoaderStrategy
+    {
+        public:
+        virtual std::shared_ptr<AssetData> Load(const std::filesystem::path &path) const override;
+    };
 }// namespace SOF

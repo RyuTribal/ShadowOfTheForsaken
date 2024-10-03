@@ -5,6 +5,7 @@
 #include "Renderer/Renderer.h"
 #include "Asset/Manager.h"
 #include "Core/Game.h"
+#include "Sound/SoundEngine.h"
 
 namespace SOF
 {
@@ -48,6 +49,12 @@ namespace SOF
             AssetManager::DeregisterAsset(handle);
             memset(m_DeletedAssetHandle, 0, sizeof(m_DeletedAssetHandle));
         }
+
+        ImGui::Text("Audio settings");
+        float curr_volume = SoundEngine::GetVolume();
+        if (ImGui::SliderFloat("Volume", &curr_volume, 0.0f, 1.f)) { SoundEngine::SetVolume(curr_volume); }
+
+        if (ImGui::Button("Stop all sounds")) { SoundEngine::StopAllAudio(); }
 
         ImGui::End();
 

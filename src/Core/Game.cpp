@@ -8,6 +8,7 @@
 #include "Renderer/Texture.h"
 #include "Scene/Components.h"
 #include "Scene/Entity.h"
+#include "Sound/SoundEngine.h"
 
 
 namespace SOF
@@ -29,6 +30,7 @@ namespace SOF
 #endif
         m_RendererThread.WaitForAllTasks();
         AssetManager::Init("Assets.sofp");
+        SoundEngine::Init();
 
         m_Scene = std::make_shared<Scene>("Test scene");
 
@@ -60,6 +62,19 @@ namespace SOF
                 sprite.SpriteCoordinates = glm::vec2(3.f, 4.f);
                 entity->AddComponent<TransformComponent>(transform);
                 entity->AddComponent<SpriteComponent>(sprite);
+
+                // if (x == gridWidth - 1 && y == gridHeight - 1) {
+                if (x == 70 && y == 70) {
+                    SoundComponent sound_comp;
+                    sound_comp.Loop = true;
+                    sound_comp.AssetHandle = "sound_test";
+                    sound_comp.Type = SoundType::SPATIAL;
+                    entity->AddComponent<SoundComponent>(sound_comp);
+                    // Should not be here, but for testing it works
+                    auto sound_ref = entity->GetComponent<SoundComponent>();
+                    auto transform_ref = entity->GetComponent<TransformComponent>();
+                    sound_ref->InstanceID = SoundEngine::PlayAudio(sound_ref, transform_ref->Translation);
+                }
             }
         }
 
@@ -87,6 +102,7 @@ namespace SOF
         m_Scene->CreatePhysicsWorld();
 
         m_Scene->SetGravity({ 0.f, 0.f });// We won't really have a gravity in a jrpg like world
+        m_Scene->SetListenerEntity(m_WarsayID);
     }
 
     Game *Game::CreateGame(const Window::WindowData &props) { return new Game(props); }
@@ -139,6 +155,7 @@ namespace SOF
 #ifdef DEBUG
         m_RendererThread.Run(&ImGuiLayer::Shutdown);
 #endif
+        SoundEngine::Shutdown();
         AssetManager::Shutdown();
         return true;
     }

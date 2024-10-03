@@ -18,4 +18,10 @@ namespace SOF
         public:
         virtual std::shared_ptr<Asset> Load(TOCEntry &toc, std::vector<char> &data) const override;
     };
+
+    class AudioDeserializer : public IAssetDeserializerStrategy
+    {
+        public:
+        virtual std::shared_ptr<Asset> Load(TOCEntry &toc, std::vector<char> &data) const override;
+    };
 }// namespace SOF

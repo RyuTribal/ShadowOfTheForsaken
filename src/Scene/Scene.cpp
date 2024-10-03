@@ -4,6 +4,7 @@
 #include "Components.h"
 #include "Renderer/Renderer.h"
 #include "Core/Game.h"
+#include "Sound/SoundEngine.h"
 
 namespace SOF
 {
@@ -186,6 +187,10 @@ namespace SOF
                 }
             }
         }
+
+        // Update sound engine
+        auto listener_transform = m_ComponentRegistry.Get<TransformComponent>(m_Listener);
+        if (listener_transform) { SoundEngine::Update(listener_transform->Translation, this); }
     }
 
 

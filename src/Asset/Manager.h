@@ -54,7 +54,7 @@ namespace SOF
 
         static void DeregisterAsset(std::string &asset_handle);
 
-        template<typename T> static std::shared_ptr<T> Load(std::string &asset_handle)
+        template<typename T> static std::shared_ptr<T> Load(const std::string &asset_handle)
         {
             if (Instance()->m_TOCEntries.find(asset_handle) == Instance()->m_TOCEntries.end()) {
                 SOF_ERROR("AssetManager", "The handle does not exist!");

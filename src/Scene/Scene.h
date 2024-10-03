@@ -42,6 +42,9 @@ namespace SOF
 
         uint32_t EntitySize() { return (uint32_t)m_EntityMap.size(); }
 
+        UUID GetListenerEntity() { return m_Listener; }
+        void SetListenerEntity(UUID id) { m_Listener = id; }
+
         private:
         UUID m_ID = UUID();
         Registry m_ComponentRegistry;
@@ -53,5 +56,8 @@ namespace SOF
         glm::vec2 m_Gravity = DefaultGravity;
         float m_PhysicsTimeStep = 1.0f / 60.0f;
         int8_t m_PhysicsSubStep = 4;
+
+        // Some sound settings
+        UUID m_Listener;
     };
 }// namespace SOF
