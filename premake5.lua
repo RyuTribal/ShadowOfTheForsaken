@@ -1,9 +1,12 @@
-local rootPath = path.getabsolute(".")
+rootPath = path.getabsolute(".")
 require("cmake")
 
-workspace("2DGame")
+workspace("ShadowOfTheForsaken")
 architecture("x64")
 startproject("Game")
+
+PCHFile = "%{wks.location}/Engine/src/pch.cpp"
+
 
 configurations({
 	"Debug",
@@ -38,111 +41,22 @@ filter "action:vs*"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-pchheader "pch.h"
-pchsource "src/pch.cpp"
-
 IncludeDir = {}
-IncludeDir["GLFW"] = "vendor/GLFW/include"
-IncludeDir["Glad"] = "vendor/Glad/include"
-IncludeDir["ImGui"] = "vendor/imgui"
-IncludeDir["glm"] = "vendor/glm"
-IncludeDir["Box2D"] = "vendor/box2d/include"
-IncludeDir["miniaudio"] = "vendor/miniaudio/include"
+IncludeDir["GLFW"] = "%{wks.location}/Engine/vendor/GLFW/include"
+IncludeDir["Glad"] = "%{wks.location}/Engine/vendor/Glad/include"
+IncludeDir["ImGui"] = "%{wks.location}/Engine/vendor/imgui"
+IncludeDir["glm"] = "%{wks.location}/Engine/vendor/glm"
+IncludeDir["Box2D"] = "%{wks.location}/Engine/vendor/box2d/include"
+IncludeDir["miniaudio"] = "%{wks.location}/Engine/vendor/miniaudio/include"
 
 group("Dependencies")
-include("vendor/GLFW")
-include("vendor/Glad")
-include("vendor/imgui")
-include("vendor/box2d")
+include("Engine/vendor/GLFW")
+include("Engine/vendor/Glad")
+include("Engine/vendor/imgui")
+include("Engine/vendor/box2d")
+
+group("Tools")
+include("Engine")
 
 group("")
-project("Game")
-location("./")
-kind("ConsoleApp")
-staticruntime("off")
-language("C++")
-cppdialect("C++20")
-targetdir("bin/" .. outputdir .. "/%{prj.name}")
-objdir("bin-int/" .. outputdir .. "/%{prj.name}")
-
-files({
-	"src/**.h",
-	"src/**.hpp",
-	"src/**.cpp",
-	"src/**.c",
-	"vendor/glm/glm/**.hpp",
-	"vendor/glm/glm/**.inl",
-})
-
-removefiles({
-	"src/Platform/**",
-})
-
-libdirs({
-	"vendor/GLFW/lib-vc2022",
-})
-
-links({
-	"GLFW",
-	"Glad",
-	"ImGui",
-	"Box2D"
-})
-
-defines({
-	"_CRT_SECURE_NO_WARNINGS",
-	'ROOT_PATH="' .. rootPath .. "/" .. '%{prj.name}"',
-})
-
-includedirs({
-	"vendor/spdlog/include",
-	"vendor/stb",
-	"%{IncludeDir.GLFW}",
-	"%{IncludeDir.Glad}",
-	"%{IncludeDir.ImGui}",
-	"%{IncludeDir.glm}",
-	"%{IncludeDir.Box2D}",
-	"%{IncludeDir.miniaudio}",
-	"src/",
-})
-
-filter("system:windows")
-    systemversion("latest")
-    defines({
-        "PLATFORM_WINDOWS",
-        "BUILD_DLL",
-        "GLFW_INCLUDE_NONE",
-        "WIN32_LEAN_AND_MEAN",
-    })
-
-    links({
-        "opengl32.lib",
-    })
-
-filter("system:linux")
-    systemversion("latest")
-    defines({
-        "PLATFORM_LINUX",
-        "GLFW_INCLUDE_NONE",
-    })
-
-    links({
-        "GL",
-        "pthread",
-        "X11",
-    })
-
-filter("configurations:Debug")
-defines("DEBUG")
-runtime("Debug")
-symbols("on")
-
-filter("configurations:Release")
-defines("RELEASE")
-runtime("Release")
-optimize("on")
-
-filter("configurations:Dist")
-defines("DIST")
-runtime("Release")
-optimize("on")
+include("Game")
