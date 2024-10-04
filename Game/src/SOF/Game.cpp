@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Game.h"
 #include <string>
-
 namespace SOF
 {
     void SOFGame::OnGameStart()
@@ -54,11 +53,10 @@ namespace SOF
                 m_Scene->ReparentEntity(entityID, floor_entity_id);
             }
         }
-
         // cReating warsay
         m_WarsayID = m_Scene->CreateEntity("WarsayBox");
-
         auto warsay_entity = m_Scene->GetEntity(m_WarsayID);
+        m_player.emplace(m_WarsayID, 3.0f);
         TransformComponent warsay_transform = TransformComponent();
         SpriteComponent warsay_sprite = SpriteComponent(glm::vec4(1.f, 0.f, 0.f, 1.f));
         warsay_sprite.TextureRef = warsay_texture;
@@ -87,7 +85,8 @@ namespace SOF
     {
         SOF_PROFILE_FUNC();
         m_Scene->Begin();
-        HandleMovement();
+        if (m_player && !m_DebugWindow.IsWindowActive()) { m_player->UpdateMovement(m_Scene); }
+        // HandleMovement();
         m_Scene->Update();
         m_Scene->End();
     }
@@ -97,20 +96,8 @@ namespace SOF
         EventDispatcher dispatcher(event);
         dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(SOF::SOFGame::OnKeyPressedEvent));
     }
-    void SOFGame::HandleMovement()
-    {
-        bool any_movement = Input::IsKeyPressed(GLFW_KEY_W) || Input::IsKeyPressed(GLFW_KEY_S)
-                            || Input::IsKeyPressed(GLFW_KEY_A) || Input::IsKeyPressed(GLFW_KEY_D);
-        if (!m_DebugWindow.IsWindowActive() && any_movement) {
-            glm::vec3 velocity = { 0.f, 0.f, 0.f };
-            if (Input::IsKeyPressed(GLFW_KEY_W)) { velocity.y += m_WarsaySpeed; }
-            if (Input::IsKeyPressed(GLFW_KEY_S)) { velocity.y -= m_WarsaySpeed; }
-            if (Input::IsKeyPressed(GLFW_KEY_A)) { velocity.x -= m_WarsaySpeed; }
-            if (Input::IsKeyPressed(GLFW_KEY_D)) { velocity.x += m_WarsaySpeed; }
-            if (glm::length(velocity) > 0.0f) { velocity = glm::normalize(velocity); }
-            m_Scene->GetPhysicsWorld()->SetVelocity(m_Scene->GetEntity(m_WarsayID), velocity, VelocityType::Linear);
-        }
-    }
+
+    void SOFGame::HandleMovement() {}
     bool SOFGame::OnKeyPressedEvent(KeyPressedEvent &event)
     {
         if (m_DebugWindow.IsWindowActive()) { return false; }

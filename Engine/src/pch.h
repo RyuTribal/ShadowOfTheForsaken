@@ -19,7 +19,7 @@
 #include <limits>
 #include <fstream>
 #include <filesystem>
-
+#include <optional>
 #include <string>
 #include <string_view>
 #include <sstream>

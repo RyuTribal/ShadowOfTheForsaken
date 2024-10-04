@@ -2,7 +2,7 @@
 
 #include <Engine/Engine.h>
 #include "Debug/DebugWindow.h"
-
+#include "Player.hpp"
 namespace SOF
 {
     class SOFGame : public Game
@@ -29,5 +29,6 @@ namespace SOF
         ThreadPool m_ThreadPool{};
         DebugWindow m_DebugWindow{};
         float m_WarsaySpeed = 100.f;
+        std::optional<Player> m_player;
     };
 }// namespace SOF

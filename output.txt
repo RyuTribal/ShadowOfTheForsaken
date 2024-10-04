@@ -1,0 +1,341 @@
+#include "pch.h"
+#include <Engine/Engine.h>
+#include <Engine/Core/EntryPoint.h>
+#include "SOF/Game.h"
+
+SOF::Game *SOF::CreateGame(int argc, char **argv)
+{
+    SOF::Window::WindowData window_settings{};
+    window_settings.Title = "Shadow of the Forsaken";
+    window_settings.VSync = false;
+    window_settings.Height = 720;
+    window_settings.Width = 1280;
+    window_settings.Fullscreen = true;
+    window_settings.FullScreenType = SOF::FullscreenType::WINDOWED;
+    return new SOFGame(window_settings);
+}#include "pch.h"
+#include "Player.hpp"
+
+namespace SOF
+{
+    Player::Player(UUID uid, float velo) : m_id{ uid }, m_PlayerController{ std::make_unique<PlayerController>(velo) }
+    {}
+
+    void Player::UpdateMovement(std::shared_ptr<Scene> scene) { m_PlayerController->UpdateMovement(m_id, scene); }
+}// namespace SOF
+#pragma ONCE
+#include "CharactherController.hpp"
+namespace SOF
+{
+    class PlayerController : public CharactherController
+    {
+        public:
+        PlayerController(float m_speed);
+        ~PlayerController() override = default;
+        void UpdateMovement(UUID, std::shared_ptr<Scene> scene) override;
+
+        private:
+        float m_velocity;
+    };
+}// namespace SOF
+#include "pch.h"
+#include "Game.h"
+#include <string>
+namespace SOF
+{
+    void SOFGame::OnGameStart()
+    {
+        m_Scene = std::make_shared<Scene>("Test scene");
+
+        // Load textures
+        std::string warsay_asset_handle = "black_idle";
+        std::string grounds_asset_handle = "grounds";
+        auto warsay_texture_promise = m_ThreadPool.AddTask(AssetManager::Load<Texture>, warsay_asset_handle);
+        auto grounds_texture_promise = m_ThreadPool.AddTask(AssetManager::Load<Texture>, grounds_asset_handle);
+        m_ThreadPool.Await();
+        auto warsay_texture = warsay_texture_promise.get();
+        auto grounds_texture = grounds_texture_promise.get();
+
+        // cReating warsay home
+        int gridWidth = 100;
+        int gridHeight = 100;
+        float spacing = 1.0f;
+
+        UUID floor_entity_id = m_Scene->CreateEntity("Floor");
+
+        for (int x = 0; x < gridWidth; ++x) {
+            for (int y = 0; y < gridHeight; ++y) {
+                UUID entityID = m_Scene->CreateEntity("GridEntity_" + std::to_string(x) + "_" + std::to_string(y));
+                auto entity = m_Scene->GetEntity(entityID);
+                m_WarsayHome.push_back(entityID);
+                TransformComponent transform;
+                transform.Translation = glm::vec3(x * spacing, y * spacing, 0.0f);
+
+                SpriteComponent sprite;
+                sprite.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                sprite.TextureRef = grounds_texture;
+                sprite.SpriteCoordinates = glm::vec2(3.f, 4.f);
+                entity->AddComponent<TransformComponent>(transform);
+                entity->AddComponent<SpriteComponent>(sprite);
+
+                // if (x == gridWidth - 1 && y == gridHeight - 1) {
+                if (x == 70 && y == 70) {
+                    SoundComponent sound_comp;
+                    sound_comp.Loop = true;
+                    sound_comp.AssetHandle = "sound_test";
+                    sound_comp.Type = SoundType::SPATIAL;
+                    entity->AddComponent<SoundComponent>(sound_comp);
+                    // Should not be here, but for testing it works
+                    auto sound_ref = entity->GetComponent<SoundComponent>();
+                    auto transform_ref = entity->GetComponent<TransformComponent>();
+                    sound_ref->InstanceID = SoundEngine::PlayAudio(sound_ref, transform_ref->Translation);
+                }
+                m_Scene->ReparentEntity(entityID, floor_entity_id);
+            }
+        }
+        // cReating warsay
+        m_WarsayID = m_Scene->CreateEntity("WarsayBox");
+        auto warsay_entity = m_Scene->GetEntity(m_WarsayID);
+        m_player = std::move(Player(m_WarsayID, 3.0f));
+        TransformComponent warsay_transform = TransformComponent();
+        SpriteComponent warsay_sprite = SpriteComponent(glm::vec4(1.f, 0.f, 0.f, 1.f));
+        warsay_sprite.TextureRef = warsay_texture;
+        warsay_sprite.SpriteSize = glm::vec2(128.f, 128.f);
+        warsay_sprite.Layer = 1;
+        CameraComponent warsay_camera = CameraComponent(true);
+        warsay_camera.ClipToTransform = true;
+        warsay_camera.CameraRef = Camera::Create((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
+        Rigidbody2DComponent rigid_body{};
+        rigid_body.Type = ColliderType::DYNAMIC;
+        rigid_body.FixedRotation = true;
+        CapsuleCollider2DComponent capsule_collider{};
+        capsule_collider.HalfHeight = warsay_sprite.SpriteSize.y * 0.5f;
+        warsay_entity->AddComponent<TransformComponent>(warsay_transform);
+        warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
+        warsay_entity->AddComponent<CameraComponent>(warsay_camera);
+        warsay_entity->AddComponent<Rigidbody2DComponent>(rigid_body);
+        warsay_entity->AddComponent<CapsuleCollider2DComponent>(capsule_collider);
+
+        m_Scene->GetPhysicsWorld()->SetGravity({ 0.f, 0.f });// We won't really have a gravity in a jrpg like world
+        m_Scene->GetPhysicsWorld()->SetAirFriction(1.f);// Since we don't have a "ground" so to speak
+        m_Scene->SetListenerEntity(m_WarsayID);
+    }
+    void SOFGame::OnGameShutdown() {}
+    void SOFGame::OnGameUpdate(float delta_time)
+    {
+        m_Scene->Begin();
+        m_player.UpdateMovement(m_Scene);
+        // HandleMovement();
+        m_Scene->Update();
+        m_Scene->End();
+    }
+    void SOFGame::OnDebugUpdate() { m_DebugWindow.Render(m_Scene.get()); }
+    void SOFGame::OnGameEvent(Event &event)
+    {
+        EventDispatcher dispatcher(event);
+        dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(SOF::SOFGame::OnKeyPressedEvent));
+    }
+
+    void SOFGame::HandleMovement() {}
+    bool SOFGame::OnKeyPressedEvent(KeyPressedEvent &event)
+    {
+        if (m_DebugWindow.IsWindowActive()) { return false; }
+        return true;
+    }
+}// namespace SOF
+#include "pch.h"
+#include "pch.h"
+namespace SOF
+{
+    PlayerController::PlayerController(float speed) : m_velocity{ speed } {}
+    void PlayerController::UpdateMovement(UUID uid, std::shared_ptr<Scene> scene)
+    {
+        bool any_movement = Input::IsKeyPressed(GLFW_KEY_W) || Input::IsKeyPressed(GLFW_KEY_S)
+                            || Input::IsKeyPressed(GLFW_KEY_A) || Input::IsKeyPressed(GLFW_KEY_D);
+        if (!m_DebugWindow.IsWindowActive() && any_movement) {
+            glm::vec3 velocity = { 0.f, 0.f, 0.f };
+            if (Input::IsKeyPressed(GLFW_KEY_W)) { velocity.y += m_velocity; }
+            if (Input::IsKeyPressed(GLFW_KEY_S)) { velocity.y -= m_velocity; }
+            if (Input::IsKeyPressed(GLFW_KEY_A)) { velocity.x -= m_velocity; }
+            if (Input::IsKeyPressed(GLFW_KEY_D)) { velocity.x += m_velocity; }
+            if (glm::length(velocity) > 0.0f) { velocity = glm::normalize(velocity); }
+            scene->GetPhysicsWorld()->SetVelocity(scene->GetEntity(uid), velocity, VelocityType::Linear);
+        }
+    }
+}// namespace SOF
+#pragma once
+#include "PlayerController.hpp"
+namespace SOF
+{
+
+    class Player
+    {
+        public:
+        Player() = delete;
+        Player(UUID, float);
+        ~Player() = default;
+
+        void UpdateMovement(std::shared_ptr<Scene>);
+
+        private:
+        std::unique_ptr<CharactherController> m_PlayerController;
+        UUID m_id;
+    };
+
+}// namespace SOF
+#pragma once
+
+#include <Engine/Engine.h>
+#include "Debug/DebugWindow.h"
+#include "Player.hpp"
+namespace SOF
+{
+    class SOFGame : public Game
+    {
+        public:
+        SOFGame(Window::WindowData props) : Game(props) {}
+
+        ~SOFGame() {}
+
+        virtual void OnGameStart() override;
+        virtual void OnGameShutdown() override;
+        virtual void OnGameUpdate(float delta_time) override;
+        virtual void OnDebugUpdate() override;
+        virtual void OnGameEvent(Event &event) override;
+
+        void HandleMovement();
+
+        bool OnKeyPressedEvent(KeyPressedEvent &event);
+
+        private:
+        std::shared_ptr<Scene> m_Scene;
+        UUID m_WarsayID;
+        std::vector<UUID> m_WarsayHome{};
+        ThreadPool m_ThreadPool{};
+        DebugWindow m_DebugWindow{};
+        float m_WarsaySpeed = 100.f;
+        std::optional<Player> m_player;
+    };
+}// namespace SOF
+#pragma ONCE
+namespace SOF
+{
+
+    class CharactherController
+    {
+        public:
+        virtual ~CharactherController() = default;
+        virtual void UpdateMovement(UUID, std::shared_ptr<Scene> scene) = 0;
+    };
+
+}// namespace SOF
+#include "pch.h"
+#include <Engine/Engine.h>
+#include "DebugWindow.h"
+#include <imgui.h>
+#include <imgui_internal.h>
+
+namespace SOF
+{
+    DebugWindow::DebugWindow()
+    {
+        m_AssetFilePath[0] = 0;
+        m_AssetHandle[0] = 0;
+        m_DeletedAssetHandle[0] = 0;
+    }
+
+    void DebugWindow::Render(Scene *current_scene)
+    {
+        FrameStats &frame_stats = Game::Get()->GetFrameStats();
+
+
+        m_WindowActive = ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantCaptureMouse;
+
+        ImGui::Begin("Debug");
+        m_WindowActive = ImGui::IsWindowFocused();
+
+        if (ImGui::ColorEdit3("Background color", m_BgColor)) {
+            glm::vec3 color_vec(m_BgColor[0], m_BgColor[1], m_BgColor[2]);
+            Renderer::ChangeBackgroundColor(color_vec);
+        }
+
+        ImGui::Text("Register asset into the asset pack:");
+        ImGui::InputText("File path", m_AssetFilePath, 255);
+        ImGui::InputText("Asset handle##register", m_AssetHandle, 255);
+        if (ImGui::Button("Register asset") && m_AssetHandle[0] != 0 && m_AssetFilePath[0] != 0) {
+            std::string handle = std::string(m_AssetHandle);
+            AssetManager::RegisterAsset(m_AssetFilePath, handle, AssetManager::FileToAssetType(m_AssetFilePath));
+            memset(m_AssetFilePath, 0, sizeof(m_AssetFilePath));
+            memset(m_AssetHandle, 0, sizeof(m_AssetHandle));
+        }
+
+        ImGui::Text("Deregister asset from the asset pack:");
+        ImGui::InputText("Asset handle##deregister", m_DeletedAssetHandle, 255);
+        if (ImGui::Button("Deregister asset") && m_DeletedAssetHandle[0] != 0) {
+            std::string handle = std::string(m_DeletedAssetHandle);
+            AssetManager::DeregisterAsset(handle);
+            memset(m_DeletedAssetHandle, 0, sizeof(m_DeletedAssetHandle));
+        }
+
+        ImGui::Text("Audio settings");
+        float curr_volume = SoundEngine::GetVolume();
+        if (ImGui::SliderFloat("Volume", &curr_volume, 0.0f, 1.f)) { SoundEngine::SetVolume(curr_volume); }
+
+        if (ImGui::Button("Stop all sounds")) { SoundEngine::StopAllAudio(); }
+
+        ImGui::End();
+
+        ImGui::Begin("Stat");
+        ImGui::Text("Scene stats:");
+        ImGui::Text("	- Entity count: %i", current_scene->EntitySize());
+
+        ImGui::Text("Renderer stats:");
+        ImGui::Text("	- FPS: %f", frame_stats.FPS);
+        ImGui::Text("	- Quads drawn: %i", Renderer::GetStats().QuadsDrawn);
+        ImGui::Text("	- Draw calls: %i", Renderer::GetStats().DrawCalls);
+        ImGui::End();
+
+
+        ImGui::Begin("Asset manager");
+        ImGui::Text("Asset count count: %i", AssetManager::GetGlobalHeader().NumAssets);
+        ImGui::Text("Assets:");
+        for (auto &[handle, toc] : AssetManager::GetTOCEntries()) {
+            if (ImGui::TreeNode(handle.c_str())) {
+                std::string uuid = fmt::format("UUID: {}", toc.UUID);
+                std::string length = fmt::format("Length: {}", toc.Length);
+                std::string offset = fmt::format("Offset: {}", toc.Offset);
+                std::string type = fmt::format("Asset Type: {}", AssetTypeToString((AssetType)toc.Type));
+
+                ImGui::Text(uuid.c_str());
+                ImGui::Text(length.c_str());
+                ImGui::Text(offset.c_str());
+                ImGui::Text(type.c_str());
+
+                ImGui::TreePop();
+            }
+        }
+        ImGui::End();
+    }
+
+}// namespace SOF
+#pragma once
+
+
+namespace SOF
+{
+    class DebugWindow
+    {
+        public:
+        DebugWindow();
+        void Render(Scene *current_scene);
+
+        bool IsWindowActive() { return m_WindowActive; }
+
+        private:
+        float m_BgColor[3] = { 0.f, 0.f, 0.f };
+        char m_AssetFilePath[256];
+        char m_AssetHandle[256];
+        char m_DeletedAssetHandle[256];
+        bool m_WindowActive = false;
+    };
+}// namespace SOF
