@@ -85,8 +85,8 @@ namespace SOF
     {
         SOF_PROFILE_FUNC();
         m_Scene->Begin();
-        if (m_player && !m_DebugWindow.IsWindowActive()) { m_player->UpdateMovement(m_Scene); }
-        // HandleMovement();
+        this->HandleMovement();
+
         m_Scene->Update();
         m_Scene->End();
     }
@@ -97,7 +97,10 @@ namespace SOF
         dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(SOF::SOFGame::OnKeyPressedEvent));
     }
 
-    void SOFGame::HandleMovement() {}
+    void SOFGame::HandleMovement()
+    {
+        if (m_player && !m_DebugWindow.IsWindowActive()) { m_player->UpdateMovement(m_Scene); }
+    }
     bool SOFGame::OnKeyPressedEvent(KeyPressedEvent &event)
     {
         if (m_DebugWindow.IsWindowActive()) { return false; }
