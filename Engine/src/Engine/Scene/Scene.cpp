@@ -5,19 +5,31 @@
 #include "Engine/Renderer/Renderer.h"
 #include "Engine/Core/Game.h"
 #include "Engine/Sound/SoundEngine.h"
+#include "Engine/Physics/PhysicsEngine.h"
+#include "Engine/Core/Profiler.h"
 
 namespace SOF
 {
     std::shared_ptr<Scene> Scene::CreateScene(const std::string &name) { return std::make_shared<Scene>(name); }
-    Scene::Scene(const std::string &name) : m_Name(name) {}
+    Scene::Scene(const std::string &name) : m_Name(name)
+    {
+        m_PhysicsWorld = PhysicsEngine::CreateWorld(this);
+        m_ComponentRegistry.RegisterComponentAddedCallback(
+          [this](UUID entity_id, const std::type_index &type_index) { this->OnComponentAdded(entity_id, type_index); });
+        m_ComponentRegistry.RegisterComponentRemovedCallback([this](UUID entity_id, const std::type_index &type_index) {
+            this->OnComponentRemoved(entity_id, type_index);
+        });
+        m_PhysicsWorld->StartSimulation();
+    }
 
-    Scene::~Scene() { DestroyPhysicsWorld(); }
+    Scene::~Scene() {}
 
     UUID Scene::CreateEntity(const std::string &name)
     {
         UUID new_id = UUID();
         m_EntityMap[new_id] = std::make_unique<Entity>(new_id, this);
         m_EntityMap[new_id]->AddComponent<TagComponent>(TagComponent(name));
+        m_EntityMap[new_id]->AddComponent<RelationshipComponent>({});
         return new_id;
     }
 
@@ -25,7 +37,79 @@ namespace SOF
     {
         m_EntityMap[handle] = std::make_unique<Entity>(handle, this);
         m_EntityMap[handle]->AddComponent<TagComponent>(TagComponent(name));
+        m_EntityMap[handle]->AddComponent<RelationshipComponent>({});
         return handle;
+    }
+
+    void Scene::AddChild(UUID parentID, UUID childID)
+    {
+        auto parentRelationship = m_ComponentRegistry.Get<RelationshipComponent>(parentID);
+        auto childRelationship = m_ComponentRegistry.Get<RelationshipComponent>(childID);
+        if (!childRelationship) { return; }
+        if (parentID != 0 && !parentRelationship) { return; }// Not the root node or a valid entity
+
+        // Means that you are trying to detach the child to the root node, aka parentID = 0
+        if (parentRelationship) { parentRelationship->Children.push_back(childID); }
+        childRelationship->ParentID = parentID;
+    }
+
+    void Scene::RemoveEntity(UUID entity_id)
+    {
+        Entity *entity = m_EntityMap[entity_id].get();
+        UUID parent_id = entity->GetComponent<RelationshipComponent>()->ParentID;
+        if (parent_id != 0) {
+            Entity *parent_entity = m_EntityMap[parent_id].get();
+            auto &children_vector = parent_entity->GetComponent<RelationshipComponent>()->Children;
+            for (size_t i = 0; i < children_vector.size(); i++) {
+                if (children_vector[i] == entity_id) {
+                    children_vector.erase(children_vector.begin() + i);
+                    break;
+                }
+            }
+        }
+        auto &children_vector = entity->GetComponent<RelationshipComponent>()->Children;
+        for (size_t i = 0; i < children_vector.size(); i++) { RemoveEntity(children_vector[i]); }
+        m_EntityMap.erase(entity_id);
+    }
+
+    void Scene::ReparentEntity(UUID entity_id, UUID new_parent_id)
+    {
+        Entity *child = m_EntityMap[entity_id].get();
+        Entity *parent = m_EntityMap[new_parent_id].get();
+        if ((new_parent_id != 0 && !parent) || !child) { return; }
+        if (new_parent_id != 0) { parent->GetComponent<RelationshipComponent>()->Children.push_back(entity_id); }
+        child->GetComponent<RelationshipComponent>()->ParentID = new_parent_id;
+    }
+
+    void Scene::UpdateChildTransforms(UUID parent_id)
+    {
+        Entity *parent_entity = m_EntityMap[parent_id].get();
+        auto parent_relationship = parent_entity->GetComponent<RelationshipComponent>();
+        auto parent_transform = parent_entity->GetComponent<TransformComponent>();
+        auto parent_camera = parent_entity->GetComponent<CameraComponent>();
+
+        if (parent_camera && parent_camera->ClipToTransform) {
+            parent_camera->Camera->SetPosition(parent_transform->Translation);
+        }
+
+        for (UUID child_id : parent_relationship->Children) {
+            auto child_transform = m_ComponentRegistry.Get<TransformComponent>(child_id);
+            if (child_transform) {
+                if (parent_transform) {
+                    glm::quat parent_quat = glm::quat(parent_transform->Rotation);
+                    glm::vec3 parent_scale = parent_transform->Scale;
+                    glm::vec3 scaled_local_translation = parent_scale * child_transform->LocalTranslation;
+                    glm::vec3 rotated_translation = parent_quat * scaled_local_translation;
+                    child_transform->Translation = parent_transform->Translation + rotated_translation;
+                    glm::quat child_local_quat = glm::quat(child_transform->LocalRotation);
+                    glm::quat child_world_quat = parent_quat * child_local_quat;
+                    glm::vec3 child_world_euler = glm::eulerAngles(child_world_quat);
+                    child_transform->Rotation = child_world_euler;
+                    child_transform->Scale = parent_scale * child_transform->LocalScale;
+                }
+            }
+            m_Threads.AddTask([this, child_id]() { this->UpdateChildTransforms(child_id); });
+        }
     }
 
     void Scene::Begin()
@@ -42,117 +126,21 @@ namespace SOF
         }
     }
 
-    void Scene::CreatePhysicsWorld()
-    {
-        b2WorldDef world_def = b2DefaultWorldDef();
-        world_def.gravity = b2Vec2(m_Gravity.x, m_Gravity.y);
-        m_PhysicsWorldID = b2CreateWorld(&world_def);
-        SOF_ASSERT(b2World_IsValid(m_PhysicsWorldID), "World failed to create");
-        auto rigid_body_collider = m_ComponentRegistry.GetComponentRegistry<Rigidbody2DComponent>();
-        if (rigid_body_collider) {
-            for (auto &[id, rigidbody] : *rigid_body_collider) {
-                auto &entity = m_EntityMap[id];
-                b2BodyDef bodyDef = b2DefaultBodyDef();
-                switch (rigidbody.Type) {
-                case ColliderType::STATIC:
-                    bodyDef.type = b2_staticBody;
-                    break;
-                case ColliderType::DYNAMIC:
-                    bodyDef.type = b2_dynamicBody;
-                    break;
-                case ColliderType::KINEMATIC:
-                    bodyDef.type = b2_kinematicBody;
-                    break;
-                }
-                bodyDef.fixedRotation = rigidbody.FixedRotation;
-
-                if (entity->HasComponent<TransformComponent>()) {
-                    auto transform = entity->GetComponent<TransformComponent>();
-                    bodyDef.position = b2Vec2(transform->Translation.x, transform->Translation.y);
-                    bodyDef.rotation = b2MakeRot(transform->Rotation.z);
-                } else {
-                    bodyDef.position = { 0.0f, 0.0f };
-                }
-
-                rigidbody.RuntimeBodyID = b2CreateBody(m_PhysicsWorldID, &bodyDef);
-
-                if (entity->HasComponent<BoxCollider2DComponent>()) {
-                    auto boxCollider = entity->GetComponent<BoxCollider2DComponent>();
-                    boxCollider->Shape = b2MakeBox(boxCollider->Size.x * 0.5f, boxCollider->Size.y * 0.5f);
-                    for (int32_t i = 0; i < boxCollider->Shape.count; ++i) {
-                        boxCollider->Shape.vertices[i].x += boxCollider->Offset.x;
-                        boxCollider->Shape.vertices[i].y += boxCollider->Offset.y;
-                    }
-                    b2ShapeDef shapeDef = b2DefaultShapeDef();
-                    shapeDef.density = boxCollider->Density;
-                    shapeDef.friction = boxCollider->Friction;
-                    shapeDef.restitution = boxCollider->Restitution;
-                    boxCollider->RuntimeShapeID =
-                      b2CreatePolygonShape(rigidbody.RuntimeBodyID, &shapeDef, &boxCollider->Shape);
-                }
-
-                if (entity->HasComponent<CircleCollider2DComponent>()) {
-                    auto circleCollider = entity->GetComponent<CircleCollider2DComponent>();
-                    circleCollider->Shape.center = b2Vec2(circleCollider->Offset.x, circleCollider->Offset.y);
-                    circleCollider->Shape.radius = circleCollider->Radius;
-
-                    b2ShapeDef shapeDef = b2DefaultShapeDef();
-                    shapeDef.density = circleCollider->Density;
-                    shapeDef.friction = circleCollider->Friction;
-                    shapeDef.restitution = circleCollider->Restitution;
-
-                    circleCollider->RuntimeShapeID =
-                      b2CreateCircleShape(rigidbody.RuntimeBodyID, &shapeDef, &circleCollider->Shape);
-                }
-
-                if (entity->HasComponent<CapsuleCollider2DComponent>()) {
-                    auto capsuleCollider = entity->GetComponent<CapsuleCollider2DComponent>();
-                    float halfHeight = capsuleCollider->Height * 0.5f;
-
-                    // Define the two endpoints of the capsule along the y-axis (vertical capsule)
-                    b2Vec2 point1 = { capsuleCollider->Offset.x, capsuleCollider->Offset.y - halfHeight };
-                    b2Vec2 point2 = { capsuleCollider->Offset.x, capsuleCollider->Offset.y + halfHeight };
-
-                    capsuleCollider->Shape.center1 = point1;
-                    capsuleCollider->Shape.center2 = point2;
-                    capsuleCollider->Shape.radius = capsuleCollider->Radius;
-
-                    b2ShapeDef shapeDef = b2DefaultShapeDef();
-                    shapeDef.density = capsuleCollider->Density;
-                    shapeDef.friction = capsuleCollider->Friction;
-                    shapeDef.restitution = capsuleCollider->Restitution;
-                    capsuleCollider->RuntimeShapeID =
-                      b2CreateCapsuleShape(rigidbody.RuntimeBodyID, &shapeDef, &capsuleCollider->Shape);
-                }
-            }
-        }
-    }
-
-    void Scene::DestroyPhysicsWorld() { b2DestroyWorld(m_PhysicsWorldID); }
-
-    void Scene::SetGravity(const glm::vec2 &gravity)
-    {
-        m_Gravity = gravity;
-        b2World_SetGravity(m_PhysicsWorldID, { m_Gravity.x, m_Gravity.y });
-    }
-
     void Scene::Update()
     {
+        SOF_PROFILE_FUNC("Scene update");
         // Run physics once
-        b2World_Step(m_PhysicsWorldID, m_PhysicsTimeStep, m_PhysicsSubStep);
-        // Update all transforms
-        auto rigid_body_collider = m_ComponentRegistry.GetComponentRegistry<Rigidbody2DComponent>();
-        for (auto [id, rigid_body] : *rigid_body_collider) {
-            auto &entity = m_EntityMap[id];
-            if (entity->HasComponent<TransformComponent>()) {
-                auto transform = entity->GetComponent<TransformComponent>();
-                b2Vec2 position = b2Body_GetPosition(rigid_body.RuntimeBodyID);
-                b2Rot rotation = b2Body_GetRotation(rigid_body.RuntimeBodyID);
-                transform->Translation = { position.x, position.y, transform->Translation.z };
-                transform->Rotation.z = b2Rot_GetAngle(rotation);
+        m_PhysicsWorld->Step();
+
+        // Update relationship transforms
+        auto relationship_registry = m_ComponentRegistry.GetComponentRegistry<RelationshipComponent>();
+        if (relationship_registry) {
+            for (auto &[id, relationship] : *relationship_registry) {
+                if (relationship.ParentID == 0) { UpdateChildTransforms(id); }
             }
         }
 
+        m_Threads.Await();
 
         // Draw all entities
         auto sprite_registry = m_ComponentRegistry.GetComponentRegistry<SpriteComponent>();
@@ -195,6 +183,30 @@ namespace SOF
 
 
     void Scene::End() {}
+
+    void Scene::OnComponentAdded(UUID entity_id, const std::type_index &type_index)
+    {
+        if (type_index == typeid(Rigidbody2DComponent)) {
+            m_PhysicsWorld->AddBody(m_EntityMap[entity_id].get());
+        } else if (type_index == typeid(BoxCollider2DComponent) || type_index == typeid(CircleCollider2DComponent)
+                   || type_index == typeid(CapsuleCollider2DComponent)) {
+            if (m_EntityMap[entity_id].get()->HasComponent<Rigidbody2DComponent>()) {
+                m_PhysicsWorld->AddPolygon(m_EntityMap[entity_id].get());
+            }
+        }
+    }
+
+    void Scene::OnComponentRemoved(UUID entity_id, const std::type_index &type_index)
+    {
+        if (type_index == typeid(Rigidbody2DComponent)) {
+            m_PhysicsWorld->RemoveBody(m_EntityMap[entity_id].get());
+        } else if (type_index == typeid(BoxCollider2DComponent) || type_index == typeid(CircleCollider2DComponent)
+                   || type_index == typeid(CapsuleCollider2DComponent)) {
+            if (m_EntityMap[entity_id].get()->HasComponent<Rigidbody2DComponent>()) {
+                m_PhysicsWorld->RemovePolygon(m_EntityMap[entity_id].get());
+            }
+        }
+    }
 
     void Scene::DestroyEntity(UUID handle)
     {

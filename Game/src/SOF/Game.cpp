@@ -22,6 +22,8 @@ namespace SOF
         int gridHeight = 100;
         float spacing = 1.0f;
 
+        UUID floor_entity_id = m_Scene->CreateEntity("Floor");
+
         for (int x = 0; x < gridWidth; ++x) {
             for (int y = 0; y < gridHeight; ++y) {
                 UUID entityID = m_Scene->CreateEntity("GridEntity_" + std::to_string(x) + "_" + std::to_string(y));
@@ -49,6 +51,7 @@ namespace SOF
                     auto transform_ref = entity->GetComponent<TransformComponent>();
                     sound_ref->InstanceID = SoundEngine::PlayAudio(sound_ref, transform_ref->Translation);
                 }
+                m_Scene->ReparentEntity(entityID, floor_entity_id);
             }
         }
 
@@ -62,26 +65,28 @@ namespace SOF
         warsay_sprite.SpriteSize = glm::vec2(128.f, 128.f);
         warsay_sprite.Layer = 1;
         CameraComponent warsay_camera = CameraComponent(true);
+        warsay_camera.ClipToTransform = true;
         warsay_camera.Camera = Camera::Create((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
         Rigidbody2DComponent rigid_body{};
-        rigid_body.Type = ColliderType::DYNAMIC;// Currently just falls so keep this commented
+        rigid_body.Type = ColliderType::DYNAMIC;
+        rigid_body.FixedRotation = true;
         CapsuleCollider2DComponent capsule_collider{};
-        capsule_collider.Height = warsay_sprite.SpriteSize.y;
+        capsule_collider.HalfHeight = warsay_sprite.SpriteSize.y * 0.5f;
         warsay_entity->AddComponent<TransformComponent>(warsay_transform);
         warsay_entity->AddComponent<SpriteComponent>(warsay_sprite);
         warsay_entity->AddComponent<CameraComponent>(warsay_camera);
         warsay_entity->AddComponent<Rigidbody2DComponent>(rigid_body);
         warsay_entity->AddComponent<CapsuleCollider2DComponent>(capsule_collider);
 
-        m_Scene->CreatePhysicsWorld();
-
-        m_Scene->SetGravity({ 0.f, 0.f });// We won't really have a gravity in a jrpg like world
+        m_Scene->GetPhysicsWorld()->SetGravity({ 0.f, 0.f });// We won't really have a gravity in a jrpg like world
+        m_Scene->GetPhysicsWorld()->SetAirFriction(1.f);// Since we don't have a "ground" so to speak
         m_Scene->SetListenerEntity(m_WarsayID);
     }
     void SOFGame::OnGameShutdown() {}
     void SOFGame::OnGameUpdate(float delta_time)
     {
         m_Scene->Begin();
+        HandleMovement();
         m_Scene->Update();
         m_Scene->End();
     }
@@ -91,5 +96,23 @@ namespace SOF
         EventDispatcher dispatcher(event);
         dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(SOF::SOFGame::OnKeyPressedEvent));
     }
-    bool SOFGame::OnKeyPressedEvent(KeyPressedEvent &event) { return false; }
+    void SOFGame::HandleMovement()
+    {
+        bool any_movement = Input::IsKeyPressed(GLFW_KEY_W) || Input::IsKeyPressed(GLFW_KEY_S)
+                            || Input::IsKeyPressed(GLFW_KEY_A) || Input::IsKeyPressed(GLFW_KEY_D);
+        if (!m_DebugWindow.IsWindowActive() && any_movement) {
+            glm::vec3 velocity = { 0.f, 0.f, 0.f };
+            if (Input::IsKeyPressed(GLFW_KEY_W)) { velocity.y += m_WarsaySpeed; }
+            if (Input::IsKeyPressed(GLFW_KEY_S)) { velocity.y -= m_WarsaySpeed; }
+            if (Input::IsKeyPressed(GLFW_KEY_A)) { velocity.x -= m_WarsaySpeed; }
+            if (Input::IsKeyPressed(GLFW_KEY_D)) { velocity.x += m_WarsaySpeed; }
+            if (glm::length(velocity) > 0.0f) { velocity = glm::normalize(velocity); }
+            m_Scene->GetPhysicsWorld()->SetVelocity(m_Scene->GetEntity(m_WarsayID), velocity, VelocityType::Linear);
+        }
+    }
+    bool SOFGame::OnKeyPressedEvent(KeyPressedEvent &event)
+    {
+        if (m_DebugWindow.IsWindowActive()) { return false; }
+        return true;
+    }
 }// namespace SOF

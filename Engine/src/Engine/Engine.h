@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/Core/Game.h"
+#include "Engine/Core/Input.h"
 #include "Engine/Core/Log.h"
 #include "Engine/Core/Thread.h"
 #include "Engine/Core/ThreadPool.h"

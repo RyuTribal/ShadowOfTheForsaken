@@ -28,11 +28,24 @@ namespace SOF
         TagComponent(const std::string &new_tag) : Tag(new_tag) {}
     };
 
+    struct RelationshipComponent
+    {
+        UUID ParentID = 0;// 0 means that this was not a generated id, but a default one
+        std::vector<UUID> Children;
+
+        RelationshipComponent() = default;
+        RelationshipComponent(const RelationshipComponent &) = default;
+    };
+
     struct TransformComponent
     {
         glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
         glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
         glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
+
+        glm::vec3 LocalTranslation = { 0.0f, 0.0f, 0.0f };
+        glm::vec3 LocalRotation = { 0.0f, 0.0f, 0.0f };
+        glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };
 
         TransformComponent() = default;
         TransformComponent(const TransformComponent &) = default;
@@ -70,6 +83,7 @@ namespace SOF
     {
         std::shared_ptr<Camera> Camera = nullptr;
         bool IsActive = false;
+        bool ClipToTransform = false;// Uses the transforms positioning
         CameraComponent() = default;
         CameraComponent(const CameraComponent &) = default;
         CameraComponent(bool is_active) : IsActive(is_active) {}
@@ -79,8 +93,7 @@ namespace SOF
     {
         ColliderType Type = ColliderType::STATIC;
         bool FixedRotation = false;
-        b2ShapeId ShapeID;
-        b2BodyId RuntimeBodyID;
+        bool Dirty = false;// Use this flag to indicate that a transform was changed outside of physics simulation
 
         Rigidbody2DComponent() = default;
         Rigidbody2DComponent(const Rigidbody2DComponent &) = default;
@@ -89,13 +102,11 @@ namespace SOF
     struct BoxCollider2DComponent
     {
         glm::vec2 Offset = { 0.0f, 0.0f };
-        glm::vec2 Size = { 0.5f, 0.5f };
+        glm::vec2 HalfSize = { 0.5f, 0.5f };
         float Density = 1.0f;
         float Friction = 0.5f;
         float Restitution = 0.0f;
         float RestitutionThreshold = 0.5f;
-        b2ShapeId RuntimeShapeID;
-        b2Polygon Shape;
 
 
         BoxCollider2DComponent() = default;
@@ -106,13 +117,11 @@ namespace SOF
     {
         glm::vec2 Offset = { 0.0f, 0.0f };
         float Radius = 0.5f;
-        float Height = 1.0f;
+        float HalfHeight = 1.0f;
         float Density = 1.0f;
         float Friction = 0.5f;
         float Restitution = 0.0f;
         float RestitutionThreshold = 0.5f;
-        b2ShapeId RuntimeShapeID;
-        b2Capsule Shape;
 
         CapsuleCollider2DComponent() = default;
         CapsuleCollider2DComponent(const CapsuleCollider2DComponent &) = default;
@@ -126,8 +135,6 @@ namespace SOF
         float Friction = 0.5f;
         float Restitution = 0.0f;
         float RestitutionThreshold = 0.5f;
-        b2ShapeId RuntimeShapeID;
-        b2Circle Shape;
 
         CircleCollider2DComponent() = default;
         CircleCollider2DComponent(const CircleCollider2DComponent &) = default;
@@ -138,6 +145,7 @@ namespace SOF
         std::string AssetHandle = "";
         UUID InstanceID;
         bool Loop = false;
+        float Volume = 1.f;
         SoundType Type = SoundType::DEFAULT;
 
         SoundComponent() = default;

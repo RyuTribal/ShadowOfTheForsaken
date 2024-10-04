@@ -8,7 +8,8 @@
 
 namespace SOF
 {
-
+    using ComponentAddedCallback = std::function<void(UUID entityId, const std::type_index &type_index)>;
+    using ComponentRemovedCallback = std::function<void(UUID entityId, const std::type_index &type_index)>;
     class IComponentContainer
     {
         public:
@@ -43,6 +44,12 @@ namespace SOF
     class Registry
     {
         public:
+        void RegisterComponentAddedCallback(const ComponentAddedCallback &callback) { m_AddedCallback = callback; }
+        void RegisterComponentRemovedCallback(const ComponentRemovedCallback &callback)
+        {
+            m_RemovedCallback = callback;
+        }
+
         template<typename T> void Add(UUID entityId, T component)
         {
             const std::type_index typeIndex = std::type_index(typeid(T));
@@ -51,6 +58,8 @@ namespace SOF
             }
             std::static_pointer_cast<ComponentContainer<T>>(m_Components[typeIndex])
               ->Add(entityId, std::move(component));
+
+            if (m_AddedCallback) { m_AddedCallback(entityId, typeIndex); }
         }
 
         template<typename T> T *Get(UUID entityId)
@@ -69,12 +78,16 @@ namespace SOF
             auto it = m_Components.find(typeIndex);
             if (it != m_Components.end()) {
                 std::static_pointer_cast<ComponentContainer<T>>(it->second)->Remove(entityId);
+                if (m_RemovedCallback) { m_RemovedCallback(entityId, typeIndex); }
             }
         }
 
         void RemoveAllFromEntity(UUID entityId)
         {
-            for (auto &[typeIndex, container] : m_Components) { container->Remove(entityId); }
+            for (auto &[typeIndex, container] : m_Components) {
+                container->Remove(entityId);
+                if (m_RemovedCallback) { m_RemovedCallback(entityId, typeIndex); }
+            }
         }
 
         template<typename T> std::unordered_map<UUID, T> *GetComponentRegistry()
@@ -87,5 +100,7 @@ namespace SOF
 
         private:
         std::unordered_map<std::type_index, std::shared_ptr<IComponentContainer>> m_Components;
+        ComponentAddedCallback m_AddedCallback;
+        ComponentRemovedCallback m_RemovedCallback;
     };
 }// namespace SOF

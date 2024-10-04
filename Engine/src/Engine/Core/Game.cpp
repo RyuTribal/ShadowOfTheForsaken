@@ -9,6 +9,8 @@
 #include "Engine/Scene/Components.h"
 #include "Engine/Scene/Entity.h"
 #include "Engine/Sound/SoundEngine.h"
+#include "Engine/Physics/PhysicsEngine.h"
+#include "Engine/Core/Profiler.h"
 
 
 namespace SOF
@@ -31,6 +33,7 @@ namespace SOF
         m_RendererThread.WaitForAllTasks();
         AssetManager::Init("Assets.sofp");
         SoundEngine::Init();
+        PhysicsEngine::Init();
     }
 
     void Game::Start()
@@ -67,6 +70,8 @@ namespace SOF
             m_Window.OnUpdate();
             m_RendererThread.Run(&Renderer::SwapBuffers);
             m_RendererThread.SwapBuffers();
+
+            SOF_PROFILE_MARK_FRAME;
         }
     }
 
@@ -81,6 +86,7 @@ namespace SOF
 #endif
         SoundEngine::Shutdown();
         AssetManager::Shutdown();
+        PhysicsEngine::Shutdown();
         return true;
     }
 

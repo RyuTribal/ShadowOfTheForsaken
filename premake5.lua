@@ -48,12 +48,14 @@ IncludeDir["ImGui"] = "%{wks.location}/Engine/vendor/imgui"
 IncludeDir["glm"] = "%{wks.location}/Engine/vendor/glm"
 IncludeDir["Box2D"] = "%{wks.location}/Engine/vendor/box2d/include"
 IncludeDir["miniaudio"] = "%{wks.location}/Engine/vendor/miniaudio/include"
+IncludeDir["Tracy"] = "%{wks.location}/Engine/vendor/tracy/public"
 
 group("Dependencies")
 include("Engine/vendor/GLFW")
 include("Engine/vendor/Glad")
 include("Engine/vendor/imgui")
 include("Engine/vendor/box2d")
+include("Engine/vendor/tracy")
 
 group("Tools")
 include("Engine")

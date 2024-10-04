@@ -50,9 +50,12 @@ namespace SOF
 
               {
                   std::lock_guard<std::mutex> lock(instance->m_SoundMutex);
-                  instance->m_ActiveSounds[audio_instance_id] = {
-                      decoder, audio_asset, sound_comp->Loop, sound_comp->Type == SoundType::SPATIAL, position
-                  };
+                  instance->m_ActiveSounds[audio_instance_id] = { decoder,
+                      audio_asset,
+                      sound_comp->Loop,
+                      sound_comp->Type == SoundType::SPATIAL,
+                      sound_comp->Volume,
+                      position };
               }
           },
           position);
@@ -170,15 +173,18 @@ namespace SOF
                 for (ma_uint64 frameIndex = 0; frameIndex < audio_instance.FramesRead; ++frameIndex) {
                     for (ma_uint32 channelIndex = 0; channelIndex < pDevice->playback.channels; ++channelIndex) {
                         float sample = tempBuffer[frameIndex * pDevice->playback.channels + channelIndex];
-                        glm::vec3 direction = audio_instance.Position - instance->m_FocalPoint;
-                        float distance = glm::length(direction);
-                        float attenuation = CalculateAttenuation(distance,
-                          instance->m_Attenuation,
-                          instance->m_AttenuationSettings.RolloffFactor,
-                          instance->m_AttenuationSettings.ReferenceDistance,
-                          instance->m_AttenuationSettings.MaxDistance);
-                        float pan = CalculatePan(audio_instance.Position, instance->m_FocalPoint);
-                        float finalVolume = attenuation * instance->m_GlobalVolume;
+                        float attenuation = 1.f;
+                        if (audio_instance.Is3D) {
+                            glm::vec3 direction = audio_instance.Position - instance->m_FocalPoint;
+                            float distance = glm::length(direction);
+                            attenuation = CalculateAttenuation(distance,
+                              instance->m_Attenuation,
+                              instance->m_AttenuationSettings.RolloffFactor,
+                              instance->m_AttenuationSettings.ReferenceDistance,
+                              instance->m_AttenuationSettings.MaxDistance);
+                            float pan = CalculatePan(audio_instance.Position, instance->m_FocalPoint);
+                        }
+                        float finalVolume = attenuation * audio_instance.Volume * instance->m_GlobalVolume;
                         pOutputF32[frameIndex * pDevice->playback.channels + channelIndex] += sample * finalVolume;
                     }
                 }

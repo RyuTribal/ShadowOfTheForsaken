@@ -18,6 +18,8 @@ namespace SOF
         virtual void OnDebugUpdate() override;
         virtual void OnGameEvent(Event &event) override;
 
+        void HandleMovement();
+
         bool OnKeyPressedEvent(KeyPressedEvent &event);
 
         private:
@@ -26,5 +28,6 @@ namespace SOF
         std::vector<UUID> m_WarsayHome{};
         ThreadPool m_ThreadPool{};
         DebugWindow m_DebugWindow{};
+        float m_WarsaySpeed = 100.f;
     };
 }// namespace SOF

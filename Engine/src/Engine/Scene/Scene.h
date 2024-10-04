@@ -1,6 +1,7 @@
 #pragma once
 #include "Registry.h"
-#include "box2d/box2d.h"
+#include "Engine/Physics/PhysicsWorld.h"
+#include "Engine/Core/ThreadPool.h"
 
 namespace SOF
 {
@@ -10,7 +11,6 @@ namespace SOF
     class Scene
     {
         public:
-        static constexpr glm::vec2 DefaultGravity = { 0.f, -9.82f };
         static std::shared_ptr<Scene> CreateScene(const std::string &name);
 
         Scene(const std::string &name);
@@ -20,15 +20,19 @@ namespace SOF
 
         UUID CreateEntity(const std::string &name);
         UUID CreateEntity(const std::string &name, UUID handle);
+        void AddChild(UUID parentID, UUID childID);
+        void RemoveEntity(UUID entity_id);
+        void ReparentEntity(UUID entity_id, UUID new_parent_id);
+        void UpdateChildTransforms(UUID parent_id);
 
         void Begin();
-        void CreatePhysicsWorld();
-        void DestroyPhysicsWorld();
-        void SetGravity(const glm::vec2 &gravity);
-
         void Update();
-
         void End();
+
+        void OnComponentAdded(UUID entity_id, const std::type_index &type_index);
+        void OnComponentRemoved(UUID entity_id, const std::type_index &type_index);
+
+        PhysicsWorld *GetPhysicsWorld() { return m_PhysicsWorld.get(); }
 
         template<typename T> std::unordered_map<UUID, T> GetAllEntitiesByType() { return m_ComponentRegistry.Get<T>(); }
 
@@ -51,13 +55,10 @@ namespace SOF
         std::unordered_map<UUID, std::unique_ptr<Entity>> m_EntityMap;
         std::string m_Name = "Untitled Level";
 
-        // Physics stuff, mnight be good to move this into it's own thing
-        b2WorldId m_PhysicsWorldID;
-        glm::vec2 m_Gravity = DefaultGravity;
-        float m_PhysicsTimeStep = 1.0f / 60.0f;
-        int8_t m_PhysicsSubStep = 4;
+        std::shared_ptr<PhysicsWorld> m_PhysicsWorld;
 
         // Some sound settings
         UUID m_Listener;
+        ThreadPool m_Threads{ 10 };
     };
 }// namespace SOF

@@ -27,7 +27,8 @@ links({
 	"GLFW",
 	"Glad",
 	"ImGui",
-	"Box2D"
+	"Box2D",
+	"Tracy"
 })
 
 defines({
@@ -44,6 +45,7 @@ includedirs({
 	"%{IncludeDir.glm}",
 	"%{IncludeDir.Box2D}",
 	"%{IncludeDir.miniaudio}",
+	"%{IncludeDir.Tracy}",
 	"src"
 })
 

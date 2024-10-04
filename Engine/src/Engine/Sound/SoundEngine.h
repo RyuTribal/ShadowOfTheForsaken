@@ -42,6 +42,7 @@ namespace SOF
             ma_uint64 FramesRead = 0;
             bool ShouldBeDeleted = false;
             bool Is3D = false;
+            float Volume;
             glm::vec3 Position = { 0.f, 0.f, 0.f };
 
 
@@ -50,8 +51,10 @@ namespace SOF
               std::shared_ptr<Audio> audio_asset,
               bool loop,
               bool is_3d,
+              float volume,
               const glm::vec3 &position)
-              : Decoder(decoder), AudioAsset(audio_asset), Loop(loop), Is3D(is_3d), Position(position){};
+              : Decoder(decoder), AudioAsset(audio_asset), Loop(loop), Is3D(is_3d), Volume(volume),
+                Position(position){};
         };
         SoundEngine();
         ~SoundEngine();
