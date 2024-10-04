@@ -128,7 +128,7 @@ namespace SOF
 
     void Scene::Update()
     {
-        SOF_PROFILE_FUNC("Scene update");
+        SOF_PROFILE_FUNC();
         // Run physics once
         m_PhysicsWorld->Step();
 
