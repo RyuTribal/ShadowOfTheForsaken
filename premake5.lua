@@ -51,7 +51,6 @@ IncludeDir["miniaudio"] = "%{wks.location}/Engine/vendor/miniaudio/include"
 IncludeDir["Tracy"] = "%{wks.location}/Engine/vendor/tracy/public"
 
 group("Dependencies")
-include("Engine/vendor/tracy")
 include("Engine/vendor/GLFW")
 include("Engine/vendor/Glad")
 include("Engine/vendor/imgui")

@@ -43,7 +43,6 @@ namespace SOF
         m_Window.SetFullscreen(m_Window.GetFullScreen(), m_Window.GetFullScreenType());
         auto last_frame = std::chrono::high_resolution_clock::now();
         while (m_Running) {
-
             auto newTime = std::chrono::high_resolution_clock::now();
             float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - last_frame).count();
             last_frame = newTime;

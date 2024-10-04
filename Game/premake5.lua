@@ -40,12 +40,12 @@ links({
 	"Glad",
 	"Box2D",
 	"ImGui",
-    "Tracy"
 })
 
 defines({
 	"_CRT_SECURE_NO_WARNINGS",
 	'ROOT_PATH="' .. rootPath .. "/" .. '%{prj.name}"',
+	
 })
 
 filter("system:windows")

@@ -17,6 +17,7 @@ files({
 	"src/**.c",
 	"vendor/glm/glm/**.hpp",
 	"vendor/glm/glm/**.inl",
+	"%{wks.location}/Engine/vendor/tracy/public/TracyClient.cpp",
 })
 
 libdirs({
@@ -28,12 +29,13 @@ links({
 	"Glad",
 	"ImGui",
 	"Box2D",
-	"Tracy"
 })
 
 defines({
 	"_CRT_SECURE_NO_WARNINGS",
 	'ROOT_PATH="' .. rootPath .. "/" .. '%{prj.name}"',
+	"TRACY_ENABLE",
+	"TRACY_ON_DEMAND"
 })
 
 includedirs({

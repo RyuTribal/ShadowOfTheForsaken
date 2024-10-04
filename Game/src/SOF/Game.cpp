@@ -85,6 +85,7 @@ namespace SOF
     void SOFGame::OnGameShutdown() {}
     void SOFGame::OnGameUpdate(float delta_time)
     {
+        SOF_PROFILE_FUNC();
         m_Scene->Begin();
         HandleMovement();
         m_Scene->Update();

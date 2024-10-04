@@ -9,23 +9,20 @@ project "Tracy"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+	flags {"NoPCH"}
+
 	files
 	{
 		"public/TracyClient.cpp",
 	}
 
-	includedirs { "public/" }
+	includedirs { "public" }
 
 	filter "system:windows"
 		systemversion "latest"
 
 	filter "system:linux"
-		links({
-			"pthread",
-			"X11",
-			"m", "dl",
-			"c",
-		})
+		systemversion "latest"
 
 	filter "configurations:Debug"
 		runtime "Debug"
@@ -37,17 +34,7 @@ project "Tracy"
 		optimize "On"
 		conformancemode "On"
 
-		defines {
-			"TRACY_ENABLE",
-			"TRACY_ON_DEMAND"
-		}
-
 	filter "configurations:Dist"
 		runtime "Release"
 		optimize "Full"
 		conformancemode "On"
-
-		defines {
-			"TRACY_ENABLE",
-			"TRACY_ON_DEMAND"
-		}

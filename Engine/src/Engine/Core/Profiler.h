@@ -1,12 +1,14 @@
 #pragma once
 
-#define SOF_ENABLE_PROFILING !DIST
+#ifdef DEBUG
+#define SOF_ENABLE_PROFILING
+#endif
 
-#if SOF_ENABLE_PROFILING
+#ifdef SOF_ENABLE_PROFILING
 #include <tracy/Tracy.hpp>
 #endif
 
-#if SOF_ENABLE_PROFILING
+#ifdef SOF_ENABLE_PROFILING
 #define SOF_PROFILE_MARK_FRAME FrameMark;
 // NOTE: Use SOF_PROFILE_FUNC ONLY at the top of a function
 //				Use SOF_PROFILE_SCOPE / SOF_PROFILE_SCOPE_DYNAMIC for an inner scope
