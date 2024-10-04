@@ -66,7 +66,7 @@ namespace SOF
     struct SpriteComponent
     {
         glm::vec4 Color = { 1.f, 1.f, 1.f, 1.f };
-        std::shared_ptr<Texture> Texture = nullptr;
+        std::shared_ptr<Texture> TextureRef = nullptr;
         glm::vec2 SpriteCoordinates = { 0.f, 0.f };
         glm::vec2 SpriteSize = { 32.f, 32.f };
         int32_t Layer = 0;
@@ -81,7 +81,7 @@ namespace SOF
 
     struct CameraComponent
     {
-        std::shared_ptr<Camera> Camera = nullptr;
+        std::shared_ptr<Camera> CameraRef = nullptr;
         bool IsActive = false;
         bool ClipToTransform = false;// Uses the transforms positioning
         CameraComponent() = default;

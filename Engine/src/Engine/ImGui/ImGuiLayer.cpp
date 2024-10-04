@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Engine/imGui/ImGuiLayer.h"
+#include "Engine/ImGui/ImGuiLayer.h"
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>

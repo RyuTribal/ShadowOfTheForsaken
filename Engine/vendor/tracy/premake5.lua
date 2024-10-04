@@ -11,21 +11,7 @@ project "Tracy"
 
 	files
 	{
-		"public/client/**.h",
-		"public/client/**.hpp",
-		"public/client/**.cpp",
-
-		"public/common/**.h",
-		"public/common/**.hpp",
-		"public/common/**.cpp",
-
-		"public/tracy/**.h",
-		"public/tracy/**.hpp",
-		"public/tracy/**.cpp",
-
-		"public/libbacktrace/alloc.cpp",
-		"public/libbacktrace/sort.cpp",
-		"public/libbacktrace/state.cpp",
+		"public/TracyClient.cpp",
 	}
 
 	includedirs { "public/" }
@@ -34,14 +20,12 @@ project "Tracy"
 		systemversion "latest"
 
 	filter "system:linux"
-		files {
-			"public/libbacktrace/posix.cpp",
-			"public/libbacktrace/mmapio.cpp",
-			"public/libbacktrace/macho.cpp",
-			"public/libbacktrace/fileline.cpp",
-			"public/libbacktrace/elf.cpp",
-			"public/libbacktrace/dwarf.cpp",
-		}
+		links({
+			"pthread",
+			"X11",
+			"m", "dl",
+			"c",
+		})
 
 	filter "configurations:Debug"
 		runtime "Debug"

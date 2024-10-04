@@ -25,6 +25,7 @@ includedirs({
 	"%{IncludeDir.glm}",
 	"%{IncludeDir.Box2D}",
 	"%{IncludeDir.miniaudio}",
+    "%{IncludeDir.Tracy}",
 	"%{wks.location}/Engine/src",
 	"src",
 })
@@ -35,7 +36,11 @@ libdirs({
 
 links({
 	"Engine",
-	"ImGui"
+    "GLFW",
+	"Glad",
+	"Box2D",
+	"ImGui",
+    "Tracy"
 })
 
 defines({

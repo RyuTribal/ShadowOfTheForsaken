@@ -21,6 +21,7 @@ namespace SOF
     Game::Game(const Window::WindowData &props) : m_RendererThread("Render Thread"), m_Window(props)
     {
         SOF_ASSERT(!s_Instance, "Can only have one instance of a game!");
+        SOF_INFO("Game instance", "Game starting...");
         m_RendererThread.SetShutdownTask(&Renderer::Shutdown);
         m_ThreadData.MainThread = std::this_thread::get_id();
         s_Instance = this;
@@ -31,9 +32,9 @@ namespace SOF
         ImGuiLayer::Init();
 #endif
         m_RendererThread.WaitForAllTasks();
-        AssetManager::Init("Assets.sofp");
         SoundEngine::Init();
         PhysicsEngine::Init();
+        AssetManager::Init("Assets.sofp");
     }
 
     void Game::Start()

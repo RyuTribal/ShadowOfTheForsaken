@@ -37,7 +37,7 @@ cat > "$PROJECT_ROOT/.vscode/launch.json" << EOF
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "\${workspaceFolder}/bin/Debug-linux-x86_64/Game/Game",
+            "program": "\${workspaceFolder}/Game/bin/Debug-linux-x86_64/Game/Game",
             "args": [],
             "stopAtEntry": false,
             "cwd": "\${workspaceFolder}",

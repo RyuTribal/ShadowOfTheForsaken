@@ -45,6 +45,7 @@
 #include "Engine/Core/UUID.h"
 #include "Engine/Core/Log.h"
 #include "Engine/Core/Base.h"
+#include "Engine/Core/Profiler.h"
 #include <spdlog/fmt/fmt.h>
 
 #ifdef PLATFORM_WINDOWS
