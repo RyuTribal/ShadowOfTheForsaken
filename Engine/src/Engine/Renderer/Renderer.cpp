@@ -110,7 +110,7 @@ namespace SOF
         auto read_buffer = Game::Get()->GetRenderingThread().GetReadBuffer();
         if (!read_buffer->ValidFrame) { return; }
 
-        for (const auto &[layer, textureBatchMap] : read_buffer->BatchData) {
+        for (const auto &[layer, textureBatchMap] : read_buffer->CurrentBatch) {
             for (const auto &[texture, buffers] : textureBatchMap) {
                 if (buffers.QuadBuffer.size() > 0) {
                     auto vertex_array = VertexArray::Create();
@@ -173,40 +173,40 @@ namespace SOF
         glm::vec2 texture_size(texture->GetWidth(), texture->GetHeight());
         glm::vec2 normalized_sprite_size = sprite_size / texture_size;
 
-        write_buffer->BatchData[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(0.5f, 0.5f, 0.0f, 1.f),
+        write_buffer->CurrentBatch[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(0.5f, 0.5f, 0.0f, 1.f),
           color,
           glm::vec2(1.0f, 1.0f),
           sprite_coords,
           normalized_sprite_size });
-        write_buffer->BatchData[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(0.5f, -0.5f, 0.0f, 1.f),
+        write_buffer->CurrentBatch[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(0.5f, -0.5f, 0.0f, 1.f),
           color,
           glm::vec2(1.0f, 0.0f),
           sprite_coords,
           normalized_sprite_size });
-        write_buffer->BatchData[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(-0.5f, -0.5f, 0.0f, 1.f),
+        write_buffer->CurrentBatch[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(-0.5f, -0.5f, 0.0f, 1.f),
           color,
           glm::vec2(0.0f, 0.0f),
           sprite_coords,
           normalized_sprite_size });
-        write_buffer->BatchData[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(-0.5f, 0.5f, 0.0f, 1.f),
+        write_buffer->CurrentBatch[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(-0.5f, 0.5f, 0.0f, 1.f),
           color,
           glm::vec2(0.0f, 1.0f),
           sprite_coords,
           normalized_sprite_size });
 
-        write_buffer->BatchData[layer][texture].QuadIndices.push_back(write_buffer->BatchData[layer][texture].IndexPtr);
-        write_buffer->BatchData[layer][texture].QuadIndices.push_back(
-          write_buffer->BatchData[layer][texture].IndexPtr + 1);
-        write_buffer->BatchData[layer][texture].QuadIndices.push_back(
-          write_buffer->BatchData[layer][texture].IndexPtr + 3);
-        write_buffer->BatchData[layer][texture].QuadIndices.push_back(
-          write_buffer->BatchData[layer][texture].IndexPtr + 1);
-        write_buffer->BatchData[layer][texture].QuadIndices.push_back(
-          write_buffer->BatchData[layer][texture].IndexPtr + 2);
-        write_buffer->BatchData[layer][texture].QuadIndices.push_back(
-          write_buffer->BatchData[layer][texture].IndexPtr + 3);
+        write_buffer->CurrentBatch[layer][texture].QuadIndices.push_back(write_buffer->CurrentBatch[layer][texture].IndexPtr);
+        write_buffer->CurrentBatch[layer][texture].QuadIndices.push_back(
+          write_buffer->CurrentBatch[layer][texture].IndexPtr + 1);
+        write_buffer->CurrentBatch[layer][texture].QuadIndices.push_back(
+          write_buffer->CurrentBatch[layer][texture].IndexPtr + 3);
+        write_buffer->CurrentBatch[layer][texture].QuadIndices.push_back(
+          write_buffer->CurrentBatch[layer][texture].IndexPtr + 1);
+        write_buffer->CurrentBatch[layer][texture].QuadIndices.push_back(
+          write_buffer->CurrentBatch[layer][texture].IndexPtr + 2);
+        write_buffer->CurrentBatch[layer][texture].QuadIndices.push_back(
+          write_buffer->CurrentBatch[layer][texture].IndexPtr + 3);
 
-        write_buffer->BatchData[layer][texture].IndexPtr += 4;
+        write_buffer->CurrentBatch[layer][texture].IndexPtr += 4;
 
         s_Props.RendererInstance->m_Stats.QuadsDrawn++;
     }

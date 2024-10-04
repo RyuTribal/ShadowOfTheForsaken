@@ -89,7 +89,7 @@ namespace SOF
         auto parent_camera = parent_entity->GetComponent<CameraComponent>();
 
         if (parent_camera && parent_camera->ClipToTransform) {
-            parent_camera->Camera->SetPosition(parent_transform->Translation);
+            parent_camera->CameraRef->SetPosition(parent_transform->Translation);
         }
 
         for (UUID child_id : parent_relationship->Children) {
@@ -119,7 +119,7 @@ namespace SOF
         if (camera_registry) {
             for (auto [id, camera] : *camera_registry) {
                 if (camera.IsActive) {
-                    write_buffer->FrameCamera = camera.Camera.get();
+                    write_buffer->FrameCamera = camera.CameraRef.get();
                     break;
                 }
             }
@@ -167,7 +167,7 @@ namespace SOF
                 if (right >= camera_left && left <= camera_right && top >= camera_down && bottom <= camera_up) {
                     auto transform_mat = transform->CreateMat4x4();
                     Renderer::SubmitSquare(sprite.Color,
-                      sprite.Texture.get(),
+                      sprite.TextureRef.get(),
                       transform_mat,
                       sprite.SpriteCoordinates,
                       sprite.SpriteSize,

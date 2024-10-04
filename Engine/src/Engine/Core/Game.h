@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine/Events/ApplicationEvents.h"
 #include "Window.h"
-#include "Engine/imGui/ImGuiLayer.h"
+#include "Engine/ImGui/ImGuiLayer.h"
 #include "Thread.h"
 #include "Engine/Renderer/Renderer.h"
 #include "Engine/Scene/Scene.h"

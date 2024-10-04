@@ -15,6 +15,7 @@ namespace SOF
     {
         SOF_ASSERT(!s_Instance, "Can only have one sound engine instance!");
         s_Instance = new SoundEngine();
+        SOF_INFO("Sound Engine", "Initialized");
     }
     void SoundEngine::Shutdown()
     {
@@ -155,7 +156,10 @@ namespace SOF
     }
     void SoundEngine::DataCallback(ma_device *pDevice, void *pOutput, const void *pInput, ma_uint32 frameCount)
     {
-        SoundEngine *instance = Instance();
+        SoundEngine *instance = s_Instance;
+        if(!s_Instance){
+            return;
+        }
         float *pOutputF32 = (float *)pOutput;
         memset(pOutput, 0, frameCount * pDevice->playback.channels * sizeof(float));
 

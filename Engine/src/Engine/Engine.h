@@ -28,7 +28,7 @@
 #include "Engine/Scene/Components.h"
 
 // ---------------- Utils ----------------
-#include "Engine/imGui/ImGuiLayer.h"
+#include "Engine/ImGui/ImGuiLayer.h"
 
 //---------------- Sound ----------------
 #include "Engine/Sound/SoundEngine.h"

@@ -34,7 +34,7 @@ namespace SOF
 
                 SpriteComponent sprite;
                 sprite.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-                sprite.Texture = grounds_texture;
+                sprite.TextureRef = grounds_texture;
                 sprite.SpriteCoordinates = glm::vec2(3.f, 4.f);
                 entity->AddComponent<TransformComponent>(transform);
                 entity->AddComponent<SpriteComponent>(sprite);
@@ -61,12 +61,12 @@ namespace SOF
         auto warsay_entity = m_Scene->GetEntity(m_WarsayID);
         TransformComponent warsay_transform = TransformComponent();
         SpriteComponent warsay_sprite = SpriteComponent(glm::vec4(1.f, 0.f, 0.f, 1.f));
-        warsay_sprite.Texture = warsay_texture;
+        warsay_sprite.TextureRef = warsay_texture;
         warsay_sprite.SpriteSize = glm::vec2(128.f, 128.f);
         warsay_sprite.Layer = 1;
         CameraComponent warsay_camera = CameraComponent(true);
         warsay_camera.ClipToTransform = true;
-        warsay_camera.Camera = Camera::Create((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
+        warsay_camera.CameraRef = Camera::Create((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
         Rigidbody2DComponent rigid_body{};
         rigid_body.Type = ColliderType::DYNAMIC;
         rigid_body.FixedRotation = true;

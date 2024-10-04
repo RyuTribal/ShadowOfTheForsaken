@@ -29,13 +29,13 @@ namespace SOF
     {
         Camera *FrameCamera = nullptr;
         std::map<int32_t, std::unordered_map<Texture *, BatchData>>
-          BatchData{};// Not the best, but we will solve this problem if it ever comes to it
+          CurrentBatch{};// Not the best, but we will solve this problem if it ever comes to it
         bool ValidFrame = false;
 
         void Clear()
         {
             FrameCamera = nullptr;
-            BatchData.clear();
+            CurrentBatch.clear();
             ValidFrame = false;
         }
     };

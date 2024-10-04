@@ -60,6 +60,8 @@ filter("system:windows")
 
     links({
         "opengl32.lib",
+		"ws2_32", 
+		"dbghelp"
     })
 
 filter("system:linux")
@@ -73,6 +75,8 @@ filter("system:linux")
         "GL",
         "pthread",
         "X11",
+		"m", "dl",
+		"c",
     })
 
 filter("configurations:Debug")
