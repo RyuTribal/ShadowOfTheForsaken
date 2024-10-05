@@ -108,6 +108,8 @@ namespace SOF
 
     void Renderer::DrawObjects()
     {
+        SOF_PROFILE_FUNC();
+        SOF_PROFILE_GPU("Draw objects");
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         auto read_buffer = Game::Get()->GetRenderingThread().GetReadBuffer();
         if (!read_buffer->ValidFrame) { return; }
@@ -166,8 +168,8 @@ namespace SOF
 
     void Renderer::SubmitSquare(SpriteComponent *sprite_comp, const glm::mat4 &transform)
     {
+        SOF_PROFILE_FUNC();
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
-        std::lock_guard<std::mutex> lock(s_Props.WriteBufferMutex);
 
         auto write_buffer = Game::Get()->GetRenderingThread().GetWriteBuffer();
 

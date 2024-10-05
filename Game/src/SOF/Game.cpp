@@ -18,6 +18,7 @@ namespace SOF
         auto grounds_texture = grounds_texture_promise.get();
 
         // cReating warsay home
+
         float gridWidth = 100.f;
         float gridHeight = 100.f;
 
@@ -33,6 +34,7 @@ namespace SOF
         floor_sprite.SetCoordinate(1, 0, { 0.f, 3.f });
         floor_entity->AddComponent<TransformComponent>(floor_transform);
         floor_entity->AddComponent<SpriteComponent>(floor_sprite);
+
 
         // cReating warsay
         m_WarsayID = m_Scene->CreateEntity("Warsay");

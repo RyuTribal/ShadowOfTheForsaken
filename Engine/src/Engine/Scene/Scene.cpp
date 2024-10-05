@@ -154,7 +154,7 @@ namespace SOF
         auto write_buffer = Game::Get()->GetRenderingThread().GetWriteBuffer();
         Camera *curr_camera = write_buffer->FrameCamera;
         if (sprite_registry) {
-            SOF_PROFILE_SCOPE();
+            SOF_PROFILE_SCOPE("Scene: Sprite preparation");
             glm::vec3 &camera_pos = curr_camera->GetPosition();
             float half_width = curr_camera->GetWidth() * 0.5f / curr_camera->GetZoomLevel();
             float half_height = curr_camera->GetHeight() * 0.5f / curr_camera->GetZoomLevel();

@@ -16,8 +16,13 @@ namespace SOF
         SOF_TRACE("Renderer", "Vendor: {}", glGetString(GL_VENDOR));
         SOF_TRACE("Renderer", "Renderer: {}", glGetString(GL_RENDERER));
         SOF_TRACE("Renderer", "Version: {}", glGetString(GL_VERSION));
+        SOF_PROFILE_GPU_MARK_CONTEXT;
     }
-    void Context::SwapBuffers() { glfwSwapBuffers(m_WindowHandle); }
+    void Context::SwapBuffers()
+    {
+        glfwSwapBuffers(m_WindowHandle);
+        SOF_PROFILE_GPU_MARK_SWAP;
+    }
     void Context::SetVSync(bool vsync) { glfwSwapInterval(vsync ? 1 : 0); }
     std::unique_ptr<Context> Context::Create(void *window)
     {
