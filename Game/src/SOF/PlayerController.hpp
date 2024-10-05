@@ -1,9 +1,9 @@
 #pragma ONCE
 #include <Engine/Engine.h>
-#include "CharactherController.hpp"
+#include "CharacterController.hpp"
 namespace SOF
 {
-    class PlayerController : public CharactherController
+    class PlayerController : public CharacterController
     {
         public:
         PlayerController(float m_speed);

@@ -3,10 +3,10 @@
 namespace SOF
 {
 
-    class CharactherController
+    class CharacterController
     {
         public:
-        virtual ~CharactherController() = default;
+        virtual ~CharacterController() = default;
         virtual void UpdateMovement(UUID, std::shared_ptr<Scene> scene) = 0;
     };
 
