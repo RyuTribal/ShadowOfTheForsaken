@@ -174,13 +174,7 @@ namespace SOF
 
                 if (right >= camera_left && left <= camera_right && top >= camera_down && bottom <= camera_up) {
                     auto transform_mat = transform->CreateMat4x4();
-                    Renderer::SubmitSquare(sprite.Color,
-                      sprite.TextureRef.get(),
-                      transform_mat,
-                      sprite.SpriteCoordinates,
-                      sprite.SpriteSize,
-                      sprite.Segments,
-                      sprite.Layer);
+                    Renderer::SubmitSquare(&sprite, transform_mat);
                 }
             }
         }

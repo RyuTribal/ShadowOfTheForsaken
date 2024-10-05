@@ -18,8 +18,8 @@ namespace SOF
         auto grounds_texture = grounds_texture_promise.get();
 
         // cReating warsay home
-        float gridWidth = 10.f;
-        float gridHeight = 10.f;
+        float gridWidth = 100.f;
+        float gridHeight = 100.f;
 
         UUID floor_entity_id = m_Scene->CreateEntity("Floor");
         auto floor_entity = m_Scene->GetEntity(floor_entity_id);
@@ -29,8 +29,8 @@ namespace SOF
         SpriteComponent floor_sprite;
         floor_sprite.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         floor_sprite.TextureRef = grounds_texture;
-        floor_sprite.SpriteCoordinates = glm::vec2(3.f, 4.f);
-        floor_sprite.Segments = { gridWidth, gridHeight };
+        floor_sprite.SetTiles({ gridWidth, gridHeight });
+        floor_sprite.SetCoordinate(1, 0, { 0.f, 3.f });
         floor_entity->AddComponent<TransformComponent>(floor_transform);
         floor_entity->AddComponent<SpriteComponent>(floor_sprite);
 
