@@ -70,6 +70,8 @@ namespace SOF
         glm::vec2 SpriteCoordinates = { 0.f, 0.f };
         glm::vec2 SpriteSize = { 32.f, 32.f };
         int32_t Layer = 0;
+        // Rows and columns of a sprite, if you have more then 1x1 the sprite will tile over the quad
+        glm::vec2 Segments = { 1.f, 1.f };
 
         SpriteComponent() = default;
         SpriteComponent(const SpriteComponent &) = default;

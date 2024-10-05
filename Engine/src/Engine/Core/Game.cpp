@@ -84,6 +84,7 @@ namespace SOF
 #ifdef DEBUG
         m_RendererThread.Run(&ImGuiLayer::Shutdown);
 #endif
+        m_RendererThread.WaitForAllTasks();
         SoundEngine::Shutdown();
         AssetManager::Shutdown();
         PhysicsEngine::Shutdown();

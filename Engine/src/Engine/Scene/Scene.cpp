@@ -83,6 +83,7 @@ namespace SOF
 
     void Scene::UpdateChildTransforms(UUID parent_id)
     {
+        SOF_PROFILE_FUNC();
         Entity *parent_entity = m_EntityMap[parent_id].get();
         auto parent_relationship = parent_entity->GetComponent<RelationshipComponent>();
         auto parent_transform = parent_entity->GetComponent<TransformComponent>();
@@ -108,7 +109,7 @@ namespace SOF
                     child_transform->Scale = parent_scale * child_transform->LocalScale;
                 }
             }
-            m_Threads.AddTask([this, child_id]() { this->UpdateChildTransforms(child_id); });
+            UpdateChildTransforms(child_id);
         }
     }
 
@@ -136,17 +137,24 @@ namespace SOF
         auto relationship_registry = m_ComponentRegistry.GetComponentRegistry<RelationshipComponent>();
         if (relationship_registry) {
             for (auto &[id, relationship] : *relationship_registry) {
-                if (relationship.ParentID == 0) { UpdateChildTransforms(id); }
+                if (relationship.ParentID == 0) {
+                    auto transform = this->GetEntity(id)->GetComponent<TransformComponent>();
+                    if (transform) {
+                        transform->Translation = transform->LocalTranslation;
+                        transform->Rotation = transform->LocalRotation;
+                        transform->Scale = transform->LocalScale;
+                    }
+                    UpdateChildTransforms(id);
+                }
             }
         }
-
-        m_Threads.Await();
 
         // Draw all entities
         auto sprite_registry = m_ComponentRegistry.GetComponentRegistry<SpriteComponent>();
         auto write_buffer = Game::Get()->GetRenderingThread().GetWriteBuffer();
         Camera *curr_camera = write_buffer->FrameCamera;
         if (sprite_registry) {
+            SOF_PROFILE_SCOPE();
             glm::vec3 &camera_pos = curr_camera->GetPosition();
             float half_width = curr_camera->GetWidth() * 0.5f / curr_camera->GetZoomLevel();
             float half_height = curr_camera->GetHeight() * 0.5f / curr_camera->GetZoomLevel();
@@ -171,6 +179,7 @@ namespace SOF
                       transform_mat,
                       sprite.SpriteCoordinates,
                       sprite.SpriteSize,
+                      sprite.Segments,
                       sprite.Layer);
                 }
             }

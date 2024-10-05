@@ -16,6 +16,7 @@ namespace SOF
         glm::vec2 TexCoords = { 1.f, 1.f };
         glm::vec2 SpriteCoords = { 0.f, 0.f };
         glm::vec2 SpriteSize = { 32.f, 32.f };
+        glm::vec2 SpriteSegments = { 1.f, 1.f };
     };
 
     struct BatchData
@@ -62,6 +63,7 @@ namespace SOF
           glm::mat4 &transform,
           glm::vec2 &sprite_coords,
           glm::vec2 &sprite_size,
+          glm::vec2 &segments,
           int32_t layer);
 
         static void SubmitTriangle();

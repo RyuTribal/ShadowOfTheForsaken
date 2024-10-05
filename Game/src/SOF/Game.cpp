@@ -18,45 +18,24 @@ namespace SOF
         auto grounds_texture = grounds_texture_promise.get();
 
         // cReating warsay home
-        int gridWidth = 100;
-        int gridHeight = 100;
-        float spacing = 1.0f;
+        float gridWidth = 10.f;
+        float gridHeight = 10.f;
 
         UUID floor_entity_id = m_Scene->CreateEntity("Floor");
-
-        for (int x = 0; x < gridWidth; ++x) {
-            for (int y = 0; y < gridHeight; ++y) {
-                UUID entityID = m_Scene->CreateEntity("GridEntity_" + std::to_string(x) + "_" + std::to_string(y));
-                auto entity = m_Scene->GetEntity(entityID);
-                m_WarsayHome.push_back(entityID);
-                TransformComponent transform;
-                transform.Translation = glm::vec3(x * spacing, y * spacing, 0.0f);
-
-                SpriteComponent sprite;
-                sprite.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-                sprite.TextureRef = grounds_texture;
-                sprite.SpriteCoordinates = glm::vec2(3.f, 4.f);
-                entity->AddComponent<TransformComponent>(transform);
-                entity->AddComponent<SpriteComponent>(sprite);
-
-                // if (x == gridWidth - 1 && y == gridHeight - 1) {
-                if (x == 70 && y == 70) {
-                    SoundComponent sound_comp;
-                    sound_comp.Loop = true;
-                    sound_comp.AssetHandle = "sound_test";
-                    sound_comp.Type = SoundType::SPATIAL;
-                    entity->AddComponent<SoundComponent>(sound_comp);
-                    // Should not be here, but for testing it works
-                    auto sound_ref = entity->GetComponent<SoundComponent>();
-                    auto transform_ref = entity->GetComponent<TransformComponent>();
-                    sound_ref->InstanceID = SoundEngine::PlayAudio(sound_ref, transform_ref->Translation);
-                }
-                m_Scene->ReparentEntity(entityID, floor_entity_id);
-            }
-        }
+        auto floor_entity = m_Scene->GetEntity(floor_entity_id);
+        TransformComponent floor_transform;
+        floor_transform.LocalTranslation = glm::vec3(0.0f, 0.0f, 0.0f);
+        floor_transform.LocalScale = glm::vec3(gridWidth, gridHeight, 0.0f);
+        SpriteComponent floor_sprite;
+        floor_sprite.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        floor_sprite.TextureRef = grounds_texture;
+        floor_sprite.SpriteCoordinates = glm::vec2(3.f, 4.f);
+        floor_sprite.Segments = { gridWidth, gridHeight };
+        floor_entity->AddComponent<TransformComponent>(floor_transform);
+        floor_entity->AddComponent<SpriteComponent>(floor_sprite);
 
         // cReating warsay
-        m_WarsayID = m_Scene->CreateEntity("WarsayBox");
+        m_WarsayID = m_Scene->CreateEntity("Warsay");
 
         auto warsay_entity = m_Scene->GetEntity(m_WarsayID);
         TransformComponent warsay_transform = TransformComponent();
@@ -85,7 +64,6 @@ namespace SOF
     void SOFGame::OnGameShutdown() {}
     void SOFGame::OnGameUpdate(float delta_time)
     {
-        SOF_PROFILE_FUNC();
         m_Scene->Begin();
         HandleMovement();
         m_Scene->Update();

@@ -120,7 +120,8 @@ namespace SOF
                       { ShaderDataType::Float4, "aColor" },
                       { ShaderDataType::Float2, "aTex" },
                       { ShaderDataType::Float2, "aSpriteCoords" },
-                      { ShaderDataType::Float2, "aSpriteSize" } });
+                      { ShaderDataType::Float2, "aSpriteSize" },
+                      { ShaderDataType::Float2, "aSegments" } });
                     vertex_buffer->SetData(
                       buffers.QuadBuffer.data(), (uint32_t)buffers.QuadBuffer.size() * sizeof(Vertex));
 
@@ -163,6 +164,7 @@ namespace SOF
       glm::mat4 &transform,
       glm::vec2 &sprite_coords,
       glm::vec2 &sprite_size,
+      glm::vec2 &segments,
       int32_t layer)
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
@@ -177,24 +179,30 @@ namespace SOF
           color,
           glm::vec2(1.0f, 1.0f),
           sprite_coords,
-          normalized_sprite_size });
+          normalized_sprite_size,
+          segments });
         write_buffer->CurrentBatch[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(0.5f, -0.5f, 0.0f, 1.f),
           color,
           glm::vec2(1.0f, 0.0f),
           sprite_coords,
-          normalized_sprite_size });
-        write_buffer->CurrentBatch[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(-0.5f, -0.5f, 0.0f, 1.f),
-          color,
-          glm::vec2(0.0f, 0.0f),
-          sprite_coords,
-          normalized_sprite_size });
+          normalized_sprite_size,
+          segments });
+        write_buffer->CurrentBatch[layer][texture].QuadBuffer.push_back(
+          { transform * glm::vec4(-0.5f, -0.5f, 0.0f, 1.f),
+            color,
+            glm::vec2(0.0f, 0.0f),
+            sprite_coords,
+            normalized_sprite_size,
+            segments });
         write_buffer->CurrentBatch[layer][texture].QuadBuffer.push_back({ transform * glm::vec4(-0.5f, 0.5f, 0.0f, 1.f),
           color,
           glm::vec2(0.0f, 1.0f),
           sprite_coords,
-          normalized_sprite_size });
+          normalized_sprite_size,
+          segments });
 
-        write_buffer->CurrentBatch[layer][texture].QuadIndices.push_back(write_buffer->CurrentBatch[layer][texture].IndexPtr);
+        write_buffer->CurrentBatch[layer][texture].QuadIndices.push_back(
+          write_buffer->CurrentBatch[layer][texture].IndexPtr);
         write_buffer->CurrentBatch[layer][texture].QuadIndices.push_back(
           write_buffer->CurrentBatch[layer][texture].IndexPtr + 1);
         write_buffer->CurrentBatch[layer][texture].QuadIndices.push_back(
