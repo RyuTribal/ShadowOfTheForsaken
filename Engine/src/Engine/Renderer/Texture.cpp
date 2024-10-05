@@ -34,4 +34,6 @@ namespace SOF
 
     void Texture::Bind(uint8_t slot) { glBindTextureUnit(slot, m_ID); }
 
+    void Texture::Bind(uint32_t id, uint8_t slot) { glBindTextureUnit(slot, id); }
+
 }// namespace SOF

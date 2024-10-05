@@ -99,8 +99,8 @@ namespace SOF
                 auto transform = entity->GetComponent<TransformComponent>();
                 b2Vec2 position = b2Body_GetPosition(rigid_body->GetBodyID());
                 b2Rot rotation = b2Body_GetRotation(rigid_body->GetBodyID());
-                transform->Translation = { position.x, position.y, transform->Translation.z };
-                transform->Rotation.z = b2Rot_GetAngle(rotation);
+                transform->LocalTranslation = { position.x, position.y, transform->LocalTranslation.z };
+                transform->LocalRotation.z = b2Rot_GetAngle(rotation);
             }
         }
     }

@@ -84,6 +84,21 @@ namespace SOF
             }
         }
         ImGui::End();
+
+        ImGui::Begin("Renderer");
+        auto &effects = Renderer::GetAllPostProcessingEffects();
+        PostProcessEffect currentEffect = Renderer::GetSelectedPostProcessingEffect();
+        ImGui::Text("Select Post-Processing Effect:");
+        const char *combo_label = effects[currentEffect].c_str();
+        if (ImGui::BeginCombo("Post-Processing Effect", combo_label)) {
+            for (const auto &[effect, shaderName] : effects) {
+                bool isSelected = (currentEffect == effect);
+                if (ImGui::Selectable(shaderName.c_str(), isSelected)) { Renderer::SetPostProcessEffect(effect); }
+                if (isSelected) { ImGui::SetItemDefaultFocus(); }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::End();
     }
 
 }// namespace SOF

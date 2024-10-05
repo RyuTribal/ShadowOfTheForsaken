@@ -60,6 +60,8 @@ namespace SOF
         Window &GetWindow();
         Thread<RenderBufferData> &GetRenderingThread() { return m_RendererThread; }
 
+        const ThreadData &GetThreadData() { return m_ThreadData; }
+
         UUID SubscribeOnEvents(std::function<void(Event &)> callback);
         void RevokeSubscription(UUID subscriber);
 

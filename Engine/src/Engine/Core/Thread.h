@@ -77,6 +77,7 @@ namespace SOF
         private:
         void ThreadMain()
         {
+            SOF_PROFILE_THREAD(m_ThreadName.c_str());
             while (true) {
                 std::function<void()> task;
 

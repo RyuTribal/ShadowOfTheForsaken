@@ -69,6 +69,7 @@ namespace SOF
 
             m_Window.OnUpdate();
             m_RendererThread.Run(&Renderer::SwapBuffers);
+            m_RendererThread.WaitForAllTasks();
             m_RendererThread.SwapBuffers();
 
             SOF_PROFILE_MARK_FRAME;
@@ -84,6 +85,7 @@ namespace SOF
 #ifdef DEBUG
         m_RendererThread.Run(&ImGuiLayer::Shutdown);
 #endif
+        m_RendererThread.WaitForAllTasks();
         SoundEngine::Shutdown();
         AssetManager::Shutdown();
         PhysicsEngine::Shutdown();

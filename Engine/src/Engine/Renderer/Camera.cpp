@@ -23,8 +23,6 @@ namespace SOF
         float half_width = m_Width * 0.5f / m_ZoomLevel;
         float half_height = m_Height * 0.5f / m_ZoomLevel;
 
-        SOF_INFO_NOTAG("Half Width: {0}, Half Height: {1}", half_width, half_height);
-
         m_ProjectionMatrix = glm::ortho(-half_width, half_width, -half_height, half_height, -1.0f, 1.0f);
     }
 }// namespace SOF

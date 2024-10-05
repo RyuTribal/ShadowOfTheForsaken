@@ -22,19 +22,27 @@ namespace SOF
             auto task = std::make_shared<std::packaged_task<ReturnType()>>(
               std::bind(std::forward<F>(func), std::forward<Args>(args)...));
             std::future<ReturnType> result = task->get_future();
+
+            // Lock only for queue modification
             {
                 std::lock_guard<std::mutex> lock(m_QueueMutex);
-                m_TaskQueue.emplace([task]() { (*task)(); });
-                ++m_ActiveTasks;
+                m_TaskQueue.emplace([task]() {
+                    SOF_PROFILE_THREAD("Thread pool task");
+                    (*task)();
+                });
+                m_ActiveTasks.fetch_add(1, std::memory_order_relaxed);// Using atomic
             }
-            m_Condition.notify_one();
+
+            m_TaskAvailable.notify_one();
             return result;
         }
 
         void Await()
         {
-            std::unique_lock<std::mutex> lock(m_QueueMutex);
-            m_AwaitCondition.wait(lock, [this]() { return m_ActiveTasks == 0 && m_TaskQueue.empty(); });
+            std::unique_lock<std::mutex> lock(m_TaskMutex);
+            m_AwaitCondition.wait(lock, [this]() {
+                return m_ActiveTasks.load(std::memory_order_relaxed) == 0;// Only wait for all tasks to finish
+            });
         }
 
         void Shutdown()
@@ -43,7 +51,7 @@ namespace SOF
                 std::lock_guard<std::mutex> lock(m_QueueMutex);
                 m_ExitFlag = true;
             }
-            m_Condition.notify_all();
+            m_TaskAvailable.notify_all();
             for (std::thread &thread : m_Threads) {
                 if (thread.joinable()) { thread.join(); }
             }
@@ -57,8 +65,9 @@ namespace SOF
 
                 {
                     std::unique_lock<std::mutex> lock(m_QueueMutex);
-                    m_Condition.wait(lock, [this]() { return m_ExitFlag || !m_TaskQueue.empty(); });
-                    if (m_ExitFlag && m_TaskQueue.empty()) { return; }
+                    m_TaskAvailable.wait(lock, [this]() { return m_ExitFlag || !m_TaskQueue.empty(); });
+                    if (m_ExitFlag && m_TaskQueue.empty()) return;
+
                     if (!m_TaskQueue.empty()) {
                         task = std::move(m_TaskQueue.front());
                         m_TaskQueue.pop();
@@ -67,10 +76,10 @@ namespace SOF
 
                 if (task) {
                     task();
-                    {
-                        std::lock_guard<std::mutex> lock(m_QueueMutex);
-                        --m_ActiveTasks;
-                        if (m_ActiveTasks == 0 && m_TaskQueue.empty()) { m_AwaitCondition.notify_all(); }
+                    m_ActiveTasks.fetch_sub(1, std::memory_order_relaxed);// Atomic decrement
+                    if (m_ActiveTasks.load(std::memory_order_relaxed) == 0) {
+                        std::lock_guard<std::mutex> lock(m_TaskMutex);
+                        m_AwaitCondition.notify_all();// Signal when all tasks are done
                     }
                 }
             }
@@ -79,7 +88,8 @@ namespace SOF
         std::vector<std::thread> m_Threads;
         std::queue<std::function<void()>> m_TaskQueue;
         std::mutex m_QueueMutex;
-        std::condition_variable m_Condition;
+        std::mutex m_TaskMutex;// Separate mutex for waiting
+        std::condition_variable m_TaskAvailable;
         std::condition_variable m_AwaitCondition;
         std::atomic<bool> m_ExitFlag;
         std::atomic<size_t> m_ActiveTasks;
