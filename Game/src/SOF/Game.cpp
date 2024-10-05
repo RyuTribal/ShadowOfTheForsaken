@@ -7,6 +7,8 @@ namespace SOF
     void SOFGame::OnGameStart()
     {
         m_Scene = std::make_shared<Scene>("Test scene");
+        m_Scene->SetBackground("background");
+        Renderer::ChangeBackgroundColor({ 1.f, 1.f, 1.f });
 
         // Load textures
         std::string warsay_asset_handle = "black_idle";
@@ -19,8 +21,8 @@ namespace SOF
 
         // cReating warsay home
 
-        float gridWidth = 100.f;
-        float gridHeight = 100.f;
+        float gridWidth = 10.f;
+        float gridHeight = 10.f;
 
         UUID floor_entity_id = m_Scene->CreateEntity("Floor");
         auto floor_entity = m_Scene->GetEntity(floor_entity_id);

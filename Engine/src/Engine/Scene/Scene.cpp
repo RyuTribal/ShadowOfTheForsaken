@@ -7,6 +7,8 @@
 #include "Engine/Sound/SoundEngine.h"
 #include "Engine/Physics/PhysicsEngine.h"
 #include "Engine/Core/Profiler.h"
+#include "Engine/Asset/Manager.h"
+#include "Engine/Renderer/Texture.h"
 
 namespace SOF
 {
@@ -81,6 +83,11 @@ namespace SOF
         child->GetComponent<RelationshipComponent>()->ParentID = new_parent_id;
     }
 
+    void Scene::SetBackground(const std::string &background_handle)
+    {
+        m_Background = AssetManager::Load<Texture>(background_handle);
+    }
+
     void Scene::UpdateChildTransforms(UUID parent_id)
     {
         SOF_PROFILE_FUNC();
@@ -125,6 +132,7 @@ namespace SOF
                 }
             }
         }
+        Renderer::SubmitBackgroundTexture(m_Background.get());
     }
 
     void Scene::Update()

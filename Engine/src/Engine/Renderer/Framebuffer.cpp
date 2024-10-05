@@ -111,7 +111,7 @@ namespace SOF
             return false;
         }
 
-        static GLenum HeliosFBTextureFormatToGL(FramebufferTextureFormat format)
+        static GLenum SOFFBTextureFormatToGL(FramebufferTextureFormat format)
         {
             switch (format) {
             case FramebufferTextureFormat::RGBA8:
@@ -132,7 +132,7 @@ namespace SOF
             return 0;
         }
 
-        static GLenum HeliosDownSamplingFormatToGL(FramebufferSamplingFormat format)
+        static GLenum SOFDownSamplingFormatToGL(FramebufferSamplingFormat format)
         {
 
             switch (format) {
@@ -324,7 +324,7 @@ namespace SOF
 
         auto &spec = m_ColorAttachmentSpecifications[attachmentIndex];
         glClearTexImage(
-          m_ColorAttachments[attachmentIndex], 0, Utils::HeliosFBTextureFormatToGL(spec.TextureFormat), GL_INT, &value);
+          m_ColorAttachments[attachmentIndex], 0, Utils::SOFFBTextureFormatToGL(spec.TextureFormat), GL_INT, &value);
     }
 
 
@@ -354,7 +354,7 @@ namespace SOF
           m_Specification.Width,
           m_Specification.Height,
           GL_COLOR_BUFFER_BIT,
-          Utils::HeliosDownSamplingFormatToGL(sampling));
+          Utils::SOFDownSamplingFormatToGL(sampling));
 
         SOF_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
           "Framebuffer incomplete during content copying.");

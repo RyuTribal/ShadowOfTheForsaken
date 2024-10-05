@@ -69,6 +69,7 @@ namespace SOF
 
             m_Window.OnUpdate();
             m_RendererThread.Run(&Renderer::SwapBuffers);
+            m_RendererThread.WaitForAllTasks();
             m_RendererThread.SwapBuffers();
 
             SOF_PROFILE_MARK_FRAME;
