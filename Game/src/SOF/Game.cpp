@@ -34,18 +34,28 @@ namespace SOF
 
         // cReating warsay
 
-        m_Player.emplace("Warsay", "actors", glm::vec2(72.f, 96.f), 3.0f, m_Scene.get());
-        m_Player->CreateLocomotionStateMachine({
-          { 1.f, 6.f },// Idle stances
-          { 1.f, 5.f },
-          { 1.f, 4.f },
-          { 1.f, 7.f },
+        float anim_time = 0.2f;
+        std::shared_ptr<Animation> Idle_Up =
+          std::make_shared<Animation>(std::vector<glm::vec2>{ { 1.f, 4.f } }, anim_time);
+        std::shared_ptr<Animation> Idle_Down =
+          std::make_shared<Animation>(std::vector<glm::vec2>{ { 1.f, 7.f } }, anim_time);
+        std::shared_ptr<Animation> Idle_Right =
+          std::make_shared<Animation>(std::vector<glm::vec2>{ { 1.f, 5.f } }, anim_time);
+        std::shared_ptr<Animation> Idle_Left =
+          std::make_shared<Animation>(std::vector<glm::vec2>{ { 1.f, 6.f } }, anim_time);
 
-          { 0.f, 6.f },// Walking stances
-          { 0.f, 5.f },
-          { 0.f, 4.f },
-          { 0.f, 7.f },
-        });
+        std::shared_ptr<Animation> Walk_Up =
+          std::make_shared<Animation>(std::vector<glm::vec2>{ { 0.f, 4.f }, { 1.f, 4.f }, { 2.f, 4.f } }, anim_time);
+        std::shared_ptr<Animation> Walk_Down =
+          std::make_shared<Animation>(std::vector<glm::vec2>{ { 0.f, 7.f }, { 1.f, 7.f }, { 2.f, 7.f } }, anim_time);
+        std::shared_ptr<Animation> Walk_Right =
+          std::make_shared<Animation>(std::vector<glm::vec2>{ { 0.f, 5.f }, { 1.f, 5.f }, { 2.f, 5.f } }, anim_time);
+        std::shared_ptr<Animation> Walk_Left =
+          std::make_shared<Animation>(std::vector<glm::vec2>{ { 0.f, 6.f }, { 1.f, 6.f }, { 2.f, 6.f } }, anim_time);
+
+        m_Player.emplace("Warsay", "actors", glm::vec2(72.f, 96.f), 3.0f, m_Scene.get());
+        m_Player->CreateLocomotionStateMachine(
+          { Idle_Left, Idle_Right, Idle_Up, Idle_Down, Walk_Left, Walk_Right, Walk_Up, Walk_Down });
 
         m_Scene->GetPhysicsWorld()->SetGravity({ 0.f, 0.f });// We won't really have a gravity in a jrpg like world
         m_Scene->GetPhysicsWorld()->SetAirFriction(1.f);// Since we don't have a "ground" so to speak

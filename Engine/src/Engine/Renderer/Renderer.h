@@ -38,6 +38,9 @@ namespace SOF
           CurrentBatch{};// Not the best, but we will solve this problem if it ever comes to it
         bool ValidFrame = false;
         Texture *Background = nullptr;
+        glm::mat4 FrameProjection{ 0.f };
+        glm::mat4 FrameView{ 0.f };
+
 
         void Clear()
         {

@@ -19,8 +19,7 @@ namespace SOF
 
         void Update(float dt);
 
-        UUID
-          AddState(const std::string &name, const glm::vec2 &sprite_index, float duration, bool looping, bool starting);
+        UUID AddState(const std::string &name, std::shared_ptr<Animation> anim_instance, bool looping, bool starting);
         void AddTransition(UUID from, UUID to, std::function<bool(StateMachine *)> condition);
 
         const glm::vec2 &GetReleventSpriteIndex();

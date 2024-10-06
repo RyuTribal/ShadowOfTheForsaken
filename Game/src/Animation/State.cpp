@@ -3,8 +3,9 @@
 
 namespace SOF
 {
-    State::State(UUID id, const std::string &name, const glm::vec2 &sprite_index, float duration, bool looping)
-      : m_ID(id), m_Name(name), m_SpriteIndex(sprite_index), m_Duration(duration), m_Looping(looping)
+    State::State(UUID id, const std::string &name, std::shared_ptr<Animation> anim_instance, bool looping)
+      : m_ID(id), m_Name(name), m_Animation(anim_instance), m_Duration(anim_instance->GetTotalDuration()),
+        m_Looping(looping)
     {}
     void State::Update(float dt)
     {
@@ -14,7 +15,8 @@ namespace SOF
         }
 
         if (m_OnUpdate) { m_OnUpdate(dt); }
-
+        m_Animation->Update(dt);
+        if (m_Animation->IsFinished() && m_Looping) { m_Animation->Reset(); }
         m_Timer += dt;
     }
 
@@ -23,6 +25,7 @@ namespace SOF
         if (m_OnEnter) { m_OnEnter(); }
         m_IsActive = true;
     }
+
     void State::Exit()
     {
         if (m_OnExit) { m_OnExit(); }

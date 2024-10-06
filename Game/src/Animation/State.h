@@ -1,13 +1,14 @@
 #pragma once
 
 #include <Engine/Engine.h>
+#include "Animation.h"
 
 namespace SOF
 {
     class State
     {
         public:
-        State(UUID id, const std::string &name, const glm::vec2 &sprite_index, float duration, bool looping);
+        State(UUID id, const std::string &name, std::shared_ptr<Animation> anim_instance, bool looping);
 
         void SetOnEnterCallback(std::function<void()> callback) { m_OnEnter = callback; }
         void SetOnUpdateCallback(std::function<void(float dt)> callback) { m_OnUpdate = callback; }
@@ -18,7 +19,7 @@ namespace SOF
         bool IsLooping() { return m_Looping; }
         UUID GetID() { return m_ID; }
 
-        const glm::vec2 &GetSpriteIndex() { return m_SpriteIndex; }
+        const glm::vec2 &GetSpriteIndex() { return m_Animation->GetCurrentFrame(); }
 
         void Update(float dt);
 
@@ -27,7 +28,8 @@ namespace SOF
 
         private:
         UUID m_ID = 0;
-        glm::vec2 m_SpriteIndex = { 0.0f, 0.0f };
+        // Shared pointer for now but will probably move to the asset manager later, we will see
+        std::shared_ptr<Animation> m_Animation = nullptr;
         float m_Duration = 0.0f;
         float m_Timer = 0.0f;
         bool m_Looping = false;

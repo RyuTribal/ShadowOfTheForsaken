@@ -11,15 +11,15 @@ namespace SOF
         public:
         struct LocomotionSettings
         {
-            glm::vec2 IdleLeft = { 0.0f, 0.0f };
-            glm::vec2 IdleRight = { 0.0f, 0.0f };
-            glm::vec2 IdleUp = { 0.0f, 0.0f };
-            glm::vec2 IdleDown = { 0.0f, 0.0f };
+            std::shared_ptr<Animation> IdleLeft = nullptr;
+            std::shared_ptr<Animation> IdleRight = nullptr;
+            std::shared_ptr<Animation> IdleUp = nullptr;
+            std::shared_ptr<Animation> IdleDown = nullptr;
 
-            glm::vec2 WalkLeft = { 0.0f, 0.0f };
-            glm::vec2 WalkRight = { 0.0f, 0.0f };
-            glm::vec2 WalkUp = { 0.0f, 0.0f };
-            glm::vec2 WalkDown = { 0.0f, 0.0f };
+            std::shared_ptr<Animation> WalkLeft = nullptr;
+            std::shared_ptr<Animation> WalkRight = nullptr;
+            std::shared_ptr<Animation> WalkUp = nullptr;
+            std::shared_ptr<Animation> WalkDown = nullptr;
         };
         static constexpr uint32_t CharacterLayer = 100;
         Player(const std::string &name,

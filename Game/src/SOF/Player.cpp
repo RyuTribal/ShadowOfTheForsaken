@@ -49,15 +49,15 @@ namespace SOF
         m_LocomotionStateMachine.emplace(
           [this](StateMachine *machine, float dt) { this->OnLocomotionUpdate(machine, dt); });
 
-        UUID idle_left_id = m_LocomotionStateMachine->AddState("IdleLeft", settings.IdleLeft, 0.f, true, true);
-        UUID idle_right_id = m_LocomotionStateMachine->AddState("IdleRight", settings.IdleRight, 0.f, true, false);
-        UUID idle_up_id = m_LocomotionStateMachine->AddState("IdleUp", settings.IdleUp, 0.f, true, false);
-        UUID idle_down_id = m_LocomotionStateMachine->AddState("IdleDown", settings.IdleDown, 0.f, true, false);
+        UUID idle_left_id = m_LocomotionStateMachine->AddState("IdleLeft", settings.IdleLeft, true, true);
+        UUID idle_right_id = m_LocomotionStateMachine->AddState("IdleRight", settings.IdleRight, true, false);
+        UUID idle_up_id = m_LocomotionStateMachine->AddState("IdleUp", settings.IdleUp, true, false);
+        UUID idle_down_id = m_LocomotionStateMachine->AddState("IdleDown", settings.IdleDown, true, false);
 
-        UUID left_id = m_LocomotionStateMachine->AddState("WalkLeft", settings.WalkLeft, 0.f, true, false);
-        UUID right_id = m_LocomotionStateMachine->AddState("WalkRight", settings.WalkRight, 0.f, true, false);
-        UUID up_id = m_LocomotionStateMachine->AddState("WalkUp", settings.WalkUp, 0.f, true, false);
-        UUID down_id = m_LocomotionStateMachine->AddState("WalkDown", settings.WalkDown, 0.f, true, false);
+        UUID left_id = m_LocomotionStateMachine->AddState("WalkLeft", settings.WalkLeft, true, false);
+        UUID right_id = m_LocomotionStateMachine->AddState("WalkRight", settings.WalkRight, true, false);
+        UUID up_id = m_LocomotionStateMachine->AddState("WalkUp", settings.WalkUp, true, false);
+        UUID down_id = m_LocomotionStateMachine->AddState("WalkDown", settings.WalkDown, true, false);
 
         auto is_moving_up = [](StateMachine *machine) {
             return machine->GetVariable<glm::vec2>("velocity").y > 0.0f

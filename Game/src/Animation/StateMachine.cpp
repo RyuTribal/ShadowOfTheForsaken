@@ -16,13 +16,12 @@ namespace SOF
         }
     }
     UUID StateMachine::AddState(const std::string &name,
-      const glm::vec2 &sprite_index,
-      float duration,
+      std::shared_ptr<Animation> anim_instance,
       bool looping,
       bool starting)
     {
         UUID new_state_id;
-        m_States[new_state_id] = std::make_unique<State>(new_state_id, name, sprite_index, duration, looping);
+        m_States[new_state_id] = std::make_unique<State>(new_state_id, name, anim_instance, looping);
         if (starting) { m_CurrentActiveState = new_state_id; }
         return new_state_id;
     }
