@@ -135,4 +135,22 @@ namespace SOF
         data.Velocity = velocity;
         m_Velocities[entity_handle] = data;
     }
+    glm::vec2 PhysicsWorld::GetVelocity(Entity *entity)
+    {
+        SOF_ASSERT(entity, "Not a valid entity");
+        auto entity_handle = entity->GetHandle();
+        auto it = m_RigidBodies.find(entity_handle);
+        if (it == m_RigidBodies.end()) { return { 0.f, 0.f }; }
+        b2Vec2 velocity = b2Body_GetLinearVelocity(m_RigidBodies[entity_handle]->GetBodyID());
+        return { velocity.x, velocity.y };
+    }
+    float PhysicsWorld::GetAngle(Entity *entity)
+    {
+        SOF_ASSERT(entity, "Not a valid entity");
+        auto entity_handle = entity->GetHandle();
+        auto it = m_RigidBodies.find(entity_handle);
+        if (it == m_RigidBodies.end()) { return 0.f; }
+        b2Rot rotation = b2Body_GetRotation(m_RigidBodies[entity_handle]->GetBodyID());
+        return b2Rot_GetAngle(rotation);
+    }
 }// namespace SOF

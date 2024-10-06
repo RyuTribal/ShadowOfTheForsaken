@@ -1,5 +1,4 @@
-#pragma ONCE
-#include <Engine/Engine.h>
+#pragma once
 #include "CharacterController.hpp"
 namespace SOF
 {
@@ -8,9 +7,9 @@ namespace SOF
         public:
         PlayerController(float m_speed);
         ~PlayerController() override = default;
-        void UpdateMovement(UUID, std::shared_ptr<Scene> scene) override;
+        void UpdateMovement(Entity *context) override;
 
         private:
-        float m_velocity;
+        float m_Velocity;
     };
 }// namespace SOF

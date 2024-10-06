@@ -108,7 +108,7 @@ namespace SOF
 
         private:
         glm::vec2 Tiles = { 1.f, 1.f };
-        std::vector<glm::vec2> TileIndices{};
+        std::vector<glm::vec2> TileIndices{ 1 };
     };
 
     struct CameraComponent

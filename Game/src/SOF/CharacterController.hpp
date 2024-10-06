@@ -1,5 +1,5 @@
-#pragma ONCE
-#include <Engine/Scene/Scene.h>
+#pragma once
+#include <Engine/Engine.h>
 namespace SOF
 {
 
@@ -7,7 +7,7 @@ namespace SOF
     {
         public:
         virtual ~CharacterController() = default;
-        virtual void UpdateMovement(UUID, std::shared_ptr<Scene> scene) = 0;
+        virtual void UpdateMovement(Entity *context) = 0;
     };
 
 }// namespace SOF

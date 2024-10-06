@@ -3,6 +3,7 @@
 #include <Engine/Engine.h>
 #include "Debug/DebugWindow.h"
 #include "Player.hpp"
+#include "Animation/StateMachine.h"
 namespace SOF
 {
     class SOFGame : public Game
@@ -18,9 +19,9 @@ namespace SOF
         virtual void OnDebugUpdate() override;
         virtual void OnGameEvent(Event &event) override;
 
-        void HandleMovement();
-
         bool OnKeyPressedEvent(KeyPressedEvent &event);
+
+        ThreadPool &GetThreadPool() { return m_ThreadPool; }
 
         private:
         std::shared_ptr<Scene> m_Scene;
@@ -29,6 +30,6 @@ namespace SOF
         ThreadPool m_ThreadPool{};
         DebugWindow m_DebugWindow{};
         float m_WarsaySpeed = 100.f;
-        std::optional<Player> m_player;
+        std::optional<Player> m_Player;
     };
 }// namespace SOF
