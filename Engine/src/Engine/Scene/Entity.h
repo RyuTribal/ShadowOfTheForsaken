@@ -36,6 +36,7 @@ namespace SOF
         }
 
         void ChangeScene(Scene *scene) { m_Scene = scene; }
+        Scene *GetScene() { return m_Scene; }
 
         UUID &GetHandle() { return m_Handle; }
 

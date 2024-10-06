@@ -161,6 +161,8 @@ namespace SOF
         auto sprite_registry = m_ComponentRegistry.GetComponentRegistry<SpriteComponent>();
         auto write_buffer = Game::Get()->GetRenderingThread().GetWriteBuffer();
         Camera *curr_camera = write_buffer->FrameCamera;
+        write_buffer->FrameView = curr_camera->GetViewMatrix();
+        write_buffer->FrameProjection = curr_camera->GetProjectionMatrix();
         if (sprite_registry) {
             SOF_PROFILE_SCOPE("Scene: Sprite preparation");
             glm::vec3 &camera_pos = curr_camera->GetPosition();

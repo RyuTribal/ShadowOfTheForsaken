@@ -13,44 +13,22 @@ namespace SOF
 
         Camera(float width, float height);
 
-        glm::vec3 &GetPosition()
-        {
-            std::lock_guard<std::mutex> lock(m_CameraMutex);
-            return m_Position;
-        }
-        glm::mat4 &GetViewMatrix()
-        {
-            std::lock_guard<std::mutex> lock(m_CameraMutex);
-            return m_ViewMatrix;
-        }
-        glm::mat4 &GetProjectionMatrix()
-        {
-            std::lock_guard<std::mutex> lock(m_CameraMutex);
-            return m_ProjectionMatrix;
-        }
+        glm::vec3 &GetPosition() { return m_Position; }
+        glm::mat4 &GetViewMatrix() { return m_ViewMatrix; }
+        glm::mat4 &GetProjectionMatrix() { return m_ProjectionMatrix; }
 
-        float GetHeight()
-        {
-            std::lock_guard<std::mutex> lock(m_CameraMutex);
-            return m_Height;
-        }
-        float GetWidth()
-        {
-            std::lock_guard<std::mutex> lock(m_CameraMutex);
-            return m_Width;
-        }
-        float GetZoomLevel()
-        {
-            std::lock_guard<std::mutex> lock(m_CameraMutex);
-            return m_ZoomLevel;
-        }
+        float GetHeight() { return m_Height; }
+        float GetWidth() { return m_Width; }
+        float GetZoomLevel() { return m_ZoomLevel; }
 
+        // Can be done by the renderer
         void SetWidth(float width)
         {
             std::lock_guard<std::mutex> lock(m_CameraMutex);
             m_Width = width;
             SetOrthographic();
         }
+        // Can be done by the renderer
         void SetHeight(float height)
         {
             std::lock_guard<std::mutex> lock(m_CameraMutex);
@@ -59,19 +37,16 @@ namespace SOF
         }
         void SetZoomLevel(float zoom)
         {
-            std::lock_guard<std::mutex> lock(m_CameraMutex);
             m_ZoomLevel = zoom;
             SetOrthographic();
         }
         void SetPosition(glm::vec3 &position)
         {
-            std::lock_guard<std::mutex> lock(m_CameraMutex);
             m_Position = position;
             RecalculateViewMatrix();
         }
         void Move(glm::vec3 &velocity)
         {
-            std::lock_guard<std::mutex> lock(m_CameraMutex);
             m_Position += velocity;
             RecalculateViewMatrix();
         }
