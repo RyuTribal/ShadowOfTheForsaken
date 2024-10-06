@@ -29,6 +29,8 @@ namespace SOF
         void SetBodyDirty(Entity *entity);
 
         void SetVelocity(Entity *entity, const glm::vec3 &velocity, VelocityType type);
+        glm::vec2 GetVelocity(Entity *entity);
+        float GetAngle(Entity *entity);
 
         void StartSimulation();
         void PauseSimulation();

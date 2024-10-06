@@ -237,9 +237,8 @@ namespace SOF
                     vertex_array->Bind();
                     auto program = s_Props.RendererInstance->m_ShaderLibrary.Get("sprite");
 
-                    program->Set("u_ViewMatrix", s_Props.RendererInstance->m_CurrentActiveCamera->GetViewMatrix());
-                    program->Set(
-                      "u_ProjectionMatrix", s_Props.RendererInstance->m_CurrentActiveCamera->GetProjectionMatrix());
+                    program->Set("u_ViewMatrix", read_buffer->FrameView);
+                    program->Set("u_ProjectionMatrix", read_buffer->FrameProjection);
                     program->Set("u_UsingTexture", texture != nullptr);
                     program->Activate();
 
@@ -330,6 +329,7 @@ namespace SOF
 
 
     void Renderer::SubmitTriangle() { SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized"); }
+
     void Renderer::DrawFrame()
     {
         BeginFrame();
