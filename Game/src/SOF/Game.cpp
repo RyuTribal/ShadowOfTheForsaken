@@ -1,13 +1,20 @@
 #include "pch.h"
 #include "Game.h"
-#include <string>
+#include "Animation/Animation.h"
+
 namespace SOF
 {
     void SOFGame::OnGameStart()
     {
+
+        AssetManager::DeregisterAsset("");
         m_Scene = std::make_shared<Scene>("Test scene");
         m_Scene->SetBackground("background");
         Renderer::ChangeBackgroundColor({ 1.f, 1.f, 1.f });
+
+        // Don't need to delete it since it will be turned into a unique pointer when registering
+        AnimationSerializer *anim_serializer = new AnimationSerializer();
+        AssetManager::RegisterCustomAssetType("Animation", nullptr, anim_serializer);
 
         // Load textures
         std::string grounds_asset_handle = "grounds";
@@ -34,24 +41,16 @@ namespace SOF
 
         // cReating warsay
 
-        float anim_time = 0.2f;
-        std::shared_ptr<Animation> Idle_Up =
-          std::make_shared<Animation>(std::vector<glm::vec2>{ { 1.f, 4.f } }, anim_time);
-        std::shared_ptr<Animation> Idle_Down =
-          std::make_shared<Animation>(std::vector<glm::vec2>{ { 1.f, 7.f } }, anim_time);
-        std::shared_ptr<Animation> Idle_Right =
-          std::make_shared<Animation>(std::vector<glm::vec2>{ { 1.f, 5.f } }, anim_time);
-        std::shared_ptr<Animation> Idle_Left =
-          std::make_shared<Animation>(std::vector<glm::vec2>{ { 1.f, 6.f } }, anim_time);
+        // Load in all animations
+        std::shared_ptr<Animation> Idle_Up = AssetManager::Load<Animation>("idle_up");
+        std::shared_ptr<Animation> Idle_Down = AssetManager::Load<Animation>("idle_down");
+        std::shared_ptr<Animation> Idle_Right = AssetManager::Load<Animation>("idle_right");
+        std::shared_ptr<Animation> Idle_Left = AssetManager::Load<Animation>("idle_left");
 
-        std::shared_ptr<Animation> Walk_Up =
-          std::make_shared<Animation>(std::vector<glm::vec2>{ { 0.f, 4.f }, { 1.f, 4.f }, { 2.f, 4.f } }, anim_time);
-        std::shared_ptr<Animation> Walk_Down =
-          std::make_shared<Animation>(std::vector<glm::vec2>{ { 0.f, 7.f }, { 1.f, 7.f }, { 2.f, 7.f } }, anim_time);
-        std::shared_ptr<Animation> Walk_Right =
-          std::make_shared<Animation>(std::vector<glm::vec2>{ { 0.f, 5.f }, { 1.f, 5.f }, { 2.f, 5.f } }, anim_time);
-        std::shared_ptr<Animation> Walk_Left =
-          std::make_shared<Animation>(std::vector<glm::vec2>{ { 0.f, 6.f }, { 1.f, 6.f }, { 2.f, 6.f } }, anim_time);
+        std::shared_ptr<Animation> Walk_Up = AssetManager::Load<Animation>("walk_up");
+        std::shared_ptr<Animation> Walk_Down = AssetManager::Load<Animation>("walk_down");
+        std::shared_ptr<Animation> Walk_Right = AssetManager::Load<Animation>("walk_right");
+        std::shared_ptr<Animation> Walk_Left = AssetManager::Load<Animation>("walk_left");
 
         m_Player.emplace("Warsay", "actors", glm::vec2(72.f, 96.f), 3.0f, m_Scene.get());
         m_Player->CreateLocomotionStateMachine(
@@ -69,7 +68,7 @@ namespace SOF
         m_Scene->Update();
         m_Scene->End();
     }
-    void SOFGame::OnDebugUpdate() { m_DebugWindow.Render(m_Scene.get()); }
+    void SOFGame::OnDebugUpdate(float delta_time) { m_DebugWindow.Render(m_Scene.get(), delta_time); }
     void SOFGame::OnGameEvent(Event &event)
     {
         EventDispatcher dispatcher(event);

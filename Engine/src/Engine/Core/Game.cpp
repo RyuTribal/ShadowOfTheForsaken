@@ -61,7 +61,7 @@ namespace SOF
             ImGuiUpdateEvent debug_event{};
             OnEvent(debug_event);
 
-            OnDebugUpdate();
+            OnDebugUpdate(frameTime);
             ImGuiLayer::End();
 #endif
 

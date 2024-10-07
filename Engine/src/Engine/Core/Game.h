@@ -44,7 +44,7 @@ namespace SOF
         virtual void OnGameStart(){};
         virtual void OnGameShutdown(){};
         virtual void OnGameUpdate(float delta_time){};
-        virtual void OnDebugUpdate(){};
+        virtual void OnDebugUpdate(float delta_time){};
         virtual void OnGameEvent(Event &event){};
 
         public:

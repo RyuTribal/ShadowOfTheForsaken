@@ -16,12 +16,14 @@ namespace SOF
         virtual void OnGameStart() override;
         virtual void OnGameShutdown() override;
         virtual void OnGameUpdate(float delta_time) override;
-        virtual void OnDebugUpdate() override;
+        virtual void OnDebugUpdate(float delta_time) override;
         virtual void OnGameEvent(Event &event) override;
 
         bool OnKeyPressedEvent(KeyPressedEvent &event);
 
         ThreadPool &GetThreadPool() { return m_ThreadPool; }
+
+        DebugWindow &GetDebugWindow() { return m_DebugWindow; }
 
         private:
         std::shared_ptr<Scene> m_Scene;

@@ -17,9 +17,9 @@ namespace SOF
         void SetData(const char *data);
         void Bind(uint8_t slot);
 
-        static void Bind(uint32_t id, uint8_t slot);
+        uint32_t GetRendererID() { return m_ID; }
 
-        static void CreateTextureArray(const std::vector<Texture *> textures);
+        static void Bind(uint32_t id, uint8_t slot);
 
         virtual AssetType GetType() const override { return AssetType::Texture; };
 

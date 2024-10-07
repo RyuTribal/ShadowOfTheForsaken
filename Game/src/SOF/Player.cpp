@@ -40,7 +40,7 @@ namespace SOF
     {
         m_PlayerController->UpdateMovement(m_Entity);
         m_LocomotionStateMachine->Update(dt);
-        const glm::vec2 current_sprite = m_LocomotionStateMachine->GetReleventSpriteIndex();
+        const std::pair<uint32_t, uint32_t> current_sprite = m_LocomotionStateMachine->GetReleventSpriteIndex();
         m_Entity->GetComponent<SpriteComponent>()->SetCoordinate(0, 0, current_sprite);
     }
 

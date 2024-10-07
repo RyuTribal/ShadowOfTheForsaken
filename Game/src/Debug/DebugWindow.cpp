@@ -1,8 +1,10 @@
 #include "pch.h"
 #include <Engine/Engine.h>
 #include "DebugWindow.h"
+#include "AnimCreator.h"
 #include <imgui.h>
 #include <imgui_internal.h>
+#include "SOF/Game.h"
 
 namespace SOF
 {
@@ -18,17 +20,18 @@ namespace SOF
             { "renderer", false },
             { "anim_editor", false },
         };
+
+        AnimCreator::Init();
     }
 
-    DebugWindow::~DebugWindow() {}
+    DebugWindow::~DebugWindow() { AnimCreator::Shutdown(); }
 
-    void DebugWindow::Render(Scene *current_scene)
+    void DebugWindow::Render(Scene *current_scene, float dt)
     {
         FrameStats &frame_stats = Game::Get()->GetFrameStats();
 
 
-        m_WindowActive =
-          ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantCaptureMouse || ImGui::IsWindowFocused();
+        m_WindowActive = ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow);
 
         ImGui::Begin("Debug settings");
         for (auto &[key, value] : m_ShownWindows) { ImGui::Checkbox(key.c_str(), &value); }
@@ -49,6 +52,18 @@ namespace SOF
         if (m_ShownWindows["assets"]) { RenderAssetSettings(); }
 
         if (m_ShownWindows["renderer"]) { RenderRendererSettings(); }
+
+        if (m_ShownWindows["anim_editor"]) { AnimCreator::Render(dt); }
+    }
+
+    bool DebugWindow::ShouldCaptureInput()
+    {
+#ifdef DEBUG
+        SOFGame *game = (SOFGame *)Game::Get();
+        return !game->GetDebugWindow().IsWindowActive();
+#else
+        return true;
+#endif
     }
 
     void DebugWindow::RenderSoundSettings()
@@ -91,11 +106,13 @@ namespace SOF
                 std::string length = fmt::format("Length: {}", toc.Length);
                 std::string offset = fmt::format("Offset: {}", toc.Offset);
                 std::string type = fmt::format("Asset Type: {}", AssetTypeToString((AssetType)toc.Type));
+                std::string meta_data = fmt::format("Meta Data: {}", toc.MetaData);
 
                 ImGui::Text(uuid.c_str());
                 ImGui::Text(length.c_str());
                 ImGui::Text(offset.c_str());
                 ImGui::Text(type.c_str());
+                ImGui::Text(meta_data.c_str());
 
                 ImGui::TreePop();
             }

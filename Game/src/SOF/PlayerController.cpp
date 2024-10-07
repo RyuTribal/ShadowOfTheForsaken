@@ -1,10 +1,14 @@
 #include "pch.h"
 #include "PlayerController.hpp"
+#include "Game.h"
 namespace SOF
 {
     PlayerController::PlayerController(float speed) : m_Velocity{ speed } {}
     void PlayerController::UpdateMovement(Entity *context)
     {
+
+        if (!DebugWindow::ShouldCaptureInput()) { return; }
+
         if (!context) { return; }
         bool any_movement = Input::IsKeyPressed(GLFW_KEY_W) || Input::IsKeyPressed(GLFW_KEY_S)
                             || Input::IsKeyPressed(GLFW_KEY_A) || Input::IsKeyPressed(GLFW_KEY_D);
