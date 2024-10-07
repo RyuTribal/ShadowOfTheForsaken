@@ -270,38 +270,45 @@ namespace SOF
 
         auto write_buffer = Game::Get()->GetRenderingThread().GetWriteBuffer();
 
-        glm::vec2 texture_size(sprite_comp->TextureRef->GetWidth(), sprite_comp->TextureRef->GetHeight());
+        glm::vec2 texture_size;
+
+        if (sprite_comp->TextureRef) {
+            texture_size = { sprite_comp->TextureRef->GetWidth(), sprite_comp->TextureRef->GetHeight() };
+        }
         glm::vec2 normalized_sprite_size = sprite_comp->SpriteSize / texture_size;
         float tile_indices_offset =
           write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].TimeIndexPtr;
+
+        auto tiles = sprite_comp->GetTiles();
+        glm::vec2 tiles_converted = { tiles.first, tiles.second };
 
         write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadBuffer.push_back(
           { transform * glm::vec4(0.5f, 0.5f, 0.0f, 1.f),
             sprite_comp->Color,
             glm::vec2(1.0f, 1.0f),
             normalized_sprite_size,
-            sprite_comp->GetTiles(),
+            tiles_converted,
             tile_indices_offset });
         write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadBuffer.push_back(
           { transform * glm::vec4(0.5f, -0.5f, 0.0f, 1.f),
             sprite_comp->Color,
             glm::vec2(1.0f, 0.0f),
             normalized_sprite_size,
-            sprite_comp->GetTiles(),
+            tiles_converted,
             tile_indices_offset });
         write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadBuffer.push_back(
           { transform * glm::vec4(-0.5f, -0.5f, 0.0f, 1.f),
             sprite_comp->Color,
             glm::vec2(0.0f, 0.0f),
             normalized_sprite_size,
-            sprite_comp->GetTiles(),
+            tiles_converted,
             tile_indices_offset });
         write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadBuffer.push_back(
           { transform * glm::vec4(-0.5f, 0.5f, 0.0f, 1.f),
             sprite_comp->Color,
             glm::vec2(0.0f, 1.0f),
             normalized_sprite_size,
-            sprite_comp->GetTiles(),
+            tiles_converted,
             tile_indices_offset });
 
         write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadIndices.push_back(
@@ -321,7 +328,9 @@ namespace SOF
         write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].TimeIndexPtr +=
           sprite_comp->GetAllCoordinates().size();
         for (auto index : sprite_comp->GetAllCoordinates()) {
-            write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].TileIndices.push_back(index);
+            glm::vec2 tiles_converted = { index.first, index.second };
+            write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].TileIndices.push_back(
+              tiles_converted);
         }
 
         s_Props.RendererInstance->m_Stats.QuadsDrawn++;

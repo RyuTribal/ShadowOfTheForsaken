@@ -27,6 +27,7 @@ includedirs({
 	"%{IncludeDir.miniaudio}",
     "%{IncludeDir.Tracy}",
 	"%{wks.location}/Engine/src",
+    "vendor/nlohmann/include",
 	"src",
 })
 

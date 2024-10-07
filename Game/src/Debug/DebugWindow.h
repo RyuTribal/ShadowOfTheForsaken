@@ -8,9 +8,10 @@ namespace SOF
         public:
         DebugWindow();
         ~DebugWindow();
-        void Render(Scene *current_scene);
+        void Render(Scene *current_scene, float dt);
 
         bool IsWindowActive() { return m_WindowActive; }
+        static bool ShouldCaptureInput();
 
         private:
         void RenderSoundSettings();

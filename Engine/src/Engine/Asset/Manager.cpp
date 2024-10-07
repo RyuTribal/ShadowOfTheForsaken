@@ -56,8 +56,10 @@ namespace SOF
         return s_Data->Manager;
     }
 
-    void
-      AssetManager::RegisterAsset(std::filesystem::path path_to_file, std::string &asset_handle, AssetType asset_type)
+    void AssetManager::RegisterAsset(std::filesystem::path path_to_file,
+      const std::string &asset_handle,
+      AssetType asset_type,
+      const std::string &custom_asset_type)
     {
         SOF_ASSERT(s_Data && s_Data->Manager, "AssetManager has not been initialized, was it you Elliot?!");
 
@@ -73,14 +75,37 @@ namespace SOF
 
         SOF_TRACE("AssetManager", "Registering file {0}...", path_to_file);
 
-        auto loader = s_Data->Manager->m_Loaders.find(asset_type);
-        if (loader == s_Data->Manager->m_Loaders.end()) {
-            SOF_ERROR("AssetManager", "No loader available for asset type {0}", AssetTypeToString(asset_type));
-            return;
+        IAssetLoaderStrategy *loader = nullptr;
+
+        if (asset_type == AssetType::Custom) {
+            auto it = s_Data->Manager->m_CustomLoaders.find(custom_asset_type);
+            if (it == s_Data->Manager->m_CustomLoaders.end()) {
+                SOF_ERROR("AssetManager", "No loader available for asset type {0}", custom_asset_type);
+                return;
+            }
+            loader = it->second.get();
+
+        } else {
+            auto it = s_Data->Manager->m_Loaders.find(asset_type);
+            if (it == s_Data->Manager->m_Loaders.end()) {
+                SOF_ERROR("AssetManager", "No loader available for asset type {0}", AssetTypeToString(asset_type));
+                return;
+            }
+            loader = it->second.get();
         }
 
-        std::shared_ptr<AssetData> data = loader->second->Load(path_to_file);
+        std::shared_ptr<AssetData> data = loader->Load(path_to_file);
 
+        RegisterAssetFromMemory(data, asset_handle, asset_type);
+
+        SOF_INFO("AssetManager", "Registered file: {0}", path_to_file);
+    }
+
+    void AssetManager::RegisterAssetFromMemory(std::shared_ptr<AssetData> data,
+      const std::string &asset_handle,
+      AssetType asset_type,
+      const std::string &custom_asset_type)
+    {
         // Seek to the end of the file for writing the new asset data
         s_Data->Manager->m_OutputFile.seekp(0, std::ios::end);
         uint64_t dataOffset = s_Data->Manager->m_OutputFile.tellp();
@@ -102,10 +127,10 @@ namespace SOF
         s_Data->Manager->UpdateTOCOffsets();
         s_Data->Manager->WriteTOC();
 
-        SOF_INFO("AssetManager", "Registered file: {0}", path_to_file);
+        SOF_INFO("AssetManager", "Registered asset: {0}", asset_handle);
     }
 
-    void AssetManager::DeregisterAsset(std::string &asset_handle)
+    void AssetManager::DeregisterAsset(const std::string &asset_handle, bool force)
     {
         SOF_ASSERT(s_Data && s_Data->Manager, "AssetManager has not been initialized, was it you Elliot?!");
 
@@ -116,7 +141,7 @@ namespace SOF
             return;
         }
 
-        if (s_Data->Manager->m_Assets[asset_handle].use_count() > 1) {
+        if (s_Data->Manager->m_Assets[asset_handle].use_count() > 1 && !force) {
             SOF_ERROR("AssetManager",
               "Asset {0} is currently in use, please remove it first from the scene before deregistering",
               asset_handle);
@@ -131,6 +156,22 @@ namespace SOF
 
         s_Data->Manager->WriteTOC();
         SOF_INFO("AssetManager", "Deleted asset: {0}", asset_handle);
+    }
+
+    void AssetManager::RegisterCustomAssetType(const std::string &asset_type_handle,
+      IAssetLoaderStrategy *custom_loader,
+      IAssetDeserializerStrategy *custom_deserializer)
+    {
+        SOF_ASSERT(s_Data && s_Data->Manager, "AssetManager has not been initialized, was it you Elliot?!");
+        if (custom_loader) {
+            s_Data->Manager->m_CustomLoaders[asset_type_handle] = std::unique_ptr<IAssetLoaderStrategy>(custom_loader);
+        }
+        if (custom_deserializer) {
+            s_Data->Manager->m_CustomDeserializers[asset_type_handle] =
+              std::unique_ptr<IAssetDeserializerStrategy>(custom_deserializer);
+        }
+
+        SOF_INFO("AssetManager", "Registered asset type {0}", asset_type_handle);
     }
 
     void AssetManager::UpdateTOCOffsets()
@@ -171,6 +212,12 @@ namespace SOF
             if (temp.use_count() == 1) { s_Data->Manager->m_Assets.erase(asset_handle); }
             delete asset;
         }
+    }
+
+    bool AssetManager::Exists(const std::string &asset_handle)
+    {
+        SOF_ASSERT(s_Data && s_Data->Manager, "AssetManager has not been initialized, was it you Elliot?!");
+        return s_Data->Manager->m_TOCEntries.find(asset_handle) != s_Data->Manager->m_TOCEntries.end();
     }
 
     void AssetManager::AssetPackInit(std::filesystem::path path_to_assetpack)
