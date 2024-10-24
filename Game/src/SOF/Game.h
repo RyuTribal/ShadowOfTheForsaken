@@ -31,7 +31,6 @@ namespace SOF
         std::vector<UUID> m_WarsayHome{};
         ThreadPool m_ThreadPool{};
         DebugWindow m_DebugWindow{};
-        float m_WarsaySpeed = 100.f;
         std::optional<Player> m_Player;
     };
 }// namespace SOF

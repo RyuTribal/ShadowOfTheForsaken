@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "AnimCreator.h"
 #include "Animation/Animation.h"
+#include "SOF/Game.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -221,8 +222,9 @@ namespace SOF
                   std::stoi(AssetManager::ExtractMetadataVariable(toc.MetaData, "SpriteWidth"));
                 s_Instance->m_SpriteHeight =
                   std::stoi(AssetManager::ExtractMetadataVariable(toc.MetaData, "SpriteHeight"));
-                auto sprite_sheet_handle = AssetManager::ExtractMetadataVariable(toc.MetaData, "SpriteSheetHandle");
-                s_Instance->m_SpriteSheet = AssetManager::Load<Texture>(sprite_sheet_handle);
+                s_Instance->m_SpriteSheetHandle =
+                  AssetManager::ExtractMetadataVariable(toc.MetaData, "SpriteSheetHandle");
+                s_Instance->m_SpriteSheet = AssetManager::Load<Texture>(s_Instance->m_SpriteSheetHandle);
 
                 ImGui::CloseCurrentPopup();
             }

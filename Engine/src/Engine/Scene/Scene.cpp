@@ -142,21 +142,23 @@ namespace SOF
         m_PhysicsWorld->Step();
 
         // Update relationship transforms
-        auto relationship_registry = m_ComponentRegistry.GetComponentRegistry<RelationshipComponent>();
-        if (relationship_registry) {
-            for (auto &[id, relationship] : *relationship_registry) {
-                if (relationship.ParentID == 0) {
-                    auto transform = this->GetEntity(id)->GetComponent<TransformComponent>();
-                    if (transform) {
-                        transform->Translation = transform->LocalTranslation;
-                        transform->Rotation = transform->LocalRotation;
-                        transform->Scale = transform->LocalScale;
-                    }
+
+        {
+            SOF_PROFILE_SCOPE("Scene: Relationship update");
+            for (auto id : m_DirtyTransforms) {
+                auto transform = m_EntityMap[id]->GetComponent<TransformComponent>();
+                if (transform) {
+                    transform->Translation = transform->LocalTranslation;
+                    transform->Rotation = transform->LocalRotation;
+                    transform->Scale = transform->LocalScale;
                     UpdateChildTransforms(id);
                 }
             }
         }
 
+        m_DirtyTransforms.clear();
+
+        // Fix a better way to go through the visible sprites than just going through literally all the sprites
         // Draw all entities
         auto sprite_registry = m_ComponentRegistry.GetComponentRegistry<SpriteComponent>();
         auto write_buffer = Game::Get()->GetRenderingThread().GetWriteBuffer();
@@ -175,7 +177,7 @@ namespace SOF
             float camera_down = camera_pos.y - half_height;
             for (auto &[id, sprite] : *sprite_registry) {
                 auto transform = m_ComponentRegistry.Get<TransformComponent>(id);
-                glm::vec2 half_extents = glm::vec2(transform->Scale.x * 0.5f, transform->Scale.y * 0.5f);
+                glm::vec2 half_extents = glm::vec2(transform->Scale.x, transform->Scale.y);
 
                 float left = transform->Translation.x - half_extents.x;
                 float right = transform->Translation.x + half_extents.x;
@@ -184,7 +186,27 @@ namespace SOF
 
                 if (right >= camera_left && left <= camera_right && top >= camera_down && bottom <= camera_up) {
                     auto transform_mat = transform->CreateMat4x4();
-                    Renderer::SubmitSquare(&sprite, transform_mat);
+                    glm::vec2 texture_size = { 1.f, 1.f };
+                    if (sprite.TextureRef) {
+                        texture_size = glm::vec2(sprite.TextureRef->GetWidth(), sprite.TextureRef->GetHeight());
+                    }
+
+                    glm::vec2 normalized_uv_offset = sprite.SpriteUVOffset / texture_size;
+                    glm::vec2 normalized_sprite_size = sprite.SpriteSize / texture_size;
+
+                    glm::mat4x2 uv_coords =
+                      glm::mat4x2(normalized_uv_offset + glm::vec2(0.0f, normalized_sprite_size.y),
+                        normalized_uv_offset + glm::vec2(normalized_sprite_size.x, normalized_sprite_size.y),
+                        normalized_uv_offset + glm::vec2(0.0f, 0.0f),
+                        normalized_uv_offset + glm::vec2(normalized_sprite_size.x, 0.0f));
+
+                    SpriteData data = { sprite.TextureRef.get(),
+                        sprite.ShaderHandle,
+                        sprite.Color,
+                        uv_coords,
+                        transform_mat,
+                        sprite.Layer };
+                    Renderer::SubmitSquare(&data);
                 }
             }
         }
@@ -206,6 +228,8 @@ namespace SOF
             if (m_EntityMap[entity_id].get()->HasComponent<Rigidbody2DComponent>()) {
                 m_PhysicsWorld->AddPolygon(m_EntityMap[entity_id].get());
             }
+        } else if (type_index == typeid(TransformComponent)) {
+            m_DirtyTransforms.push_back(entity_id);
         }
     }
 

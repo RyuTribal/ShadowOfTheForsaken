@@ -7,14 +7,13 @@ namespace SOF
     void SOFGame::OnGameStart()
     {
 
-        AssetManager::DeregisterAsset("");
-        m_Scene = std::make_shared<Scene>("Test scene");
-        m_Scene->SetBackground("background");
         Renderer::ChangeBackgroundColor({ 1.f, 1.f, 1.f });
 
         // Don't need to delete it since it will be turned into a unique pointer when registering
         AnimationSerializer *anim_serializer = new AnimationSerializer();
         AssetManager::RegisterCustomAssetType("Animation", nullptr, anim_serializer);
+        m_Scene = std::make_shared<Scene>("Test scene");
+        m_Scene->SetBackground("background");
 
         // Load textures
         std::string grounds_asset_handle = "grounds";
@@ -23,21 +22,30 @@ namespace SOF
 
         // cReating warsay home
 
-        float gridWidth = 10.f;
-        float gridHeight = 10.f;
+        int gridWidth = 100;
+        int gridHeight = 100;
+        float spacing = 2.0f;
 
-        UUID floor_entity_id = m_Scene->CreateEntity("Floor");
-        auto floor_entity = m_Scene->GetEntity(floor_entity_id);
-        TransformComponent floor_transform;
-        floor_transform.LocalTranslation = glm::vec3(0.0f, 0.0f, 0.0f);
-        floor_transform.LocalScale = glm::vec3(gridWidth, gridHeight, 0.0f);
-        SpriteComponent floor_sprite;
-        floor_sprite.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-        floor_sprite.TextureRef = grounds_texture;
-        floor_sprite.SetTiles({ gridWidth, gridHeight });
-        floor_sprite.SetCoordinate(1, 0, { 0.f, 3.f });
-        floor_entity->AddComponent<TransformComponent>(floor_transform);
-        floor_entity->AddComponent<SpriteComponent>(floor_sprite);
+
+        for (int i = 0; i < gridHeight; i++) {
+            for (int j = 0; j < gridWidth; j++) {
+                std::string floor_tile_name = "Floor_" + std::to_string(i) + "_" + std::to_string(j);
+                UUID floor_entity_id = m_Scene->CreateEntity(floor_tile_name);
+                auto floor_entity = m_Scene->GetEntity(floor_entity_id);
+                TransformComponent floor_transform;
+                floor_transform.LocalTranslation = glm::vec3(spacing * j, spacing * i, 0.0f);
+                SpriteComponent floor_sprite;
+                floor_sprite.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                floor_sprite.TextureRef = grounds_texture;
+                floor_sprite.SpriteSize = { 32.f, 32.f };
+                floor_sprite.SpriteUVOffset = { 0.f, 0.f };
+                floor_sprite.Layer = 0;
+                if (i == 1 && j == 0) { floor_sprite.SpriteUVOffset = { 0.f, 32.f * 3.f }; }
+                floor_entity->AddComponent<TransformComponent>(floor_transform);
+                floor_entity->AddComponent<SpriteComponent>(floor_sprite);
+            }
+        }
+
 
         // cReating warsay
 
@@ -52,12 +60,12 @@ namespace SOF
         std::shared_ptr<Animation> Walk_Right = AssetManager::Load<Animation>("walk_right");
         std::shared_ptr<Animation> Walk_Left = AssetManager::Load<Animation>("walk_left");
 
-        m_Player.emplace("Warsay", "actors", glm::vec2(72.f, 96.f), 3.0f, m_Scene.get());
+        m_Player.emplace("Warsay", "actors", glm::vec2(72.f, 96.f), 15.0f, m_Scene.get());
         m_Player->CreateLocomotionStateMachine(
           { Idle_Left, Idle_Right, Idle_Up, Idle_Down, Walk_Left, Walk_Right, Walk_Up, Walk_Down });
 
-        m_Scene->GetPhysicsWorld()->SetGravity({ 0.f, 0.f });// We won't really have a gravity in a jrpg like world
-        m_Scene->GetPhysicsWorld()->SetAirFriction(1.f);// Since we don't have a "ground" so to speak
+        m_Scene->GetPhysicsWorld()->SetGravity({ 0.f, 0.f });// We won't really have gravity in a jrpg like world
+        m_Scene->GetPhysicsWorld()->SetAirFriction(15.f);// Since we don't have a "ground" so to speak
         m_Scene->SetListenerEntity(m_Player->GetID());
     }
     void SOFGame::OnGameShutdown() {}
@@ -67,6 +75,14 @@ namespace SOF
         m_Player->Update(delta_time);
         m_Scene->Update();
         m_Scene->End();
+        UI::BeginCanvas("Test Window", { 500.f, 500.f }, { 300.f, 200.f }, { 1.f, 0.f, 1.f, 1.f });
+        UI::Text("Hello world! dasdasdsadasdasdasdsadasdasdas erik haram", { 0.f, 0.f }, { 0.f, 0.f, 0.f, 1.f }, 0);
+        UI::Text("Windows > Linux", { 0.f, 0.f }, { 1.f, 1.f, 0.f, 1.f }, 0);
+        UI::EndCanvas();
+
+        UI::BeginCanvas("Test Window 2", { 500.f, 550.f }, { 300.f, 300.f }, { 1.f, 1.f, 0.f, 1.f });
+
+        UI::EndCanvas();
     }
     void SOFGame::OnDebugUpdate(float delta_time) { m_DebugWindow.Render(m_Scene.get(), delta_time); }
     void SOFGame::OnGameEvent(Event &event)

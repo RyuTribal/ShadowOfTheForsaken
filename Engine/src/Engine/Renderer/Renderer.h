@@ -17,24 +17,22 @@ namespace SOF
         glm::vec4 Position = { 0.f, 0.f, 0.f, 1.f };
         glm::vec4 Color = { 1.f, 1.f, 1.f, 1.f };
         glm::vec2 TexCoords = { 1.f, 1.f };
-        glm::vec2 SpriteSize = { 32.f, 32.f };
-        glm::vec2 SpriteSegments = { 1.f, 1.f };
-        float TileIndexOffset = 0.f;
+        float TextureIndex = -1.f;
     };
 
     struct BatchData
     {
         std::vector<Vertex> QuadBuffer{};
         std::vector<uint32_t> QuadIndices{};
-        std::vector<glm::vec2> TileIndices{};
         uint32_t IndexPtr = 0;
-        uint32_t TimeIndexPtr = 0;
+        int32_t TextureIndexPtr = -1;
+        std::vector<Texture *> UsedTextures;
     };
 
     struct RenderBufferData
     {
         Camera *FrameCamera = nullptr;
-        std::map<int32_t, std::unordered_map<Texture *, BatchData>>
+        std::map<int32_t, std::unordered_map<std::string, BatchData>>
           CurrentBatch{};// Not the best, but we will solve this problem if it ever comes to it
         bool ValidFrame = false;
         Texture *Background = nullptr;
@@ -57,6 +55,16 @@ namespace SOF
         uint32_t QuadsDrawn = 0;
     };
 
+    struct SpriteData
+    {
+        Texture *TextureRef = nullptr;
+        std::string ShaderHandle = "sprite";
+        glm::vec4 Color = { 0.f, 0.f, 0.f, 0.f };
+        glm::mat4x2 TileUV = glm::mat4x2(1.f);
+        glm::mat4 Transform = glm::mat4(0.f);
+        uint32_t Layer = 0;
+    };
+
     enum class PostProcessEffect { None, Chromatic, Grayscale, Sephia, Invert, Vignette, Pixelation, Blur, Sharpen };
 
     class Renderer
@@ -70,7 +78,7 @@ namespace SOF
 
         static void SwapBuffers();
 
-        static void SubmitSquare(SpriteComponent *sprite_comp, const glm::mat4 &transform);
+        static void SubmitSquare(SpriteData *sprite_data);
 
         static void SubmitTriangle();
 
@@ -98,6 +106,8 @@ namespace SOF
         static RendererStats &GetStats();
 
         static Context *GetContext();
+
+        static bool RegisterShader(const std::string &handle, const std::string &filepath);
 
         private:
         Renderer();

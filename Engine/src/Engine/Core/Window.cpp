@@ -100,6 +100,13 @@ namespace SOF
 
     void Window::OnUpdate() { glfwPollEvents(); }
 
+    glm::vec2 Window::GetDPI()
+    {
+        float x, y;
+        glfwGetWindowContentScale(m_Window, &x, &y);
+        return { x, y };
+    }
+
     void Window::SetFullscreen(bool fullscreen, FullscreenType type)
     {
         m_Data.Fullscreen = fullscreen;

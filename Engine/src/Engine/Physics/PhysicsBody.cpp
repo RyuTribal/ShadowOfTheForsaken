@@ -38,6 +38,7 @@ namespace SOF
 
         AddPolygon(entity);
     }
+    void RigidBody::DestroyBody() { b2DestroyBody(m_RuntimeBodyID); }
     void RigidBody::AddPolygon(Entity *entity)
     {
         if (entity->HasComponent<BoxCollider2DComponent>()) {

@@ -26,6 +26,7 @@ namespace SOF
         void SetEventCallback(const std::function<void(Event &)> &callback) { m_Data.EventCallback = callback; }
         int GetHeight() { return m_Data.Height; }
         int GetWidth() { return m_Data.Width; }
+        glm::vec2 GetDPI();
         GLFWwindow *GetNativeWindow() { return m_Window; }
         void SetFullscreen(bool fullscreen, FullscreenType type);
 

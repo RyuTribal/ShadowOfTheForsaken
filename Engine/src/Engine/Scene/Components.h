@@ -68,47 +68,14 @@ namespace SOF
         glm::vec4 Color = { 1.f, 1.f, 1.f, 1.f };
         std::shared_ptr<Texture> TextureRef = nullptr;
         glm::vec2 SpriteSize = { 32.f, 32.f };
+        glm::vec2 SpriteUVOffset = { 0.f, 0.f };
         int32_t Layer = 0;
+        std::string ShaderHandle = "sprite";
         SpriteComponent() = default;
         SpriteComponent(const SpriteComponent &) = default;
         SpriteComponent(const glm::vec4 &new_color) : Color(new_color) {}
         SpriteComponent(const glm::vec4 &new_color, glm::vec2 &sprite_size) : Color(new_color), SpriteSize(sprite_size)
         {}
-
-        const std::pair<uint32_t, uint32_t> &GetTiles() { return Tiles; }
-        // Will reset all tiles, this is for letting the GPU handle tiling
-        void SetTiles(const std::pair<uint32_t, uint32_t> &tiles)
-        {
-            Tiles = tiles;
-            TileIndices = std::vector<std::pair<uint32_t, uint32_t>>{};
-            TileIndices.resize(static_cast<size_t>(Tiles.first * Tiles.second));
-
-            for (uint32_t row = 0; row < Tiles.second; ++row) {
-                for (uint32_t col = 0; col < Tiles.first; ++col) {
-                    uint32_t index = col + row * static_cast<uint32_t>(Tiles.first);
-                    std::pair<uint32_t, uint32_t> tile_coords = { 0, 0 };
-                    TileIndices[index] = tile_coords;
-                }
-            }
-        }
-
-        const std::vector<std::pair<uint32_t, uint32_t>> &GetAllCoordinates() { return TileIndices; }
-
-        const std::pair<uint32_t, uint32_t> &GetCoordinate(uint32_t x, uint32_t y)
-        {
-            uint32_t index = x + y * static_cast<uint32_t>(Tiles.first);
-            return TileIndices[index];
-        }
-
-        void SetCoordinate(uint32_t x, uint32_t y, const std::pair<uint32_t, uint32_t> &sprite_position)
-        {
-            uint32_t index = x + y * static_cast<uint32_t>(Tiles.first);
-            TileIndices[index] = sprite_position;
-        }
-
-        private:
-        std::pair<uint32_t, uint32_t> Tiles = { 1, 1 };
-        std::vector<std::pair<uint32_t, uint32_t>> TileIndices{ 1 };
     };
 
     struct CameraComponent

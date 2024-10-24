@@ -7,37 +7,32 @@ startproject("Game")
 
 PCHFile = "%{wks.location}/Engine/src/pch.cpp"
 
-
-configurations({
-	"Debug",
-	"Release",
-	"Dist",
-})
+configurations({"Debug", "Release", "Dist"})
 
 filter "action:vs*"
-	linkoptions { "/ignore:4099" }
-	disablewarnings { "4068" }
+linkoptions {"/ignore:4099"}
+disablewarnings {"4068"}
 
-	filter "language:C++ or language:C"
-	architecture "x86_64"
+filter "language:C++ or language:C"
+architecture "x86_64"
 
-	filter "configurations:Debug or configurations:Debug-AS"
-	optimize "Off"
-	symbols "On"
+filter "configurations:Debug or configurations:Debug-AS"
+optimize "Off"
+symbols "On"
 
-	filter { "system:windows", "configurations:Debug-AS" }	
-	flags { "NoRuntimeChecks", "NoIncrementalLink" }
+filter {"system:windows", "configurations:Debug-AS"}
+flags {"NoRuntimeChecks", "NoIncrementalLink"}
 
-	filter "configurations:Release"
-	optimize "On"
-	symbols "Default"
+filter "configurations:Release"
+optimize "On"
+symbols "Default"
 
-	filter "configurations:Dist"
-	optimize "Full"
-	symbols "Off"
+filter "configurations:Dist"
+optimize "Full"
+symbols "Off"
 
-	filter "system:windows"
-	buildoptions { "/EHsc", "/Zc:preprocessor", "/Zc:__cplusplus" }
+filter "system:windows"
+buildoptions {"/EHsc", "/Zc:preprocessor", "/Zc:__cplusplus"}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
@@ -49,12 +44,14 @@ IncludeDir["glm"] = "%{wks.location}/Engine/vendor/glm"
 IncludeDir["Box2D"] = "%{wks.location}/Engine/vendor/box2d/include"
 IncludeDir["miniaudio"] = "%{wks.location}/Engine/vendor/miniaudio/include"
 IncludeDir["Tracy"] = "%{wks.location}/Engine/vendor/tracy/public"
+IncludeDir["Freetype"] = "%{wks.location}/Engine/vendor/freetype/include"
 
 group("Dependencies")
 include("Engine/vendor/GLFW")
 include("Engine/vendor/Glad")
 include("Engine/vendor/imgui")
 include("Engine/vendor/box2d")
+include("Engine/vendor/freetype")
 
 group("Tools")
 include("Engine")
