@@ -50,6 +50,8 @@ namespace SOF
         UUID GetListenerEntity() { return m_Listener; }
         void SetListenerEntity(UUID id) { m_Listener = id; }
 
+        void SetDirtyTransform(UUID entity_id) { m_DirtyTransforms.push_back(entity_id); }
+
         private:
         void UpdateChildTransforms(UUID parent_id);
 
@@ -57,6 +59,7 @@ namespace SOF
         UUID m_ID = UUID();
         Registry m_ComponentRegistry;
         std::unordered_map<UUID, std::unique_ptr<Entity>> m_EntityMap;
+        std::vector<UUID> m_DirtyTransforms;
         std::string m_Name = "Untitled Level";
         std::shared_ptr<PhysicsWorld> m_PhysicsWorld;
         ThreadPool m_Threads{ 16 };

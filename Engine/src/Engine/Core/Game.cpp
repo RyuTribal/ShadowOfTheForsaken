@@ -9,6 +9,7 @@
 #include "Engine/Sound/SoundEngine.h"
 #include "Engine/Physics/PhysicsEngine.h"
 #include "Engine/Core/Profiler.h"
+#include "Engine/UI/UI.h"
 
 
 namespace SOF
@@ -33,6 +34,7 @@ namespace SOF
         SoundEngine::Init();
         PhysicsEngine::Init();
         AssetManager::Init("Assets.sofp");
+        UI::Init();
     }
 
     void Game::Start()
@@ -52,22 +54,23 @@ namespace SOF
 
             m_RendererThread.Run(&Renderer::DrawFrame);
 
+            UI::BeginFrame();
             OnGameUpdate(frameTime);
+            UI::EndFrame();
 
-            m_RendererThread.WaitForAllTasks();
+            // m_RendererThread.WaitForAllTasks();
 
 #ifdef DEBUG
             ImGuiLayer::Begin();
             ImGuiUpdateEvent debug_event{};
             OnEvent(debug_event);
 
-            OnDebugUpdate();
+            OnDebugUpdate(frameTime);
             ImGuiLayer::End();
 #endif
-
             m_Window.OnUpdate();
             m_RendererThread.Run(&Renderer::SwapBuffers);
-            m_RendererThread.WaitForAllTasks();
+            /*m_RendererThread.WaitForAllTasks();*/
             m_RendererThread.SwapBuffers();
 
             SOF_PROFILE_MARK_FRAME;
@@ -87,6 +90,7 @@ namespace SOF
         SoundEngine::Shutdown();
         AssetManager::Shutdown();
         PhysicsEngine::Shutdown();
+        UI::Shutdown();
         return true;
     }
 
@@ -99,9 +103,10 @@ namespace SOF
     void Game::OnEvent(Event &event)
     {
         EventDispatcher dispatcher(event);
+        UI::OnWindowEvent(event);
+        OnGameEvent(event);
         dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(SOF::Game::OnShutDown));
         dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(SOF::Game::OnWindowResize));
-        OnGameEvent(event);
 
         for (auto [subscriber, callback] : m_Subscribers) { callback(event); }
     }

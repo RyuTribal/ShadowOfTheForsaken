@@ -20,7 +20,8 @@ namespace SOF
           : m_Type(type), m_Density(density), m_Friction(friction), m_Restitution(restitution), m_Offset(offset),
             m_RigidBodyID(rigid_body_id)
         {}
-        virtual ~PolygonShape() = default;
+
+        void DestroyShape() { b2DestroyShape(m_RuntimeShapeID); }
 
         PolygonType GetType() { return m_Type; }
 
@@ -45,8 +46,6 @@ namespace SOF
           const glm::vec2 &half_size)
           : PolygonShape(rigid_body_id, PolygonType::Box, density, friction, restitution, offset), m_HalfSize(half_size)
         {}
-
-        ~BoxShape() { b2DestroyShape(m_RuntimeShapeID); }
 
         virtual void CreateShape() override
         {
@@ -78,8 +77,6 @@ namespace SOF
           float radius)
           : PolygonShape(rigid_body_id, PolygonType::Circle, density, friction, restitution, offset), m_Radius(radius)
         {}
-
-        ~CircleShape() { b2DestroyShape(m_RuntimeShapeID); }
 
         virtual void CreateShape() override
         {
@@ -113,8 +110,6 @@ namespace SOF
             m_HalfHeight(half_height)
         {}
 
-        ~CapsuleShape() { b2DestroyShape(m_RuntimeShapeID); }
-
         virtual void CreateShape() override
         {
             // Define the two endpoints of the capsule along the y-axis (vertical capsule)
@@ -142,7 +137,8 @@ namespace SOF
     {
         public:
         RigidBody(Entity *entity, b2WorldId world_id);
-        ~RigidBody() { b2DestroyBody(m_RuntimeBodyID); }
+
+        void DestroyBody();
 
         b2BodyId GetBodyID() { return m_RuntimeBodyID; }
         void AddPolygon(Entity *entity);

@@ -6,6 +6,7 @@ namespace SOF
         None = 0,
         Texture,
         Audio,
+        Custom,
     };
 
     static std::string AssetTypeToString(AssetType type)
@@ -14,6 +15,8 @@ namespace SOF
             return "Texture";
         } else if (type == AssetType::Audio) {
             return "Audio";
+        } else if (type == AssetType::Custom) {
+            return "Custom";
         } else {
             return "Unknown asset";
         }
@@ -26,6 +29,8 @@ namespace SOF
             return AssetType::Texture;
         } else if (type_name == "Audio") {
             return AssetType::Audio;
+        } else if (type_name == "Custom") {
+            return AssetType::Custom;
         } else {
             return AssetType::None;
         }

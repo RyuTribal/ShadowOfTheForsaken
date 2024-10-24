@@ -24,6 +24,7 @@ namespace SOF
         camera.ClipToTransform = true;
         camera.CameraRef =
           Camera::Create((float)game_instance->GetWindow().GetWidth(), (float)game_instance->GetWindow().GetHeight());
+        camera.CameraRef->SetZoomLevel(50.f);
         Rigidbody2DComponent rigid_body{};
         rigid_body.Type = ColliderType::DYNAMIC;
         rigid_body.FixedRotation = true;
@@ -38,10 +39,12 @@ namespace SOF
 
     void Player::Update(float dt)
     {
-        m_PlayerController->UpdateMovement(m_Entity);
+        m_PlayerController->UpdateMovement(m_Entity, dt);
         m_LocomotionStateMachine->Update(dt);
-        const glm::vec2 current_sprite = m_LocomotionStateMachine->GetReleventSpriteIndex();
-        m_Entity->GetComponent<SpriteComponent>()->SetCoordinate(0, 0, current_sprite);
+        const std::pair<uint32_t, uint32_t> current_sprite = m_LocomotionStateMachine->GetReleventSpriteIndex();
+        auto sprite_comp = m_Entity->GetComponent<SpriteComponent>();
+        sprite_comp->SpriteUVOffset = { current_sprite.first * sprite_comp->SpriteSize.x,
+            current_sprite.second * sprite_comp->SpriteSize.y };
     }
 
     void Player::CreateLocomotionStateMachine(const LocomotionSettings &settings)

@@ -72,7 +72,24 @@ namespace SOF
         Game::Get()->GetRenderingThread().Run([&texture_promise, &toc, &data]() {
             TextureMetadata metadata{};
             DeserializeTextureMetadata(toc.MetaData, metadata);
-            auto texture = new Texture(data.data(), metadata.Width, metadata.Height, metadata.Channels);
+            TextureSpecification spec;
+            spec.Width = metadata.Width;
+            spec.Height = metadata.Height;
+            switch (metadata.Channels) {
+            case 1:
+                spec.Format = ImageFormat::R8;
+                break;
+            case 3:
+                spec.Format = ImageFormat::RGB8;
+                break;
+            case 4:
+                spec.Format = ImageFormat::RGBA8;
+                break;
+            default:
+                SOF_ASSERT(false, "Image has an invalid format");
+            }
+
+            auto texture = new Texture(spec, data.data());
             texture_promise.set_value(
               std::shared_ptr<Asset>(texture, [toc](Asset *asset) { AssetManager::RefDeleter(asset, toc.Handle); }));
         });

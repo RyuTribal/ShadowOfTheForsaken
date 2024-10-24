@@ -33,7 +33,7 @@ namespace SOF
         }
     }
 
-    const glm::vec2 &StateMachine::GetReleventSpriteIndex()
+    const std::pair<uint32_t, uint32_t> &StateMachine::GetReleventSpriteIndex()
     {
         if (m_CurrentActiveState) { return m_States[m_CurrentActiveState]->GetSpriteIndex(); }
         return { 0.f, 0.f };

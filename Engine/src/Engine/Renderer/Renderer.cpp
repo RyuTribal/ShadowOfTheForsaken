@@ -66,6 +66,8 @@ namespace SOF
         s_Props.RendererInstance->m_SceneBuffer = Framebuffer::Create(frame_spec);
 
         s_Props.RendererInstance->m_ShaderLibrary.Load("sprite", "assets/shaders/sprite");
+        s_Props.RendererInstance->m_ShaderLibrary.Load("ui", "assets/shaders/ui");
+        s_Props.RendererInstance->m_ShaderLibrary.Load("font", "assets/shaders/font");
         s_Props.RendererInstance->m_ShaderLibrary.Load("background_shader", "assets/shaders/background");
         s_Props.RendererInstance->m_ShaderLibrary.Load("default_shader", "assets/shaders/postprocess/no_effects");
         s_Props.RendererInstance->m_ShaderLibrary.Load(
@@ -90,7 +92,11 @@ namespace SOF
 
 
         const uint8_t blackPixel[4] = { 0, 0, 0, 255 };
-        s_Props.DefaultBackground = std::make_unique<Texture>(reinterpret_cast<const char *>(blackPixel), 1, 1, 4);
+        TextureSpecification pixel_spec;
+        pixel_spec.Height = 1;
+        pixel_spec.Width = 1;
+        pixel_spec.Format = ImageFormat::RGBA8;
+        s_Props.DefaultBackground = std::make_unique<Texture>(pixel_spec, reinterpret_cast<const char *>(blackPixel));
 
         std::vector<float> fullscreenQuadVertices;
         std::vector<uint32_t> indices;
@@ -210,8 +216,8 @@ namespace SOF
         auto read_buffer = Game::Get()->GetRenderingThread().GetReadBuffer();
         if (!read_buffer->ValidFrame) { return; }
 
-        for (const auto &[layer, textureBatchMap] : read_buffer->CurrentBatch) {
-            for (const auto &[texture, buffers] : textureBatchMap) {
+        for (const auto &[layer, shaderBatchMap] : read_buffer->CurrentBatch) {
+            for (const auto &[shader, buffers] : shaderBatchMap) {
                 if (buffers.QuadBuffer.size() > 0) {
                     auto vertex_array = VertexArray::Create();
 
@@ -219,9 +225,7 @@ namespace SOF
                     vertex_buffer->SetLayout({ { ShaderDataType::Float4, "aPos" },
                       { ShaderDataType::Float4, "aColor" },
                       { ShaderDataType::Float2, "aTex" },
-                      { ShaderDataType::Float2, "aSpriteSize" },
-                      { ShaderDataType::Float2, "aSegments" },
-                      { ShaderDataType::Float, "aTileIndexOffset" } });
+                      { ShaderDataType::Float, "aTextureIndex" } });
                     vertex_buffer->SetData(
                       buffers.QuadBuffer.data(), (uint32_t)buffers.QuadBuffer.size() * sizeof(Vertex));
 
@@ -231,18 +235,15 @@ namespace SOF
                     vertex_array->SetVertexBuffer(vertex_buffer);
                     vertex_array->SetIndexBuffer(index_buffer);
 
-                    ShaderStorageBuffer tile_indices{ buffers.TileIndices.size() * 2 * sizeof(float), 0 };
-                    tile_indices.SetData(buffers.TileIndices.data(), buffers.TileIndices.size() * 2 * sizeof(float));
-
                     vertex_array->Bind();
-                    auto program = s_Props.RendererInstance->m_ShaderLibrary.Get("sprite");
+                    auto program = s_Props.RendererInstance->m_ShaderLibrary.Get(shader);
 
                     program->Set("u_ViewMatrix", read_buffer->FrameView);
                     program->Set("u_ProjectionMatrix", read_buffer->FrameProjection);
-                    program->Set("u_UsingTexture", texture != nullptr);
                     program->Activate();
 
-                    if (texture != nullptr) { texture->Bind(0); }
+                    for (size_t i = 0; i < buffers.UsedTextures.size(); i++) { buffers.UsedTextures[i]->Bind(i); }
+
                     s_Props.RendererInstance->m_SceneBuffer->Bind();
                     glDrawElements(GL_TRIANGLES, (GLsizei)buffers.QuadIndices.size(), GL_UNSIGNED_INT, 0);
                     s_Props.RendererInstance->m_SceneBuffer->Unbind();
@@ -263,66 +264,70 @@ namespace SOF
         s_Props.RendererInstance->m_Context->SwapBuffers();
     }
 
-    void Renderer::SubmitSquare(SpriteComponent *sprite_comp, const glm::mat4 &transform)
+    void Renderer::SubmitSquare(SpriteData *sprite_data)
     {
         SOF_PROFILE_FUNC();
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
 
         auto write_buffer = Game::Get()->GetRenderingThread().GetWriteBuffer();
 
-        glm::vec2 texture_size(sprite_comp->TextureRef->GetWidth(), sprite_comp->TextureRef->GetHeight());
-        glm::vec2 normalized_sprite_size = sprite_comp->SpriteSize / texture_size;
-        float tile_indices_offset =
-          write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].TimeIndexPtr;
+        auto &used_texture = write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].UsedTextures;
 
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadBuffer.push_back(
-          { transform * glm::vec4(0.5f, 0.5f, 0.0f, 1.f),
-            sprite_comp->Color,
-            glm::vec2(1.0f, 1.0f),
-            normalized_sprite_size,
-            sprite_comp->GetTiles(),
-            tile_indices_offset });
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadBuffer.push_back(
-          { transform * glm::vec4(0.5f, -0.5f, 0.0f, 1.f),
-            sprite_comp->Color,
-            glm::vec2(1.0f, 0.0f),
-            normalized_sprite_size,
-            sprite_comp->GetTiles(),
-            tile_indices_offset });
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadBuffer.push_back(
-          { transform * glm::vec4(-0.5f, -0.5f, 0.0f, 1.f),
-            sprite_comp->Color,
-            glm::vec2(0.0f, 0.0f),
-            normalized_sprite_size,
-            sprite_comp->GetTiles(),
-            tile_indices_offset });
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadBuffer.push_back(
-          { transform * glm::vec4(-0.5f, 0.5f, 0.0f, 1.f),
-            sprite_comp->Color,
-            glm::vec2(0.0f, 1.0f),
-            normalized_sprite_size,
-            sprite_comp->GetTiles(),
-            tile_indices_offset });
+        bool found_used_tex = false;
 
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadIndices.push_back(
-          write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].IndexPtr);
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadIndices.push_back(
-          write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].IndexPtr + 1);
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadIndices.push_back(
-          write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].IndexPtr + 3);
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadIndices.push_back(
-          write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].IndexPtr + 1);
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadIndices.push_back(
-          write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].IndexPtr + 2);
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].QuadIndices.push_back(
-          write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].IndexPtr + 3);
-
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].IndexPtr += 4;
-        write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].TimeIndexPtr +=
-          sprite_comp->GetAllCoordinates().size();
-        for (auto index : sprite_comp->GetAllCoordinates()) {
-            write_buffer->CurrentBatch[sprite_comp->Layer][sprite_comp->TextureRef.get()].TileIndices.push_back(index);
+        for (auto texture_handle : used_texture) {
+            if (texture_handle == sprite_data->TextureRef) {
+                found_used_tex = true;
+                break;
+            }
         }
+
+        if (!found_used_tex && sprite_data->TextureRef != nullptr) {
+            used_texture.push_back(sprite_data->TextureRef);
+            write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].TextureIndexPtr++;
+        }
+
+        float texture_index =
+          sprite_data->TextureRef == nullptr
+            ? -1.f
+            : (float)write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].TextureIndexPtr;
+
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].QuadBuffer.push_back(
+          { sprite_data->Transform * glm::vec4(1.f, 1.f, 0.0f, 1.f),
+            sprite_data->Color,
+            sprite_data->TileUV[1],
+            texture_index });
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].QuadBuffer.push_back(
+          { sprite_data->Transform * glm::vec4(1.f, -1.f, 0.0f, 1.f),
+            sprite_data->Color,
+            sprite_data->TileUV[3],
+            texture_index });
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].QuadBuffer.push_back(
+          { sprite_data->Transform * glm::vec4(-1.f, -1.f, 0.0f, 1.f),
+            sprite_data->Color,
+            sprite_data->TileUV[2],
+            texture_index });
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].QuadBuffer.push_back(
+          { sprite_data->Transform * glm::vec4(-1.f, 1.f, 0.0f, 1.f),
+            sprite_data->Color,
+            sprite_data->TileUV[0],
+            texture_index });
+
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].QuadIndices.push_back(
+          write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].IndexPtr);
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].QuadIndices.push_back(
+          write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].IndexPtr + 1);
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].QuadIndices.push_back(
+          write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].IndexPtr + 3);
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].QuadIndices.push_back(
+          write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].IndexPtr + 1);
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].QuadIndices.push_back(
+          write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].IndexPtr + 2);
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].QuadIndices.push_back(
+          write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].IndexPtr + 3);
+
+
+        write_buffer->CurrentBatch[sprite_data->Layer][sprite_data->ShaderHandle].IndexPtr += 4;
 
         s_Props.RendererInstance->m_Stats.QuadsDrawn++;
     }
@@ -440,5 +445,16 @@ namespace SOF
     {
         SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
         return s_Props.RendererInstance->m_Context.get();
+    }
+    bool Renderer::RegisterShader(const std::string &handle, const std::string &filepath)
+    {
+        SOF_ASSERT(s_Props.RendererInstance, "Renderer not initialized");
+        auto shader = s_Props.RendererInstance->m_ShaderLibrary.Get(handle);
+        if (shader != nullptr) {
+            SOF_WARN("Renderer", "Shader already exists!");
+            return false;
+        }
+        s_Props.RendererInstance->m_ShaderLibrary.Load(handle, filepath);
+        return true;
     }
 }// namespace SOF

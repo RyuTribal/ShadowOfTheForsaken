@@ -21,6 +21,9 @@
 // ------------- Renderer ----------------
 #include "Engine/Renderer/Renderer.h"
 
+// ---------------- UI -------------------
+#include "Engine/UI/UI.h"
+
 
 // ---------------- Scene ----------------
 #include "Engine/Scene/Scene.h"

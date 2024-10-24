@@ -17,6 +17,7 @@ namespace SOF
     struct ImGuiGlobals
     {
         bool BlockEvents = true;
+        ImGuiContext *Context = nullptr;
     };
 
     ImGuiGlobals *s_Data = nullptr;
@@ -25,7 +26,7 @@ namespace SOF
     {
         IMGUI_CHECKVERSION();
         s_Data = new ImGuiGlobals();
-        ImGui::CreateContext();
+        s_Data->Context = ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
         (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;

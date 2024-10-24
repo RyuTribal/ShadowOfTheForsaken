@@ -77,13 +77,14 @@ namespace SOF
             SOF_ERROR("PhysicsWorld", "Tried stepping without starting the simulation");
             return;
         }
-        PhysicsGlobals *props = PhysicsEngine::GetGlobalSettings();
 
+        PhysicsGlobals *props = PhysicsEngine::GetGlobalSettings();
         UpdateDirtyBodies();
 
         for (auto &[id, velocity] : m_Velocities) {
             if (velocity.Type == VelocityType::Linear) {
                 b2Body_SetLinearVelocity(m_RigidBodies[id]->GetBodyID(), { velocity.Velocity.x, velocity.Velocity.y });
+
             } else if (velocity.Type == VelocityType::Angular) {
                 b2Body_SetAngularVelocity(m_RigidBodies[id]->GetBodyID(), velocity.Velocity.z);
             }
@@ -91,10 +92,11 @@ namespace SOF
         m_Velocities.clear();
 
         b2World_Step(m_WorldID, props->TimeStep, props->SubStep);
-        // Update all transforms
+
         auto rigid_body_collider = m_Context->GetRegistry()->GetComponentRegistry<Rigidbody2DComponent>();
         for (auto &[id, rigid_body] : m_RigidBodies) {
             auto entity = m_Context->GetEntity(id);
+            if (glm::length2(GetVelocity(entity)) > 0.f) { m_Context->SetDirtyTransform(id); }
             if (entity->HasComponent<TransformComponent>()) {
                 auto transform = entity->GetComponent<TransformComponent>();
                 b2Vec2 position = b2Body_GetPosition(rigid_body->GetBodyID());
@@ -116,7 +118,7 @@ namespace SOF
         auto entity_handle = entity->GetHandle();
         auto it = m_RigidBodies.find(entity_handle);
         if (it != m_RigidBodies.end()) {
-            auto body_id = m_RigidBodies[entity->GetHandle()]->GetBodyID();
+            m_RigidBodies[entity->GetHandle()]->DestroyBody();
             m_RigidBodies.erase(entity->GetHandle());
         }
     }
@@ -135,6 +137,7 @@ namespace SOF
         data.Velocity = velocity;
         m_Velocities[entity_handle] = data;
     }
+
     glm::vec2 PhysicsWorld::GetVelocity(Entity *entity)
     {
         SOF_ASSERT(entity, "Not a valid entity");

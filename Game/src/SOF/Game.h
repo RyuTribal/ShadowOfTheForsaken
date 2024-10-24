@@ -16,12 +16,14 @@ namespace SOF
         virtual void OnGameStart() override;
         virtual void OnGameShutdown() override;
         virtual void OnGameUpdate(float delta_time) override;
-        virtual void OnDebugUpdate() override;
+        virtual void OnDebugUpdate(float delta_time) override;
         virtual void OnGameEvent(Event &event) override;
 
         bool OnKeyPressedEvent(KeyPressedEvent &event);
 
         ThreadPool &GetThreadPool() { return m_ThreadPool; }
+
+        DebugWindow &GetDebugWindow() { return m_DebugWindow; }
 
         private:
         std::shared_ptr<Scene> m_Scene;
@@ -29,7 +31,6 @@ namespace SOF
         std::vector<UUID> m_WarsayHome{};
         ThreadPool m_ThreadPool{};
         DebugWindow m_DebugWindow{};
-        float m_WarsaySpeed = 100.f;
         std::optional<Player> m_Player;
     };
 }// namespace SOF

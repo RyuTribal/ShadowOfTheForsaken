@@ -10,76 +10,31 @@ objdir("bin-int/" .. outputdir .. "/%{prj.name}")
 pchheader "pch.h"
 pchsource "src/pch.cpp"
 
-files({
-	"src/**.h",
-	"src/**.hpp",
-	"src/**.cpp",
-	"src/**.c",
-	"vendor/glm/glm/**.hpp",
-	"vendor/glm/glm/**.inl",
-	"%{wks.location}/Engine/vendor/tracy/public/TracyClient.cpp",
-})
+files({"src/**.h", "src/**.hpp", "src/**.cpp", "src/**.c", "vendor/glm/glm/**.hpp", "vendor/glm/glm/**.inl",
+       "%{wks.location}/Engine/vendor/tracy/public/TracyClient.cpp"})
 
-libdirs({
-	"vendor/GLFW/lib-vc2022",
-})
+libdirs({"vendor/GLFW/lib-vc2022"})
 
-links({
-	"GLFW",
-	"Glad",
-	"ImGui",
-	"Box2D",
-})
+links({"GLFW", "Glad", "ImGui", "Box2D", "Freetype"})
 
-defines({
-	"_CRT_SECURE_NO_WARNINGS",
-	'ROOT_PATH="' .. rootPath .. "/" .. '%{prj.name}"',
-	"TRACY_ENABLE",
-	"TRACY_ON_DEMAND"
-})
+defines({"_CRT_SECURE_NO_WARNINGS", 'ROOT_PATH="' .. rootPath .. "/" .. '%{prj.name}"', "TRACY_ENABLE",
+         "TRACY_ON_DEMAND"})
 
-includedirs({
-	"vendor/spdlog/include",
-	"vendor/stb",
-	"%{IncludeDir.GLFW}",
-	"%{IncludeDir.Glad}",
-	"%{IncludeDir.ImGui}",
-	"%{IncludeDir.glm}",
-	"%{IncludeDir.Box2D}",
-	"%{IncludeDir.miniaudio}",
-	"%{IncludeDir.Tracy}",
-	"src"
-})
+includedirs({"vendor/spdlog/include", "vendor/stb", "%{IncludeDir.GLFW}", "%{IncludeDir.Glad}", "%{IncludeDir.ImGui}",
+             "%{IncludeDir.glm}", "%{IncludeDir.Box2D}", "%{IncludeDir.Freetype}", "%{IncludeDir.miniaudio}",
+             "%{IncludeDir.Tracy}", "src"})
 
 filter("system:windows")
-    systemversion("latest")
-    defines({
-        "PLATFORM_WINDOWS",
-        "BUILD_DLL",
-        "GLFW_INCLUDE_NONE",
-        "WIN32_LEAN_AND_MEAN",
-    })
+systemversion("latest")
+defines({"PLATFORM_WINDOWS", "BUILD_DLL", "GLFW_INCLUDE_NONE", "WIN32_LEAN_AND_MEAN"})
 
-    links({
-        "opengl32.lib",
-		"ws2_32", 
-		"dbghelp"
-    })
+links({"opengl32.lib", "ws2_32", "dbghelp"})
 
 filter("system:linux")
-    systemversion("latest")
-    defines({
-        "PLATFORM_LINUX",
-        "GLFW_INCLUDE_NONE",
-    })
+systemversion("latest")
+defines({"PLATFORM_LINUX", "GLFW_INCLUDE_NONE"})
 
-    links({
-        "GL",
-        "pthread",
-        "X11",
-		"m", "dl",
-		"c",
-    })
+links({"GL", "pthread", "X11", "m", "dl", "c"})
 
 filter("configurations:Debug")
 defines("DEBUG")
