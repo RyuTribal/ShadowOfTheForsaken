@@ -22,8 +22,8 @@ namespace SOF
 
         // cReating warsay home
 
-        int gridWidth = 100;
-        int gridHeight = 100;
+        int gridWidth = 1000;
+        int gridHeight = 1000;
         float spacing = 2.0f;
 
 
@@ -34,6 +34,7 @@ namespace SOF
                 auto floor_entity = m_Scene->GetEntity(floor_entity_id);
                 TransformComponent floor_transform;
                 floor_transform.LocalTranslation = glm::vec3(spacing * j, spacing * i, 0.0f);
+                floor_transform.Translation = floor_transform.LocalTranslation;
                 SpriteComponent floor_sprite;
                 floor_sprite.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
                 floor_sprite.TextureRef = grounds_texture;
@@ -76,7 +77,7 @@ namespace SOF
         m_Scene->Update();
         m_Scene->End();
         UI::BeginCanvas("Test Window", { 500.f, 500.f }, { 300.f, 200.f }, { 1.f, 0.f, 1.f, 1.f });
-        UI::Text("Hello world! dasdasdsadasdasdasdsadasdasdas erik haram", { 0.f, 0.f }, { 0.f, 0.f, 0.f, 1.f }, 0);
+        UI::Text("Hello world!", { 0.f, 0.f }, { 0.f, 0.f, 0.f, 1.f }, 0);
         UI::Text("Windows > Linux", { 0.f, 0.f }, { 1.f, 1.f, 0.f, 1.f }, 0);
         UI::EndCanvas();
 

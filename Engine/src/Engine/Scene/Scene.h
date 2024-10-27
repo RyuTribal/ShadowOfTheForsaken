@@ -2,6 +2,7 @@
 #include "Registry.h"
 #include "Engine/Physics/PhysicsWorld.h"
 #include "Engine/Core/ThreadPool.h"
+#include "Chunk.h"
 
 namespace SOF
 {
@@ -52,6 +53,8 @@ namespace SOF
 
         void SetDirtyTransform(UUID entity_id) { m_DirtyTransforms.push_back(entity_id); }
 
+        ChunkManager &GetChunks() { return m_Chunks; }
+
         private:
         void UpdateChildTransforms(UUID parent_id);
 
@@ -64,7 +67,7 @@ namespace SOF
         std::shared_ptr<PhysicsWorld> m_PhysicsWorld;
         ThreadPool m_Threads{ 16 };
         std::shared_ptr<Texture> m_Background;
-
+        ChunkManager m_Chunks{ 8.f, this };
         // Some sound settings
         UUID m_Listener;
     };

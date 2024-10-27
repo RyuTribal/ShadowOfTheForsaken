@@ -114,6 +114,7 @@ namespace SOF
                     glm::vec3 child_world_euler = glm::eulerAngles(child_world_quat);
                     child_transform->Rotation = child_world_euler;
                     child_transform->Scale = parent_scale * child_transform->LocalScale;
+                    m_Chunks.UpdateEntity(child_id);
                 }
             }
             UpdateChildTransforms(child_id);
@@ -151,6 +152,7 @@ namespace SOF
                     transform->Translation = transform->LocalTranslation;
                     transform->Rotation = transform->LocalRotation;
                     transform->Scale = transform->LocalScale;
+                    m_Chunks.UpdateEntity(id);
                     UpdateChildTransforms(id);
                 }
             }
@@ -160,39 +162,29 @@ namespace SOF
 
         // Fix a better way to go through the visible sprites than just going through literally all the sprites
         // Draw all entities
-        auto sprite_registry = m_ComponentRegistry.GetComponentRegistry<SpriteComponent>();
         auto write_buffer = Game::Get()->GetRenderingThread().GetWriteBuffer();
         Camera *curr_camera = write_buffer->FrameCamera;
         write_buffer->FrameView = curr_camera->GetViewMatrix();
         write_buffer->FrameProjection = curr_camera->GetProjectionMatrix();
-        if (sprite_registry) {
+        auto visible_chunks = m_Chunks.GetVisibleChunks(
+          curr_camera->GetPosition(), curr_camera->GetWorldWidth(), curr_camera->GetWorldHeight());
+
+        {
             SOF_PROFILE_SCOPE("Scene: Sprite preparation");
-            glm::vec3 &camera_pos = curr_camera->GetPosition();
-            float half_width = curr_camera->GetWidth() * 0.5f / curr_camera->GetZoomLevel();
-            float half_height = curr_camera->GetHeight() * 0.5f / curr_camera->GetZoomLevel();
+            for (Chunk *chunk : visible_chunks) {
+                for (UUID entity_id : chunk->Entities) {
 
-            float camera_left = camera_pos.x - half_width;
-            float camera_right = camera_pos.x + half_width;
-            float camera_up = camera_pos.y + half_height;
-            float camera_down = camera_pos.y - half_height;
-            for (auto &[id, sprite] : *sprite_registry) {
-                auto transform = m_ComponentRegistry.Get<TransformComponent>(id);
-                glm::vec2 half_extents = glm::vec2(transform->Scale.x, transform->Scale.y);
-
-                float left = transform->Translation.x - half_extents.x;
-                float right = transform->Translation.x + half_extents.x;
-                float top = transform->Translation.y + half_extents.y;
-                float bottom = transform->Translation.y - half_extents.y;
-
-                if (right >= camera_left && left <= camera_right && top >= camera_down && bottom <= camera_up) {
+                    auto sprite = m_EntityMap[entity_id]->GetComponent<SpriteComponent>();
+                    auto transform = m_EntityMap[entity_id]->GetComponent<TransformComponent>();
+                    SOF_ASSERT(sprite, "This object does not have a sprite, this hsould not happen");
                     auto transform_mat = transform->CreateMat4x4();
                     glm::vec2 texture_size = { 1.f, 1.f };
-                    if (sprite.TextureRef) {
-                        texture_size = glm::vec2(sprite.TextureRef->GetWidth(), sprite.TextureRef->GetHeight());
+                    if (sprite->TextureRef) {
+                        texture_size = glm::vec2(sprite->TextureRef->GetWidth(), sprite->TextureRef->GetHeight());
                     }
 
-                    glm::vec2 normalized_uv_offset = sprite.SpriteUVOffset / texture_size;
-                    glm::vec2 normalized_sprite_size = sprite.SpriteSize / texture_size;
+                    glm::vec2 normalized_uv_offset = sprite->SpriteUVOffset / texture_size;
+                    glm::vec2 normalized_sprite_size = sprite->SpriteSize / texture_size;
 
                     glm::mat4x2 uv_coords =
                       glm::mat4x2(normalized_uv_offset + glm::vec2(0.0f, normalized_sprite_size.y),
@@ -200,16 +192,17 @@ namespace SOF
                         normalized_uv_offset + glm::vec2(0.0f, 0.0f),
                         normalized_uv_offset + glm::vec2(normalized_sprite_size.x, 0.0f));
 
-                    SpriteData data = { sprite.TextureRef.get(),
-                        sprite.ShaderHandle,
-                        sprite.Color,
+                    SpriteData data = { sprite->TextureRef.get(),
+                        sprite->ShaderHandle,
+                        sprite->Color,
                         uv_coords,
                         transform_mat,
-                        sprite.Layer };
+                        sprite->Layer };
                     Renderer::SubmitSquare(&data);
                 }
             }
         }
+
 
         // Update sound engine
         auto listener_transform = m_ComponentRegistry.Get<TransformComponent>(m_Listener);
@@ -229,7 +222,9 @@ namespace SOF
                 m_PhysicsWorld->AddPolygon(m_EntityMap[entity_id].get());
             }
         } else if (type_index == typeid(TransformComponent)) {
-            m_DirtyTransforms.push_back(entity_id);
+            m_Chunks.UpdateEntity(entity_id);
+        } else if (type_index == typeid(SpriteComponent)) {
+            m_Chunks.AddEntity(entity_id);
         }
     }
 
@@ -237,18 +232,21 @@ namespace SOF
     {
         if (type_index == typeid(Rigidbody2DComponent)) {
             m_PhysicsWorld->RemoveBody(m_EntityMap[entity_id].get());
+
         } else if (type_index == typeid(BoxCollider2DComponent) || type_index == typeid(CircleCollider2DComponent)
                    || type_index == typeid(CapsuleCollider2DComponent)) {
             if (m_EntityMap[entity_id].get()->HasComponent<Rigidbody2DComponent>()) {
                 m_PhysicsWorld->RemovePolygon(m_EntityMap[entity_id].get());
             }
+        } else if (type_index == typeid(SpriteComponent)) {
+            m_Chunks.RemoveEntity(entity_id);
         }
     }
 
     void Scene::DestroyEntity(UUID handle)
     {
-        m_EntityMap.erase(handle);
         m_ComponentRegistry.RemoveAllFromEntity(handle);
+        m_EntityMap.erase(handle);
     }
 
     Entity *Scene::GetEntity(UUID id) { return m_EntityMap[id].get(); }
