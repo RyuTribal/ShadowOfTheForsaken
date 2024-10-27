@@ -22,8 +22,8 @@ namespace SOF
 
         // cReating warsay home
 
-        int gridWidth = 1000;
-        int gridHeight = 1000;
+        int gridWidth = 10;
+        int gridHeight = 10;
         float spacing = 2.0f;
 
 
