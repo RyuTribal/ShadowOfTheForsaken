@@ -101,8 +101,13 @@ namespace SOF
                 auto transform = entity->GetComponent<TransformComponent>();
                 b2Vec2 position = b2Body_GetPosition(rigid_body->GetBodyID());
                 b2Rot rotation = b2Body_GetRotation(rigid_body->GetBodyID());
+                bool needs_update = false;
+                if (transform->LocalTranslation.x != position.x || transform->LocalTranslation.y != position.y) {
+                    needs_update = true;
+                }
                 transform->LocalTranslation = { position.x, position.y, transform->LocalTranslation.z };
                 transform->LocalRotation.z = b2Rot_GetAngle(rotation);
+                if (needs_update) { m_Context->GetChunks().UpdateEntity(entity->GetHandle()); }
             }
         }
     }

@@ -21,6 +21,9 @@ namespace SOF
         float GetWidth() { return m_Width; }
         float GetZoomLevel() { return m_ZoomLevel; }
 
+        float GetWorldWidth() { return m_WorldWidth; }
+        float GetWorldHeight() { return m_WorldHeight; }
+
         // Can be done by the renderer
         void SetWidth(float width)
         {
@@ -64,6 +67,9 @@ namespace SOF
         float m_Width = 1920.f;
         float m_Height = 1080.f;
         float m_ZoomLevel = 100.f;
+
+        float m_WorldWidth = 1.f;
+        float m_WorldHeight = 1.f;
 
         std::mutex m_CameraMutex;
     };
