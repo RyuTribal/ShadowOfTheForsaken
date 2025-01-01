@@ -40,7 +40,7 @@ cat > "$PROJECT_ROOT/.vscode/launch.json" << EOF
             "program": "\${workspaceFolder}/Game/bin/Debug-linux-x86_64/Game/Game",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "\${workspaceFolder}",
+            "cwd": "\${workspaceFolder}/Game",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

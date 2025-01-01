@@ -73,7 +73,7 @@ namespace SOF
                 glyph_sprite.TextureRef = font->Atlas.get();
                 glyph_sprite.ShaderHandle = "font";
                 glyph_sprite.Color = Color;
-                glyph_sprite.Layer = parent_layer;
+                glyph_sprite.Layer = parent_layer + 1;
                 glm::vec2 absolute_pos = parent_position + offset + Position + glyph_position;
 
                 glm::vec2 normalized_size = UI::NormalizeScreenScale(glyph_size);

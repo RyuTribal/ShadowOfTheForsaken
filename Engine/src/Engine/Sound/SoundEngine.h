@@ -77,5 +77,6 @@ namespace SOF
         glm::vec3 m_FocalPoint = { 0.f, 0.f, 0.f };
         SoundAttenuation m_Attenuation = SoundAttenuation::EXPONENTIAL;
         AttenuationSettings m_AttenuationSettings;
+        static SoundEngine* s_Instance;
     };
 }// namespace SOF

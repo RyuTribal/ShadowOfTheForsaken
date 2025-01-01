@@ -33,10 +33,13 @@ namespace SOF
         }
     }
 
-    const std::pair<uint32_t, uint32_t> &StateMachine::GetReleventSpriteIndex()
+    const std::pair<uint32_t, uint32_t> StateMachine::GetReleventSpriteIndex()
     {
-        if (m_CurrentActiveState) { return m_States[m_CurrentActiveState]->GetSpriteIndex(); }
-        return { 0.f, 0.f };
+        if (!m_CurrentActiveState || m_States.find(m_CurrentActiveState) == m_States.end()) {
+            SOF_ERROR("StateMachine", "No current active state registered!");
+            return {0, 0};
+        }
+        return m_States[m_CurrentActiveState]->GetSpriteIndex();
     }
 
     void StateMachine::TransitionState(UUID new_state)

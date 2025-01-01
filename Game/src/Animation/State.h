@@ -19,7 +19,7 @@ namespace SOF
         bool IsLooping() { return m_Looping; }
         UUID GetID() { return m_ID; }
 
-        const std::pair<uint32_t, uint32_t> &GetSpriteIndex() { return m_Animation->GetCurrentFrame(); }
+        const std::pair<uint32_t, uint32_t> GetSpriteIndex() { return m_Animation->GetCurrentFrame(); }
 
         void Update(float dt);
 

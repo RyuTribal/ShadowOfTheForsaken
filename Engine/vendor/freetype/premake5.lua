@@ -68,8 +68,15 @@ project "Freetype"
         "VC_EXTRALEAN",
         "_CRT_SECURE_NO_WARNINGS",
         "FT2_BUILD_LIBRARY",      
-    }    
+    }  
     
+    filter "system:linux"
+    systemversion "latest"
+    defines
+    {
+        "_CRT_SECURE_NO_WARNINGS",
+        "FT2_BUILD_LIBRARY",      
+    }  
     filter "configurations:Debug"
        defines 
        {

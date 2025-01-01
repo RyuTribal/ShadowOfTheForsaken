@@ -24,5 +24,6 @@ namespace SOF
         bool m_IsSaving = false;
         bool m_IsOverwritting = false;
         std::vector<std::pair<uint32_t, uint32_t>> m_AnimationIndices;
+        static AnimCreator* s_Instance;
     };
 }// namespace SOF

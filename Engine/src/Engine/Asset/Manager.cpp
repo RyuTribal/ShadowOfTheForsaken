@@ -225,7 +225,7 @@ namespace SOF
         SOF_ASSERT(s_Data && s_Data->Manager, "AssetManager has not been initialized, was it you Elliot?!");
         SOF_TRACE("AssetManager", "Opening asset pack...");
         bool fileExists = std::filesystem::exists(path_to_assetpack);
-
+    
         GlobalHeader header = {};
 
         if (!fileExists) {
@@ -243,7 +243,6 @@ namespace SOF
             s_Data->Manager->m_OutputFile.write(reinterpret_cast<char *>(&header), sizeof(GlobalHeader));
             s_Data->Manager->m_OutputFile.close();
         }
-
         s_Data->Manager->m_OutputFile.open(path_to_assetpack, std::ios::binary | std::ios::in | std::ios::out);
         SOF_ASSERT(s_Data->Manager->m_OutputFile.is_open(), "Failed to open the asset pack!");
 
@@ -251,7 +250,6 @@ namespace SOF
         SOF_ASSERT(s_Data->Manager->m_OutputFile.gcount() == sizeof(GlobalHeader),
           "Failed to read the global header from file: {0}",
           path_to_assetpack.string());
-
         SOF_ASSERT(std::strncmp(m_GlobalHeader.Signature, "SOFP", 4) == 0,
           "Invalid file format: {0}",
           path_to_assetpack.string());

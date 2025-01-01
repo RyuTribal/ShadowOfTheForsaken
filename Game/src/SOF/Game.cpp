@@ -76,14 +76,6 @@ namespace SOF
         m_Player->Update(delta_time);
         m_Scene->Update();
         m_Scene->End();
-        UI::BeginCanvas("Test Window", { 500.f, 500.f }, { 300.f, 200.f }, { 1.f, 0.f, 1.f, 1.f });
-        UI::Text("Hello world!", { 0.f, 0.f }, { 0.f, 0.f, 0.f, 1.f }, 0);
-        UI::Text("Windows > Linux", { 0.f, 0.f }, { 1.f, 1.f, 0.f, 1.f }, 0);
-        UI::EndCanvas();
-
-        UI::BeginCanvas("Test Window 2", { 500.f, 550.f }, { 300.f, 300.f }, { 1.f, 1.f, 0.f, 1.f });
-
-        UI::EndCanvas();
     }
     void SOFGame::OnDebugUpdate(float delta_time) { m_DebugWindow.Render(m_Scene.get(), delta_time); }
     void SOFGame::OnGameEvent(Event &event)

@@ -41,6 +41,7 @@ links({
 	"Glad",
 	"Box2D",
 	"ImGui",
+    "Freetype",
 })
 
 defines({

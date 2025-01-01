@@ -9,7 +9,7 @@
 
 namespace SOF
 {
-    SoundEngine *s_Instance = nullptr;
+    SoundEngine *SoundEngine::s_Instance = nullptr;
 
     void SoundEngine::Init()
     {
@@ -148,7 +148,11 @@ namespace SOF
 
         ma_device_start(&m_Device);
     }
-    SoundEngine::~SoundEngine() { ma_device_uninit(&m_Device); }
+    SoundEngine::~SoundEngine() { 
+        // if(ma_device__is_initialized(&m_Device)){
+        //     ma_device_uninit(&m_Device); 
+        // }
+    }
     SoundEngine *SoundEngine::Instance()
     {
         SOF_ASSERT(s_Instance, "No sound instance created, did you forget to run Init()?");

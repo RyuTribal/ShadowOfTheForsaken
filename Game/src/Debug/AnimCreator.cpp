@@ -7,7 +7,7 @@
 
 namespace SOF
 {
-    AnimCreator *s_Instance = nullptr;
+    AnimCreator *AnimCreator::s_Instance = nullptr;
 
     AnimCreator::AnimCreator() {}
 

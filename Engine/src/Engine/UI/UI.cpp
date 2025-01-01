@@ -164,6 +164,10 @@ namespace SOF
         FT_Face face;
         GlyphInfo glyph_infos[NUM_CHARS];
 
+        SOF_ASSERT(std::filesystem::exists(path_to_font),
+        "Font file does not exist: {}",
+        path_to_font);
+
         SOF_ASSERT(!FT_New_Face(s_Instance->m_Library, path_to_font.c_str(), 0, &face),
           "Failed to load the font: {}",
           path_to_font);

@@ -22,7 +22,7 @@ namespace SOF
         UUID AddState(const std::string &name, std::shared_ptr<Animation> anim_instance, bool looping, bool starting);
         void AddTransition(UUID from, UUID to, std::function<bool(StateMachine *)> condition);
 
-        const std::pair<uint32_t, uint32_t> &GetReleventSpriteIndex();
+        const std::pair<uint32_t, uint32_t> GetReleventSpriteIndex();
 
 
         private:
